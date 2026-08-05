@@ -16,7 +16,8 @@ import type {
   ActivityEntryPoint,
   EmotionNamingRow,
 } from '@services/engagementService'
-import type { RhythmEntry } from '@kaer/shared'
+import { readBreathingTechniques, todayIso, type RhythmEntry, type BreathingSessionRow } from '@kaer/shared'
+import { BreathingEvolutionPanel } from './BreathingEvolutionPanel'
 import { ChronoTrackingCard } from './ChronoTrackingCard'
 import { engagementQueries, moduleQueries, patientQueries } from '../../../hooks/queries'
 import type { ModuleType } from '../../../lib/database.types'
@@ -77,6 +78,7 @@ type EvolutionData = {
   beckEntries: FormEntryRow[]
   activityEntries: ActivityEntryPoint[]
   namingEntries: EmotionNamingRow[]
+  breathingSessions: BreathingSessionRow[]
 }
 
 const EMPTY_EVOLUTION: EvolutionData = {
@@ -92,6 +94,7 @@ const EMPTY_EVOLUTION: EvolutionData = {
   beckEntries: [],
   activityEntries: [],
   namingEntries: [],
+  breathingSessions: [],
 }
 
 export function PatientEvolutionTab({ patientId, onOpenModuleData, family }: Props) {
@@ -128,8 +131,18 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData, family }: Pro
     ...engagementQueries.moodMarkers(patientId),
     enabled: (evolutionQuery.data?.moodData.length ?? 0) > 0,
   })
-  const { scales, scaleData, moodData, fearData, defusionData, medEffects, medData, sleepData, chronoEntries, beckEntries, activityEntries, namingEntries } =
+  const { scales, scaleData, moodData, fearData, defusionData, medEffects, medData, sleepData, chronoEntries, beckEntries, activityEntries, namingEntries, breathingSessions } =
     evolutionQuery.data ?? EMPTY_EVOLUTION
+  // Techniques de respiration : couleurs et ordre viennent de la config en base
+  // (config-first). Chargées seulement si le patient a des sessions.
+  const breathingFieldsQuery = useQuery({
+    ...moduleQueries.fields('breathing_techniques'),
+    enabled: breathingSessions.length > 0,
+  })
+  const breathingTechniques = useMemo(
+    () => readBreathingTechniques(breathingFieldsQuery.data?.fields ?? []),
+    [breathingFieldsQuery.data],
+  )
   // Taxonomie du module « Nommer ce que je ressens » : dénominateurs du répertoire et
   // domaines de contexte, lus en base. Chargée seulement si le patient a des saisies.
   const namingFieldsQuery = useQuery({
@@ -155,6 +168,17 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData, family }: Pro
   )
   const isShown = (moduleType: string) => activeTypes.has(moduleType) || showArchived
   const isArchived = (moduleType: string) => !activeTypes.has(moduleType)
+
+  // Objectif hebdomadaire de respiration : il vit dans la config du module affecté,
+  // donc la query est clé sur la ligne `patient_modules`, pas sur le patient.
+  const breathingModuleId = useMemo(
+    () => (modulesQuery.data ?? []).find(m => m.module_type === 'breathing_techniques')?.id ?? null,
+    [modulesQuery.data],
+  )
+  const breathingConfigQuery = useQuery({
+    ...moduleQueries.breathingConfig(breathingModuleId ?? ''),
+    enabled: breathingModuleId != null && breathingSessions.length > 0,
+  })
 
   const days = RANGE_DAYS[range]
 
@@ -544,6 +568,29 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData, family }: Pro
           onViewData={handleViewData}
           viewDataLabel={t('evolution.view_data')}
         />
+      )}
+
+      {/* ── Respiration : calendrier du mois + comptes bruts ──────── */}
+      {showModules && breathingSessions.length > 0 && isShown('breathing_techniques') && (
+        <EvolutionSection
+          sectionKey="breathing_techniques"
+          anchorId="evo-section-breathing_techniques"
+          title={t('evolution.breathing_section_title')}
+          badge={t('evolution.n_sessions', { count: breathingSessions.length })}
+          archivedLabel={isArchived('breathing_techniques') ? t('evolution.archived_badge') : undefined}
+          expanded={isExpanded('breathing_techniques')}
+          onToggle={handleToggleSection}
+          viewDataLabel={t('evolution.view_data')}
+          onViewData={handleViewData}
+        >
+          <BreathingEvolutionPanel
+            sessions={breathingSessions}
+            techniques={breathingTechniques}
+            weeklyGoal={breathingConfigQuery.data?.weeklyGoalSessions ?? null}
+            locale={i18n.language}
+            todayIsoDate={todayIso()}
+          />
+        </EvolutionSection>
       )}
 
       {/* ── Rythmes & régularité (chronobiologie) ─────────────────── */}

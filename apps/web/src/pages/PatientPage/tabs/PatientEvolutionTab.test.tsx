@@ -43,7 +43,9 @@ vi.mock('./ColumnFormDataPanel', () => ({
 const {
   mockFetchFormEntries, mockFetchPatientModules, mockFetchSleepEvolution,
   mockFetchAvailableScales, mockFetchScaleEvolution, mockFetchMed, mockFetchNaming,
+  mockFetchBreathing,
 } = vi.hoisted(() => ({
+  mockFetchBreathing: vi.fn(),
   mockFetchFormEntries: vi.fn(),
   mockFetchPatientModules: vi.fn(),
   mockFetchSleepEvolution: vi.fn(),
@@ -82,12 +84,25 @@ vi.mock('@services/engagementService', () => ({
   fetchChronoEntries: async () => [],
   fetchActivityEntries: async () => [],
   fetchEmotionNamingEntries: (...args: unknown[]) => mockFetchNaming(...args),
+  fetchBreathingSessions: (...args: unknown[]) => mockFetchBreathing(...args),
   fetchModuleSummary: async () => ({ lastDate: null, count: 0, lastPayload: null }),
   fetchFormEntries: (...args: unknown[]) => mockFetchFormEntries(...args),
 }))
 
 vi.mock('@services/moduleAssignmentService', () => ({
   fetchPatientModules: (...args: unknown[]) => mockFetchPatientModules(...args),
+  fetchBreathingPractitionerConfig: async () => ({
+    enabledTechniques: ['coherence_cardiaque'], primaryTechnique: 'coherence_cardiaque',
+    weeklyGoalSessions: 4,
+  }),
+}))
+
+// Le panneau respiration est couvert par BreathingEvolutionPanel.test.tsx : ici on
+// vérifie seulement qu'il est monté avec les sessions et l'objectif de l'agrégat.
+vi.mock('./BreathingEvolutionPanel', () => ({
+  BreathingEvolutionPanel: ({ sessions, weeklyGoal }: { sessions: unknown[]; weeklyGoal: number | null }) => (
+    <div data-testid="breathing-panel" data-sessions={sessions.length} data-goal={String(weeklyGoal)} />
+  ),
 }))
 
 import { render, waitFor, fireEvent } from '@testing-library/react'
@@ -118,6 +133,57 @@ beforeEach(() => {
   mockFetchScaleEvolution.mockResolvedValue([])
   mockFetchMed.mockResolvedValue({ effects: [], data: [] })
   mockFetchNaming.mockResolvedValue([])
+  mockFetchBreathing.mockResolvedValue([])
+})
+
+/** Une session de respiration, datée du jour indiqué. */
+function breathingSession(startedAt: string) {
+  return {
+    startedAt, techniqueKey: 'coherence_cardiaque', durationSeconds: 300,
+    plannedDurationSeconds: 300, cyclesCompleted: 30, completed: true, feeling: null,
+  }
+}
+
+describe('PatientEvolutionTab, section respiration (W2)', () => {
+  it('ne rend aucune section quand le patient n a pas de session', async () => {
+    mockFetchPatientModules.mockResolvedValue([{ id: 'pm1', module_type: 'breathing_techniques' }])
+    const { queryByTestId, findByTestId } = renderTab()
+    await findByTestId('overview-band')
+    expect(queryByTestId('breathing-panel')).toBeNull()
+  })
+
+  it('masque la section quand le module n est plus affecte au patient', async () => {
+    mockFetchBreathing.mockResolvedValue([breathingSession('2026-03-04T08:00:00')])
+    mockFetchPatientModules.mockResolvedValue([])
+    const { queryByTestId, findByTestId } = renderTab()
+    await findByTestId('overview-band')
+    expect(queryByTestId('breathing-panel')).toBeNull()
+  })
+
+  it('monte le panneau avec les sessions et l objectif hebdomadaire du patient', async () => {
+    mockFetchBreathing.mockResolvedValue([
+      breathingSession('2026-03-04T08:00:00'), breathingSession('2026-03-12T19:00:00'),
+    ])
+    mockFetchPatientModules.mockResolvedValue([{ id: 'pm1', module_type: 'breathing_techniques' }])
+    const { findByTestId } = renderTab()
+    const panel = await findByTestId('breathing-panel')
+    expect(panel.getAttribute('data-sessions')).toBe('2')
+    await waitFor(() => expect(panel.getAttribute('data-goal')).toBe('4'))
+  })
+
+  it('demande l ouverture de l onglet Donnees du module respiration', async () => {
+    mockFetchBreathing.mockResolvedValue([breathingSession('2026-03-04T08:00:00')])
+    mockFetchPatientModules.mockResolvedValue([{ id: 'pm1', module_type: 'breathing_techniques' }])
+    const onOpen = vi.fn()
+    const { findByTestId, getAllByText } = render(
+      <QueryClientProvider client={makeClient()}>
+        <PatientEvolutionTab patientId="p1" onOpenModuleData={onOpen} />
+      </QueryClientProvider>,
+    )
+    await findByTestId('breathing-panel')
+    fireEvent.click(getAllByText('evolution.view_data').at(-1)!)
+    expect(onOpen).toHaveBeenCalledWith('breathing_techniques')
+  })
 })
 
 /** N saisies « Nommer ce que je ressens », datées d'aujourd'hui. */

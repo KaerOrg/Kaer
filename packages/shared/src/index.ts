@@ -21,13 +21,19 @@ export { readBreathingTechniques, formatRhythm } from './services/breathingTechn
 // Synthèse praticien des sessions de respiration : comptes bruts uniquement, aucun
 // score de ressenti, aucune tendance, aucune corrélation (MDR 2017/745).
 export {
-  periodStart, filterSessions, summarize, countFeelings, momentOfDay, countMoments,
-  toCsvRows, buildCsv, BREATHING_PERIODS, DAY_MOMENTS, CSV_COLUMNS,
+  periodStart, filterSessions, summarize, countFeelings, tallyFeelings, momentOfDay,
+  countMoments, toCsvRows, buildCsv, BREATHING_PERIODS, DAY_MOMENTS, CSV_COLUMNS,
 } from './services/breathingReport'
 export type {
-  BreathingSessionRow, BreathingPeriod, BreathingSummary, FeelingCounts,
+  BreathingSessionRow, BreathingPeriod, BreathingSummary, FeelingCounts, FeelingTally,
   DayMoment, BreathingFeelingValue,
 } from './services/breathingReport'
+
+// Agrégation mensuelle des sessions : le calendrier de la page Évolution clinique.
+export {
+  monthsWithSessions, sessionsInMonth, buildMonthDays, previousMonth, sessionsInWeekFrom,
+} from './services/breathingMonth'
+export type { YearMonth, BreathingDay } from './services/breathingMonth'
 export type {
   BreathingTechniqueSpec, BreathingPhaseSpec, BreathingPhaseType,
 } from './services/breathingTechniques'

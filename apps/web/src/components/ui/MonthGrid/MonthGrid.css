@@ -1,0 +1,52 @@
+/* Grille calendaire d'un mois, lundi au dimanche. */
+
+.month-grid__weekdays,
+.month-grid__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.month-grid__weekday {
+  text-align: center;
+  font-size: var(--font-size-xxs);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.month-grid__days {
+  margin-top: 4px;
+}
+
+/* Une case = le carré du jour et, sous lui, la place du point. */
+.month-grid__slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-height: 34px;
+}
+
+.month-grid__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted, #F3F4F6);
+  font-size: var(--font-size-xxs);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.month-grid__day--dimmed {
+  opacity: 0.35;
+}
+
+.month-grid__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+}

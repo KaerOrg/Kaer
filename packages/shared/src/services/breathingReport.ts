@@ -127,15 +127,30 @@ function spanInDays(sessions: readonly BreathingSessionRow[]): number {
   return Math.round((last - first) / 86_400_000) + 1
 }
 
-/** Comptes de ressenti d'une technique. Des effectifs, jamais un score. */
-export interface FeelingCounts {
-  techniqueKey: string
+/** Effectifs de ressenti d'un lot de sessions. Des comptes, jamais un score. */
+export interface FeelingTally {
   calmer: number
   same: number
   tenser: number
   /** Sessions sans ressenti : le patient a passé, c'est légitime. */
   unanswered: number
   total: number
+}
+
+/** Les mêmes effectifs, rattachés à une technique. */
+export interface FeelingCounts extends FeelingTally {
+  techniqueKey: string
+}
+
+/** Effectifs de ressenti, toutes techniques confondues. */
+export function tallyFeelings(sessions: readonly BreathingSessionRow[]): FeelingTally {
+  return {
+    calmer: sessions.filter(s => s.feeling === 'calmer').length,
+    same: sessions.filter(s => s.feeling === 'same').length,
+    tenser: sessions.filter(s => s.feeling === 'tenser').length,
+    unanswered: sessions.filter(s => s.feeling == null).length,
+    total: sessions.length,
+  }
 }
 
 /**
@@ -147,17 +162,10 @@ export function countFeelings(
   sessions: readonly BreathingSessionRow[],
   techniqueKeys: readonly string[],
 ): FeelingCounts[] {
-  return techniqueKeys.map(techniqueKey => {
-    const own = sessions.filter(session => session.techniqueKey === techniqueKey)
-    return {
-      techniqueKey,
-      calmer: own.filter(s => s.feeling === 'calmer').length,
-      same: own.filter(s => s.feeling === 'same').length,
-      tenser: own.filter(s => s.feeling === 'tenser').length,
-      unanswered: own.filter(s => s.feeling == null).length,
-      total: own.length,
-    }
-  })
+  return techniqueKeys.map(techniqueKey => ({
+    techniqueKey,
+    ...tallyFeelings(sessions.filter(session => session.techniqueKey === techniqueKey)),
+  }))
 }
 
 /**

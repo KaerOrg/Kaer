@@ -4,7 +4,9 @@
     "cancel": "Abbrechen",
     "save": "Speichern",
     "back": "Zurück",
-    "error_generic": "Ein Fehler ist aufgetreten."
+    "error_generic": "Ein Fehler ist aufgetreten.",
+    "previous": "Zurück",
+    "next": "Weiter"
   },
   "nav": {
     "profile_menu": "Profilmenü",
@@ -106,7 +108,8 @@
     "wardrobe_desc": "Die aktuell für diesen Patienten aktivierten Module.",
     "wardrobe_empty": "Kein Modul für diesen Patienten aktiviert. Klicken Sie auf „Modul hinzufügen“, um zu beginnen.",
     "add_module_button": "Modul hinzufügen",
-    "add_module_title": "Modul hinzufügen",    "unlock_button": "Freischalten",
+    "add_module_title": "Modul hinzufügen",
+    "unlock_button": "Freischalten",
     "revoke_button": "Widerrufen",
     "preview_button": "Vorschau",
     "patient_view": "Was Ihr Patient sehen wird",

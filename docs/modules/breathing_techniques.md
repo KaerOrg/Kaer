@@ -151,6 +151,32 @@ carte « Moment de pratique » de l'onglet Données : une seule clé de cache, u
 Le changement est propre à `breathing_techniques` : les autres modules gardent leur
 éditeur de routine (`NotificationRoutinePanel`).
 
+### La section « Évolution clinique » (W2, web)
+
+La page Évolution clinique porte une section respiration dès que le patient a au moins
+une session et que le module lui est encore affecté.
+
+**Calendrier du mois.** Un carré par jour : sa couleur est celle de la technique
+pratiquée ce jour-là (la majoritaire s'il y en a plusieurs, égalité tranchée par la
+session la plus ancienne), gris s'il n'y a pas eu de session, estompé pour les jours à
+venir. Le point sous le carré porte le ressenti de la **dernière** session du jour, et
+reste absent quand le patient a passé. La navigation par mois est bornée : pas avant la
+première session, pas au-delà du mois courant.
+
+**Colonne de droite.** Le compte du mois avec, en dessous, celui du mois précédent ; les
+sessions de la semaine en cours rapportées à l'objectif réglé par le patient (le compte
+nu s'il n'en a pas fixé) ; les ressentis du mois en barre empilée, avec le nombre de
+réponses renseignées sur le total.
+
+Les agrégats sont purs et partagés : `@kaer/shared/breathingMonth`
+(`buildMonthDays`, `monthsWithSessions`, `sessionsInMonth`, `sessionsInWeekFrom`) et
+`tallyFeelings` de `breathingReport`. La grille est le primitive `ui/MonthGrid`.
+
+> **MDR 2017/745.** La couleur d'un carré code l'**identité** de la technique, jamais une
+> qualité de journée ; un jour sans session est une absence de donnée, pas un manquement.
+> Le rapprochement au mois précédent est l'affichage de **deux comptes bruts côte à côte** :
+> ni flèche, ni pourcentage d'évolution, ni couleur de progression.
+
 ### L'onglet Sources : niveau de preuve par technique (W4, web)
 
 Le panneau générique liste les sources d'un module groupées par niveau de preuve. Pour
