@@ -22,6 +22,11 @@ interface Props {
   sessions: BreathingSessionRow[]
   /** Référence publique du patient, pour nommer le fichier exporté. */
   patientRef: string
+  /**
+   * Rappel réglé par le patient, déjà formaté (« Rappel patient réglé sur 21:00 ·
+   * jours choisis : L, Me, V »). `null` = aucun rappel actif.
+   */
+  reminderSummary: string | null
   locale: string
 }
 
@@ -40,7 +45,7 @@ const PERIOD_OBSERVED_DAYS: Record<BreathingPeriod, number | null> = {
  * une technique comme efficace. La couleur code l'identité d'une technique ou d'un
  * ressenti nommé, jamais une valence.
  */
-export function BreathingDataPanel({ sessions, patientRef, locale }: Props) {
+export function BreathingDataPanel({ sessions, patientRef, reminderSummary, locale }: Props) {
   const { t } = useTranslation()
   const [period, setPeriod] = useState<BreathingPeriod>('30d')
   const [technique, setTechnique] = useState<string | null>(null)
@@ -156,7 +161,7 @@ export function BreathingDataPanel({ sessions, patientRef, locale }: Props) {
       </Card>
 
       <Card variant="outlined" header={{ title: t('patient.breathing_moment_title') }}>
-        <BreathingMomentBars counts={moments} reminderSummary={null} />
+        <BreathingMomentBars counts={moments} reminderSummary={reminderSummary} />
       </Card>
 
       <Card variant="outlined" header={{ title: t('patient.breathing_journal_title') }}>

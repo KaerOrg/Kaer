@@ -632,7 +632,16 @@
     "breathing_interrupted": "interrompue",
     "breathing_page_of": "Page {{page}} sur {{total}}",
     "breathing_since": "depuis le {{date}}",
-    "breathing_data_footer": "Le ressenti est facultatif côté patient · données déclaratives, sans capteur ni interprétation algorithmique."
+    "breathing_data_footer": "Le ressenti est facultatif côté patient · données déclaratives, sans capteur ni interprétation algorithmique.",
+    "breathing_reminder_intro": "Le rappel de pratique est créé et réglé par le patient dans son app (heure et jours).",
+    "breathing_reminder_card_title": "Rappel actuel du patient",
+    "breathing_reminder_none_created": "Aucun rappel créé.",
+    "breathing_reminder_state": "État",
+    "breathing_reminder_active": "Actif",
+    "breathing_reminder_time": "Heure",
+    "breathing_reminder_days": "Jours",
+    "breathing_reminder_set_on": "Réglé par le patient le",
+    "breathing_reminder_summary": "Rappel patient réglé sur {{time}} · jours choisis : {{days}}"
   },
   "modules": {
     "nav_link": "Bibliothèque",

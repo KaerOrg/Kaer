@@ -291,6 +291,49 @@ export async function fetchBreathingSessions(patientId: string): Promise<Breathi
   return sessions
 }
 
+// ── Respiration : le rappel réglé PAR LE PATIENT, en lecture seule (W3 #375) ──
+//
+// Le rappel de pratique est créé et réglé par le patient dans son app (M1/M5). Le
+// praticien le lit, il ne l'édite pas : deux endroits qui pilotent la même chose,
+// c'est un endroit de trop. Son levier à lui est l'objectif proposé (W0).
+//
+// La config patient arrive par la sync dans `patient_entries`
+// (`entry_kind = 'breathing_setting'`, une entrée unique remplacée à chaque
+// changement) : on lit donc la plus récente.
+
+/** Le rappel tel que le patient l'a réglé. */
+export interface BreathingReminder {
+  enabled: boolean
+  /** « HH:MM », ou `null` si aucune heure n'a été choisie. */
+  time: string | null
+  /** Jours au format `Date.getDay()` (0 = dimanche). */
+  days: number[]
+  /** Horodatage du dernier réglage par le patient. */
+  updatedAt: string
+}
+
+export async function fetchBreathingReminder(patientId: string): Promise<BreathingReminder | null> {
+  const { data, error } = await supabase
+    .from('patient_entries')
+    .select('client_created_at, payload')
+    .eq('patient_id', patientId)
+    .eq('entry_kind', 'breathing_setting')
+    .eq('module_id', 'breathing_techniques')
+    .order('client_created_at', { ascending: false })
+    .limit(1)
+
+  if (error || !data || data.length === 0) return null
+
+  const row = data[0]
+  const days = row.payload.reminder_days
+  return {
+    enabled: row.payload.reminder_enabled === true,
+    time: typeof row.payload.reminder_time === 'string' ? row.payload.reminder_time : null,
+    days: Array.isArray(days) ? days.filter((d): d is number => typeof d === 'number') : [],
+    updatedAt: row.client_created_at,
+  }
+}
+
 // ── « Nommer ce que je ressens » : saisies brutes, non agrégées ───────────────
 //
 // Ce module ne produit pas de série numérique mais une catégorie (famille · nuance ·

@@ -130,6 +130,27 @@ sur deux jours d'observation.
 **L'export CSV** sort les lignes brutes, sans colonne calculée interprétative, avec un
 BOM UTF-8 pour qu'Excel n'affiche pas « CohÃ©rence » à l'ouverture.
 
+### L'onglet Notifications, en lecture seule (W3, web)
+
+Le rappel de pratique est **créé et réglé par le patient** dans son app (M1/M5). L'onglet
+praticien le lit, il ne l'édite pas : deux endroits qui pilotent la même chose, c'est un
+endroit de trop, et l'ancien réglage praticien produisait des rappels que le patient
+n'avait pas demandés.
+
+Ce n'est pas retirer au praticien son influence sur la pratique : elle passe par
+l'**objectif proposé** (W0), qui est le bon levier parce qu'il se discute en séance.
+
+La lecture vient de `patient_entries` (`entry_kind = 'breathing_setting'`, entrée unique
+remplacée à chaque changement, donc on lit la plus récente). Le même appel légende la
+carte « Moment de pratique » de l'onglet Données : une seule clé de cache, un seul fetch.
+
+> **Un rappel n'est affiché « actif » que s'il déclenche réellement quelque chose** :
+> bascule activée **et** heure posée **et** au moins un jour coché. Afficher « actif »
+> une bascule sans heure mentirait au praticien sur ce que vit son patient.
+
+Le changement est propre à `breathing_techniques` : les autres modules gardent leur
+éditeur de routine (`NotificationRoutinePanel`).
+
 ### Configuration des techniques (config-first, issue #69)
 
 La définition des 5 techniques (couleur, durée recommandée, séquence de phases) vit
