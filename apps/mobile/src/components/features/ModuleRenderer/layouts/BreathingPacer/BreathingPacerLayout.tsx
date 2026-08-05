@@ -12,6 +12,7 @@ import {
   saveBreathingSettings,
   techniquesFromFields,
   breathingConfigFromFields,
+  techniqueInfoFromFields,
   resolveActivation,
   type BreathingFeeling,
   type BreathingSession,
@@ -184,6 +185,11 @@ export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutP
   const openInfo = useCallback(() => {
     if (activation?.primary != null) setActiveSheet({ kind: 'info', technique: activation.primary })
   }, [activation])
+
+  const openTechniqueInfo = useCallback((techniqueKey: string) => {
+    const found = techniques.find(tech => tech.key === techniqueKey)
+    if (found) setActiveSheet({ kind: 'info', technique: found })
+  }, [techniques])
 
   // Démarrer n'ouvre plus l'exercice directement : la feuille de préparation
   // s'intercale pour laisser le temps de s'installer et de régler la session.
@@ -383,6 +389,7 @@ export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutP
                 technique={technique}
                 lbl={lbl}
                 onOpen={openTechnique}
+                onInfo={openTechniqueInfo}
               />
             ))}
           </>
@@ -415,8 +422,10 @@ export function BreathingPacerLayout({ fields, moduleId }: BreathingPacerLayoutP
         <TechniqueInfoSheet
           visible
           technique={activeSheet.technique}
+          blocks={techniqueInfoFromFields(fields, activeSheet.technique.key)}
           onClose={closeSheet}
           lbl={lbl}
+          t={t}
           closeLabel={t('common.close')}
         />
       ) : null}

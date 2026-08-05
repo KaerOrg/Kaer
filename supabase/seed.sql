@@ -1889,6 +1889,44 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('bt.tech.pleine_conscience.phase_4',    'breathing_techniques', NULL, 'bt.tech.pleine_conscience',    'breathing_phase',     NULL, 4)
 on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
+-- ── module_content_fields : « En savoir plus » par technique (epic #195, M6) ──
+-- Le contenu de la feuille vit EN BASE, pas dans le code : ajouter un paragraphe à
+-- une technique est un INSERT, pas un déploiement. Chaque bloc est un enfant
+-- `technique_info` de sa technique, ordonné par sort_order (10, 20, 30… pour ne pas
+-- se mêler aux `breathing_phase`, numérotées 1, 2, 3…).
+--
+-- `text_code` porte la clé i18n du texte, `info_label` celle du titre du bloc, et
+-- `info_section` dit s'il s'affiche d'emblée (`body`) ou dans la section repliée
+-- (`sources`). C'est là, et seulement là, que les preuves apparaissent côté patient.
+--
+-- MDR 2017/745 : ces textes décrivent un MÉCANISME, jamais une promesse de résultat.
+insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
+  ('bt.tech.coherence_cardiaque.info_what',  'breathing_techniques', NULL, 'bt.tech.coherence_cardiaque', 'technique_info', 'modules.breathing_techniques.coherence_cardiaque_info_what', 10),
+  ('bt.tech.coherence_cardiaque.info_when',  'breathing_techniques', NULL, 'bt.tech.coherence_cardiaque', 'technique_info', 'modules.breathing_techniques.coherence_cardiaque_info_when', 20),
+  ('bt.tech.coherence_cardiaque.info_how',   'breathing_techniques', NULL, 'bt.tech.coherence_cardiaque', 'technique_info', 'modules.breathing_techniques.coherence_cardiaque_info_how',  30),
+  ('bt.tech.coherence_cardiaque.info_src',   'breathing_techniques', NULL, 'bt.tech.coherence_cardiaque', 'technique_info', 'modules.breathing_techniques.coherence_cardiaque_evidence',  90),
+
+  ('bt.tech.diaphragmatique.info_what',      'breathing_techniques', NULL, 'bt.tech.diaphragmatique',     'technique_info', 'modules.breathing_techniques.diaphragmatique_info_what',     10),
+  ('bt.tech.diaphragmatique.info_when',      'breathing_techniques', NULL, 'bt.tech.diaphragmatique',     'technique_info', 'modules.breathing_techniques.diaphragmatique_info_when',     20),
+  ('bt.tech.diaphragmatique.info_how',       'breathing_techniques', NULL, 'bt.tech.diaphragmatique',     'technique_info', 'modules.breathing_techniques.diaphragmatique_info_how',      30),
+  ('bt.tech.diaphragmatique.info_src',       'breathing_techniques', NULL, 'bt.tech.diaphragmatique',     'technique_info', 'modules.breathing_techniques.diaphragmatique_evidence',      90),
+
+  ('bt.tech.carree.info_what',               'breathing_techniques', NULL, 'bt.tech.carree',              'technique_info', 'modules.breathing_techniques.carree_info_what',              10),
+  ('bt.tech.carree.info_when',               'breathing_techniques', NULL, 'bt.tech.carree',              'technique_info', 'modules.breathing_techniques.carree_info_when',              20),
+  ('bt.tech.carree.info_how',                'breathing_techniques', NULL, 'bt.tech.carree',              'technique_info', 'modules.breathing_techniques.carree_info_how',               30),
+  ('bt.tech.carree.info_src',                'breathing_techniques', NULL, 'bt.tech.carree',              'technique_info', 'modules.breathing_techniques.carree_evidence',               90),
+
+  ('bt.tech.quatre_sept_huit.info_what',     'breathing_techniques', NULL, 'bt.tech.quatre_sept_huit',    'technique_info', 'modules.breathing_techniques.quatre_sept_huit_info_what',    10),
+  ('bt.tech.quatre_sept_huit.info_when',     'breathing_techniques', NULL, 'bt.tech.quatre_sept_huit',    'technique_info', 'modules.breathing_techniques.quatre_sept_huit_info_when',    20),
+  ('bt.tech.quatre_sept_huit.info_how',      'breathing_techniques', NULL, 'bt.tech.quatre_sept_huit',    'technique_info', 'modules.breathing_techniques.quatre_sept_huit_info_how',     30),
+  ('bt.tech.quatre_sept_huit.info_src',      'breathing_techniques', NULL, 'bt.tech.quatre_sept_huit',    'technique_info', 'modules.breathing_techniques.quatre_sept_huit_evidence',     90),
+
+  ('bt.tech.pleine_conscience.info_what',    'breathing_techniques', NULL, 'bt.tech.pleine_conscience',   'technique_info', 'modules.breathing_techniques.pleine_conscience_info_what',   10),
+  ('bt.tech.pleine_conscience.info_when',    'breathing_techniques', NULL, 'bt.tech.pleine_conscience',   'technique_info', 'modules.breathing_techniques.pleine_conscience_info_when',   20),
+  ('bt.tech.pleine_conscience.info_how',     'breathing_techniques', NULL, 'bt.tech.pleine_conscience',   'technique_info', 'modules.breathing_techniques.pleine_conscience_info_how',    30),
+  ('bt.tech.pleine_conscience.info_src',     'breathing_techniques', NULL, 'bt.tech.pleine_conscience',   'technique_info', 'modules.breathing_techniques.pleine_conscience_evidence',    90)
+on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
+
 -- ── module_content_fields : modules "coming_soon" (placeholders) ─────────────
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
   ('chro.label',         'chronobiology_tracker',  NULL, NULL, 'module_label',       'module.chronobiology_tracker.label', 0),
@@ -2162,7 +2200,44 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('bt.tech.pleine_conscience.phase_3',   'phase_type',               'exhale'),
   ('bt.tech.pleine_conscience.phase_3',   'phase_seconds',            '6'),
   ('bt.tech.pleine_conscience.phase_4',   'phase_type',               'hold_out'),
-  ('bt.tech.pleine_conscience.phase_4',   'phase_seconds',            '1')
+  ('bt.tech.pleine_conscience.phase_4',   'phase_seconds',            '1'),
+  -- « En savoir plus » (M6) : titre du bloc et section d'affichage. `sources` est la
+  -- partie repliée, où descendent les citations qui encombraient les cartes.
+  ('bt.tech.coherence_cardiaque.info_what', 'info_label',   'modules.breathing_techniques.info_label_what'),
+  ('bt.tech.coherence_cardiaque.info_what', 'info_section', 'body'),
+  ('bt.tech.coherence_cardiaque.info_when', 'info_label',   'modules.breathing_techniques.info_label_when'),
+  ('bt.tech.coherence_cardiaque.info_when', 'info_section', 'body'),
+  ('bt.tech.coherence_cardiaque.info_how',  'info_label',   'modules.breathing_techniques.info_label_how'),
+  ('bt.tech.coherence_cardiaque.info_how',  'info_section', 'body'),
+  ('bt.tech.coherence_cardiaque.info_src',  'info_section', 'sources'),
+  ('bt.tech.diaphragmatique.info_what',     'info_label',   'modules.breathing_techniques.info_label_what'),
+  ('bt.tech.diaphragmatique.info_what',     'info_section', 'body'),
+  ('bt.tech.diaphragmatique.info_when',     'info_label',   'modules.breathing_techniques.info_label_when'),
+  ('bt.tech.diaphragmatique.info_when',     'info_section', 'body'),
+  ('bt.tech.diaphragmatique.info_how',      'info_label',   'modules.breathing_techniques.info_label_how'),
+  ('bt.tech.diaphragmatique.info_how',      'info_section', 'body'),
+  ('bt.tech.diaphragmatique.info_src',      'info_section', 'sources'),
+  ('bt.tech.carree.info_what',              'info_label',   'modules.breathing_techniques.info_label_what'),
+  ('bt.tech.carree.info_what',              'info_section', 'body'),
+  ('bt.tech.carree.info_when',              'info_label',   'modules.breathing_techniques.info_label_when'),
+  ('bt.tech.carree.info_when',              'info_section', 'body'),
+  ('bt.tech.carree.info_how',               'info_label',   'modules.breathing_techniques.info_label_how'),
+  ('bt.tech.carree.info_how',               'info_section', 'body'),
+  ('bt.tech.carree.info_src',               'info_section', 'sources'),
+  ('bt.tech.quatre_sept_huit.info_what',    'info_label',   'modules.breathing_techniques.info_label_what'),
+  ('bt.tech.quatre_sept_huit.info_what',    'info_section', 'body'),
+  ('bt.tech.quatre_sept_huit.info_when',    'info_label',   'modules.breathing_techniques.info_label_when'),
+  ('bt.tech.quatre_sept_huit.info_when',    'info_section', 'body'),
+  ('bt.tech.quatre_sept_huit.info_how',     'info_label',   'modules.breathing_techniques.info_label_how'),
+  ('bt.tech.quatre_sept_huit.info_how',     'info_section', 'body'),
+  ('bt.tech.quatre_sept_huit.info_src',     'info_section', 'sources'),
+  ('bt.tech.pleine_conscience.info_what',   'info_label',   'modules.breathing_techniques.info_label_what'),
+  ('bt.tech.pleine_conscience.info_what',   'info_section', 'body'),
+  ('bt.tech.pleine_conscience.info_when',   'info_label',   'modules.breathing_techniques.info_label_when'),
+  ('bt.tech.pleine_conscience.info_when',   'info_section', 'body'),
+  ('bt.tech.pleine_conscience.info_how',    'info_label',   'modules.breathing_techniques.info_label_how'),
+  ('bt.tech.pleine_conscience.info_how',    'info_section', 'body'),
+  ('bt.tech.pleine_conscience.info_src',    'info_section', 'sources')
 on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- crisis_plan : couleurs/icônes par étape + boutons urgence + sections VHB-EF

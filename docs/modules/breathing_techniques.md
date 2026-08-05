@@ -47,7 +47,7 @@ plus une liste académique des cinq techniques.
 | `.../PrimaryTechniqueCard` + `BreathingPulse` | Carte « Travaillée en séance » et sa pastille animée en boucle |
 | `.../WeekCard` + `WeekDots` + `ReminderRow` | Carte « Cette semaine » : pastilles, série, objectif, ligne de rappel |
 | `.../TechniqueRow` | Une ligne de la liste « Vos techniques » |
-| `.../{GoalSheet,ReminderSheet,TechniqueInfoSheet}` + `DayChip` | Feuilles objectif, rappel, « En savoir plus » |
+| `.../{GoalSheet,ReminderSheet,TechniqueInfoSheet}` + `DayChip` + `InfoBlock` | Feuilles objectif, rappel, « En savoir plus » |
 | `.../PreparationSheet` + `AmbientChip` | Feuille de préparation : durée, vibrations, souffle, ambiance |
 | `.../{rhythmLabels,weekDayOrder,formatDuration,preferredDuration}` | Helpers purs du dossier (rythmes, ordre de semaine, durées) |
 | `.../BreathingSessionScreen` | Écran de session immersif (modale plein écran) |
@@ -195,6 +195,39 @@ upsert via `syncUpsert`), sans en créer une seconde. « Passer » n'écrit donc
 la session est déjà enregistrée et aucun refus n'est noté nulle part. Ce choix garantit
 qu'une session n'est jamais perdue si l'app est fermée sur l'écran de clôture.
 
+### « En savoir plus » (M6)
+
+Feuille ouverte depuis l'icône ⓘ de la carte principale **et depuis chaque technique de
+la liste** (l'icône ouvre la feuille, le reste de la ligne lance la préparation).
+
+**C'est ici, et seulement ici, que les preuves apparaissent côté patient.** Les cartes du
+hub et les lignes de la liste portent un bénéfice en langage courant, jamais une citation.
+La section « Références scientifiques » est repliée par défaut, et se replie à nouveau à
+chaque réouverture : elle n'est jamais l'entrée en matière.
+
+**Le contenu vit en base**, pas dans le code. Chaque bloc est un enfant `technique_info`
+de sa technique :
+
+| Colonne / prop | Rôle |
+|---|---|
+| `text_code` | Clé i18n du texte du bloc |
+| `info_label` | Clé i18n du titre du bloc (`À quoi ça sert`, `Quand l'utiliser`, `Comment ça marche`) |
+| `info_section` | `body` (visible d'emblée) ou `sources` (section repliée) |
+| `sort_order` | Ordre d'affichage (10, 20, 30… pour ne pas se mêler aux phases, numérotées 1, 2, 3) |
+
+Ajouter un paragraphe à une technique est un **INSERT**, pas un déploiement. Le composant
+reçoit des clés i18n et n'en dérive aucune : `techniqueInfoFromFields` fait la lecture,
+`InfoBlock` fait le rendu.
+
+> **Attention en touchant à `toTechnique`** : une technique porte désormais deux sortes
+> d'enfants. Les phases se filtrent sur `field_type === 'breathing_phase'` ; sans ce
+> filtre, les blocs d'information seraient lus comme des phases et le rythme deviendrait
+> faux. Un test verrouille ce point.
+
+> **MDR 2017/745** : ces textes décrivent un **mécanisme** ou un usage, jamais une
+> promesse de résultat. « Respirer à un rythme lent agit sur le système nerveux » se dit ;
+> « vous vous sentirez mieux » ne se dit pas.
+
 ### Les rappels locaux (M5)
 
 Notifications programmées **sur l'appareil**, aux jours et à l'heure choisis par le
@@ -315,6 +348,7 @@ npx jest BreathingPacer
 - [x] Mobile : sessions interrompues enregistrées (`completed = false`)
 - [x] Mobile : clôture de session et ressenti facultatif, stocké brut (M4, #369)
 - [x] Mobile : rappels locaux opt-in, texte constant, sans doublon (M5, #370)
+- [x] Mobile : « En savoir plus » par technique, contenu en base, preuves repliées (M6, #371)
 - [x] Mobile : `BreathingSessionScreen` : session immersive animée en continu (remplace `BreathingExercisePlayer`)
 - [x] Mobile : table SQLite `breathing_sessions` + `initDatabase`
 - [x] Mobile : rendu via le moteur générique (`preview_kind = 'breathing_pacer'`), aucun écran custom

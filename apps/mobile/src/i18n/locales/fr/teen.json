@@ -630,7 +630,10 @@
       "summary_feeling_note": "Partagé avec ton praticien, sans interprétation.",
       "summary_regularity": "La régularité compte plus que la durée : 5 minutes par jour suffisent pour installer l'effet.",
       "reminder_notification_body": "Ton rappel de respiration. Prends le temps si le moment te convient.",
-      "reminder_denied_toast": "Les notifications sont désactivées pour Kær. Ton rappel est enregistré mais ne s’affichera pas."
+      "reminder_denied_toast": "Les notifications sont désactivées pour Kær. Ton rappel est enregistré mais ne s’affichera pas.",
+      "coherence_cardiaque_info_how": "Tu inspires et tu expires sur des durées égales, soit environ six respirations par minute. Le guide donne le tempo, tu n'as qu'à le suivre.",
+      "diaphragmatique_info_how": "Pose une main sur ton ventre : c'est elle qui se soulève, pas la poitrine. L'expiration dure plus longtemps que l'inspiration.",
+      "pleine_conscience_info_how": "Tu suis le souffle tel qu'il vient, avec deux courtes pauses. Il n'y a rien à réussir, seulement à remarquer."
     },
     "rim": {
       "title": "Réécrire le cauchemar",
