@@ -1,0 +1,301 @@
+/* Miniatures des quatre écrans patient de la respiration (aperçu praticien, W5).
+   Tout est décoratif et inerte : aucun de ces éléments n'est cliquable. */
+
+.bpv-title {
+  margin: 0 0 6px;
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.bpv-sub {
+  margin: 8px 0 4px;
+  font-size: var(--font-size-xxs);
+  color: var(--color-text-muted);
+}
+
+.bpv-hint {
+  margin: 6px 0 0;
+  font-size: var(--font-size-xxs);
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.bpv-empty {
+  margin: 8px 0;
+  padding: 10px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xxs);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.bpv-section {
+  margin: 10px 0 4px;
+  font-size: var(--font-size-xxs);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+/* ── Hub ── */
+
+.bpv-primary {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.bpv-primary__name {
+  font-size: var(--font-size-xxs);
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.bpv-primary__rhythm,
+.bpv-primary__meta {
+  font-size: var(--font-size-xxs);
+  color: var(--color-text-muted);
+}
+
+.bpv-week {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: var(--color-surface-muted, #F3F4F6);
+  border-radius: var(--radius-sm);
+}
+
+.bpv-week__label {
+  font-size: var(--font-size-xxs);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.bpv-week__dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.bpv-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+}
+
+.bpv-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  font-size: var(--font-size-xxs);
+  color: var(--color-text-muted);
+}
+
+.bpv-row--between {
+  justify-content: space-between;
+}
+
+.bpv-row__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bpv-trow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-xxs);
+}
+
+.bpv-trow:last-child {
+  border-bottom: none;
+}
+
+.bpv-trow__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.bpv-trow__name {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.bpv-trow__rhythm {
+  margin-left: auto;
+  color: var(--color-text-muted);
+}
+
+/* ── Préparation ── */
+
+.bpv-durations {
+  display: flex;
+  gap: 5px;
+}
+
+.bpv-chip {
+  padding: 3px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xxs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.bpv-chip--on {
+  font-weight: 800;
+}
+
+.bpv-switch {
+  width: 24px;
+  height: 13px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+/* ── Session ── */
+
+.bpv-session {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.bpv-orb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 88px;
+  height: 88px;
+  border: 2.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.bpv-orb__phase {
+  font-size: var(--font-size-xxs);
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.bpv-orb__count {
+  font-size: var(--font-size-h3, 20px);
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.bpv-progress {
+  width: 100%;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.bpv-progress__fill {
+  height: 100%;
+}
+
+.bpv-remaining {
+  font-size: var(--font-size-xxs);
+  color: var(--color-text-muted);
+}
+
+/* ── Clôture ── */
+
+.bpv-stats {
+  display: flex;
+  gap: var(--spacing-md);
+  margin: 6px 0;
+}
+
+.bpv-stat {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--font-size-xxs);
+  color: var(--color-text-muted);
+}
+
+.bpv-stat strong {
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+/* Les trois réponses partagent une teinte unique : voir la note MDR du builder. */
+.bpv-feelings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bpv-feeling {
+  padding: 5px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xxs);
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: center;
+}
+
+/* ── Boutons décoratifs ── */
+
+.bpv-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.bpv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-white, #fff);
+  font-size: var(--font-size-xxs);
+  font-weight: 700;
+}
+
+.bpv-btn--full {
+  align-self: stretch;
+  width: 100%;
+}
+
+.bpv-btn--soft {
+  background: var(--color-surface-muted, #F3F4F6);
+  color: var(--color-text);
+}
+
+.bpv-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xxs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}

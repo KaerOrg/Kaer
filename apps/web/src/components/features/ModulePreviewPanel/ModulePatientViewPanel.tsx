@@ -8,6 +8,7 @@ import { Banner } from '../../ui/Banner'
 import { FieldRenderer } from '../ModuleRenderer'
 import { DefusionPatientView } from './DefusionPatientView'
 import { EmotionNamingPatientView } from './EmotionNamingPatientView'
+import { BreathingPatientView } from './BreathingPatientView'
 import './ModulePreviewPanel.css'
 
 // Layouts dont le contenu vit dans une autre table que module_content_fields
@@ -52,6 +53,12 @@ export function ModulePatientViewPanel({ moduleType, patientModuleId }: Props) {
   // écrans ; le FieldRenderer générique n'en sait montrer qu'un.
   if (moduleType === 'emotion_wheel') {
     return <EmotionNamingPatientView />
+  }
+
+  // Respiration : quatre écrans (hub, préparation, session, clôture) pilotés par la
+  // configuration du patient. Le FieldRenderer générique n'en montrerait qu'un (W5).
+  if (moduleType === 'breathing_techniques') {
+    return <BreathingPatientView patientModuleId={patientModuleId} />
   }
 
   const meaningfulFieldsCount = result
