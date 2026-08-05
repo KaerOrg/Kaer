@@ -17,11 +17,29 @@ export interface BreathingPhaseSpec {
   seconds: number
 }
 
+/** Niveau de preuve d'une technique, tel que déclaré en config. */
+export type EvidenceGrade = 'A' | 'B' | 'C'
+
 export interface BreathingTechniqueSpec {
   key: string
   color: string
   recommendedDurationMin: number
   phases: BreathingPhaseSpec[]
+  /** Grade de preuve, ou `null` s'il n'est pas déclaré. */
+  evidenceGrade: EvidenceGrade | null
+  /**
+   * Clé i18n précisant le périmètre du grade quand il ne vaut que pour une
+   * indication (pleine conscience : grade A sur la rechute dépressive, pas au-delà).
+   */
+  evidenceScopeCode: string | null
+}
+
+const EVIDENCE_GRADES: readonly EvidenceGrade[] = ['A', 'B', 'C']
+
+function toEvidenceGrade(value: string | undefined): EvidenceGrade | null {
+  return value != null && (EVIDENCE_GRADES as readonly string[]).includes(value)
+    ? (value as EvidenceGrade)
+    : null
 }
 
 /** Contrat minimal d'un field, satisfait par `ContentField` des deux apps. */
@@ -67,6 +85,8 @@ export function readBreathingTechniques(fields: readonly FieldLike[]): Breathing
       color: field.props.color ?? '',
       recommendedDurationMin: Number(field.props.recommended_duration_min) || 0,
       phases,
+      evidenceGrade: toEvidenceGrade(field.props.evidence_grade),
+      evidenceScopeCode: field.props.evidence_scope ?? null,
     })
   }
 

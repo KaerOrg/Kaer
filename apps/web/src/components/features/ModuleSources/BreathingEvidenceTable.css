@@ -1,0 +1,82 @@
+/* Niveau de preuve par technique, en tête de l'onglet Sources (W4). */
+
+.breathing-evidence {
+  margin-bottom: var(--spacing-lg);
+}
+
+.breathing-evidence__title {
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.breathing-evidence__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breathing-evidence__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.breathing-evidence__row:last-child {
+  border-bottom: none;
+}
+
+.breathing-evidence__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.breathing-evidence__name {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* Le badge qualifie un niveau de preuve scientifique, pas une donnée patient. */
+.breathing-evidence__grade {
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xxs);
+  font-weight: 700;
+}
+
+.breathing-evidence__grade--established {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.breathing-evidence__grade--consensus {
+  background: var(--color-warning-light);
+  color: var(--color-warning-text);
+}
+
+.breathing-evidence__scope {
+  font-weight: 600;
+  text-transform: none;
+}
+
+/* Les références occupent la fin de ligne et passent seules à la ligne si besoin. */
+.breathing-evidence__refs {
+  flex: 1 1 220px;
+  min-width: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.breathing-evidence__note {
+  margin: var(--spacing-sm) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  line-height: 1.5;
+}

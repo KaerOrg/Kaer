@@ -5,6 +5,7 @@ import { ExternalLink, BookOpen, FlaskConical, GitBranch, FileText, Users } from
 import type { ModuleSourceType } from '@kaer/shared'
 import { moduleSourcesQueries } from '../../../hooks/queries'
 import { ModuleIndicationsBlock } from './ModuleIndicationsBlock'
+import { BreathingEvidenceTable } from './BreathingEvidenceTable'
 import { groupSourcesByEvidence } from './sourceGroups'
 import './ModuleSourcesPanel.css'
 
@@ -39,6 +40,10 @@ export function ModuleSourcesPanel({ moduleId }: Props) {
   return (
     <div className="sources-panel">
       <ModuleIndicationsBlock moduleId={moduleId} />
+
+      {/* Respiration : le niveau de preuve par technique passe en tête, c'est ce que
+          le praticien lit pour décider quoi activer en séance (W4 #376). */}
+      {moduleId === 'breathing_techniques' && <BreathingEvidenceTable />}
 
       <p className="sources-panel__intro">{t('patient.sources_intro')}</p>
 

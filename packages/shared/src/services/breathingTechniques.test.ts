@@ -27,7 +27,25 @@ describe('readBreathingTechniques', () => {
     expect(techniques).toEqual([{
       key: 'coherence_cardiaque', color: '#4A9EA3', recommendedDurationMin: 5,
       phases: [{ type: 'inhale', seconds: 5 }, { type: 'exhale', seconds: 5 }],
+      evidenceGrade: null, evidenceScopeCode: null,
     }])
+  })
+
+  it('lit le niveau de preuve et son périmètre', () => {
+    const techniques = readBreathingTechniques([
+      technique('pleine_conscience', [], { evidence_grade: 'A', evidence_scope: 'modules.x.relapse' }),
+    ])
+    expect(techniques[0].evidenceGrade).toBe('A')
+    expect(techniques[0].evidenceScopeCode).toBe('modules.x.relapse')
+  })
+
+  it('écarte un grade inconnu plutôt que de l’afficher tel quel', () => {
+    const techniques = readBreathingTechniques([technique('x', [], { evidence_grade: 'excellent' })])
+    expect(techniques[0].evidenceGrade).toBeNull()
+  })
+
+  it('accepte une technique sans niveau de preuve déclaré', () => {
+    expect(readBreathingTechniques([technique('x', [])])[0].evidenceGrade).toBeNull()
   })
 
   it('ignore les fields qui ne sont pas des techniques', () => {

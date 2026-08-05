@@ -641,7 +641,9 @@
     "breathing_reminder_time": "Heure",
     "breathing_reminder_days": "Jours",
     "breathing_reminder_set_on": "Réglé par le patient le",
-    "breathing_reminder_summary": "Rappel patient réglé sur {{time}} · jours choisis : {{days}}"
+    "breathing_reminder_summary": "Rappel patient réglé sur {{time}} · jours choisis : {{days}}",
+    "breathing_evidence_title": "Niveau de preuve par technique",
+    "breathing_evidence_note": "Grades repris de la littérature citée ci-dessous. À faire valider par le référent clinique avant mise en production."
   },
   "modules": {
     "nav_link": "Bibliothèque",
@@ -1410,7 +1412,13 @@
       "diaphragmatique_name": "Respiration diaphragmatique",
       "carree_name": "Respiration carrée",
       "quatre_sept_huit_name": "Technique 4-7-8",
-      "pleine_conscience_name": "Pleine conscience respiratoire"
+      "pleine_conscience_name": "Pleine conscience respiratoire",
+      "coherence_cardiaque_evidence": "Lehrer & Gevirtz (2014), Goessl et al. (2017)",
+      "diaphragmatique_evidence": "HAS, Conrad et al. (2007), Fincham et al. (2023)",
+      "carree_evidence": "VA/DoD PTSD Guidelines, accord d’experts",
+      "quatre_sept_huit_evidence": "Accord d’experts international",
+      "pleine_conscience_evidence": "NICE CG90, Segal et al. (2002)",
+      "evidence_scope_relapse": "rechute dépressive"
     },
     "cognitive_saturation": {
       "label": "Décrocher d'une pensée",

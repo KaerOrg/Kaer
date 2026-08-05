@@ -151,6 +151,30 @@ carte « Moment de pratique » de l'onglet Données : une seule clé de cache, u
 Le changement est propre à `breathing_techniques` : les autres modules gardent leur
 éditeur de routine (`NotificationRoutinePanel`).
 
+### L'onglet Sources : niveau de preuve par technique (W4, web)
+
+Le panneau générique liste les sources d'un module groupées par niveau de preuve. Pour
+la respiration, une table s'ajoute **en tête** : une ligne par technique graduée, avec
+son grade et ses références clés. C'est ce que le praticien lit pour décider quoi
+activer en séance ; les revues transversales restent en dessous.
+
+Les grades vivent dans `field_props` (`evidence_grade` sur chaque `bt.tech.*`), les
+références en i18n (`<clé>_evidence`) : corriger un grade ou ajouter une technique ne
+demande pas de toucher au code. `evidence_scope` précise le périmètre quand le grade ne
+vaut que pour une indication (pleine conscience : grade A **sur la rechute dépressive**,
+pas au-delà).
+
+Une technique sans grade déclaré est écartée de la table plutôt que d'y figurer avec une
+case vide.
+
+> **La teinte du badge distingue un grade établi (A, B) d'un accord d'experts (C).** Elle
+> qualifie un **niveau de preuve scientifique**, jamais une donnée patient : la règle MDR
+> sur les couleurs de valence ne s'applique pas ici.
+
+> ⚠️ **Les grades sont repris de l'existant et restent à faire valider par le référent
+> clinique avant mise en production** (demande explicite du ticket #376). La note sous la
+> table le dit à l'écran.
+
 ### Configuration des techniques (config-first, issue #69)
 
 La définition des 5 techniques (couleur, durée recommandée, séquence de phases) vit
