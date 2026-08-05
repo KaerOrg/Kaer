@@ -195,6 +195,45 @@ upsert via `syncUpsert`), sans en créer une seconde. « Passer » n'écrit donc
 la session est déjà enregistrée et aucun refus n'est noté nulle part. Ce choix garantit
 qu'une session n'est jamais perdue si l'app est fermée sur l'écran de clôture.
 
+### Les rappels locaux (M5)
+
+Notifications programmées **sur l'appareil**, aux jours et à l'heure choisis par le
+patient dans le hub. Rien à voir avec `notification_routines` (rappels serveur posés
+par le praticien) : ici tout est local et piloté par `breathing_settings`.
+
+| Fichier | Rôle |
+|---|---|
+| `lib/breathingReminderPlan.ts` | Pur : `breathing_settings` → occurrences hebdomadaires |
+| `services/breathingReminderService.ts` | `syncBreathingReminders`, `cancelBreathingReminders` |
+
+**Opt-in strict.** Rien n'est programmé tant que le patient n'a pas créé de rappel.
+`buildReminderPlan` rend `[]` dans tous les cas où il ne doit rien y avoir (bascule
+coupée, heure absente ou illisible, aucun jour coché), et l'appelant se contente alors
+d'annuler l'existant.
+
+**Jamais de doublon.** `syncBreathingReminders` annule systématiquement avant de
+reprogrammer. Ses notifications sont reconnues au marqueur `kind: 'breathing_reminder'`
+du payload : celles des autres modules ne sont jamais touchées.
+
+**Conversion des jours.** `reminder_days` est au format `Date.getDay()` (0 = dimanche),
+`expo-notifications` attend 1 à 7 (1 = dimanche). La conversion vit dans
+`buildReminderPlan`, à un seul endroit.
+
+**Le tap ouvre le hub.** Le payload porte `module_type` et `screen: 'home'` ; le routage
+est assuré par `useNotificationNavigation`, déjà en place et générique.
+
+**Permission** demandée seulement au moment où un rappel est réellement voulu, jamais à
+l'ouverture du module. Si l'OS refuse, le réglage reste enregistré et un toast le dit.
+
+> **Invariant MDR 2017/745 : le texte du rappel est une CONSTANTE.** Il ne dépend
+> d'aucune donnée saisie, d'aucun compte de sessions, d'aucun objectif atteint ou
+> manqué. Un rappel n'est jamais déclenché par l'état des données : ni « vous n'avez pas
+> pratiqué depuis 3 jours », ni « plus qu'une session pour votre objectif ».
+> **L'objectif hebdomadaire ne pilote jamais les rappels.** Le service reçoit le titre et
+> le corps déjà traduits, il n'a aucun moyen d'y injecter quoi que ce soit. Verrouillé
+> par `src/__tests__/breathingReminderText.guard.test.ts`, qui échoue si une
+> interpolation apparaît dans une locale ou si le service se met à composer son message.
+
 ### Statistiques de la semaine (partagées web ≡ mobile)
 
 Les comptes affichés par le hub viennent de `packages/shared/src/services/breathingStats.ts` :
@@ -275,6 +314,7 @@ npx jest BreathingPacer
 - [x] Mobile : session immersive, orbe animée en continu, keep-awake, pause en arrière-plan (M3, #368)
 - [x] Mobile : sessions interrompues enregistrées (`completed = false`)
 - [x] Mobile : clôture de session et ressenti facultatif, stocké brut (M4, #369)
+- [x] Mobile : rappels locaux opt-in, texte constant, sans doublon (M5, #370)
 - [x] Mobile : `BreathingSessionScreen` : session immersive animée en continu (remplace `BreathingExercisePlayer`)
 - [x] Mobile : table SQLite `breathing_sessions` + `initDatabase`
 - [x] Mobile : rendu via le moteur générique (`preview_kind = 'breathing_pacer'`), aucun écran custom

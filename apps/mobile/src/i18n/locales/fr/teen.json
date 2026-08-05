@@ -628,7 +628,9 @@
       "prep_stop_anytime": "Tu pourras arrêter à tout moment.",
       "summary_feeling_title": "Comment te sens-tu ?",
       "summary_feeling_note": "Partagé avec ton praticien, sans interprétation.",
-      "summary_regularity": "La régularité compte plus que la durée : 5 minutes par jour suffisent pour installer l'effet."
+      "summary_regularity": "La régularité compte plus que la durée : 5 minutes par jour suffisent pour installer l'effet.",
+      "reminder_notification_body": "Ton rappel de respiration. Prends le temps si le moment te convient.",
+      "reminder_denied_toast": "Les notifications sont désactivées pour Kær. Ton rappel est enregistré mais ne s’affichera pas."
     },
     "rim": {
       "title": "Réécrire le cauchemar",

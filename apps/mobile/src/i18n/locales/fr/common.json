@@ -1446,7 +1446,10 @@
       "summary_skip": "Passer",
       "feeling_calmer": "Plus calme",
       "feeling_same": "Pareil",
-      "feeling_tenser": "Plus tendu"
+      "feeling_tenser": "Plus tendu",
+      "reminder_notification_title": "Un moment pour respirer ?",
+      "reminder_notification_body": "Votre rappel de respiration. Prenez le temps si le moment vous convient.",
+      "reminder_denied_toast": "Les notifications sont désactivées pour Kær. Votre rappel est enregistré mais ne s’affichera pas."
     },
     "cognitive_saturation": {
       "label": "Décrocher d'une pensée",

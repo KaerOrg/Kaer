@@ -55,6 +55,11 @@ jest.mock('@services/errorReportingService', () => ({
   reportFailedOperation: (...a: unknown[]) => mockReport(...a),
 }))
 
+const mockSyncReminders = jest.fn()
+jest.mock('@services/breathingReminderService', () => ({
+  syncBreathingReminders: (...a: unknown[]) => mockSyncReminders(...a),
+}))
+
 // L'écran de session a son propre test : ici, un stub qui expose la technique active
 // et permet de déclencher une fin de session depuis le layout.
 let finishSession: ((result: unknown) => void) | null = null
@@ -91,6 +96,7 @@ describe('BreathingPacerLayout : hub', () => {
     mockFetchSettings.mockResolvedValue(SETTINGS)
     mockSaveSettings.mockResolvedValue(undefined)
     mockSaveSession.mockResolvedValue(undefined)
+    mockSyncReminders.mockResolvedValue({ status: 'scheduled', count: 1 })
     finishSession = null
   })
 
@@ -376,6 +382,63 @@ describe('BreathingPacerLayout : hub', () => {
     await waitFor(() => {
       expect(mockReport).toHaveBeenCalledWith(
         'module/breathing_techniques/session', 'breathing session write failed', 'disk full',
+      )
+    })
+  })
+
+  it('programme les notifications avec le réglage enregistré', async () => {
+    renderHub()
+    fireEvent.press(await screen.findByTestId('breathing-reminder-action'))
+    fireEvent(screen.getByTestId('breathing-reminder-toggle-switch'), 'valueChange', true)
+    fireEvent.press(screen.getByTestId('breathing-reminder-day-1'))
+    fireEvent.press(screen.getByTestId('breathing-reminder-save'))
+    await waitFor(() => {
+      expect(mockSyncReminders).toHaveBeenCalledWith(
+        expect.objectContaining({ reminder_enabled: true, reminder_days: [1] }),
+        'Un moment pour respirer ?',
+        expect.any(String),
+      )
+    })
+  })
+
+  it('annule les notifications quand le patient coupe son rappel', async () => {
+    mockFetchSettings.mockResolvedValue({
+      ...SETTINGS, reminder_enabled: true, reminder_time: '21:00', reminder_days: [1],
+    })
+    renderHub()
+    fireEvent.press(await screen.findByTestId('breathing-reminder-action'))
+    fireEvent(screen.getByTestId('breathing-reminder-toggle-switch'), 'valueChange', false)
+    fireEvent.press(screen.getByTestId('breathing-reminder-save'))
+    await waitFor(() => {
+      expect(mockSyncReminders).toHaveBeenCalledWith(
+        expect.objectContaining({ reminder_enabled: false }),
+        expect.any(String), expect.any(String),
+      )
+    })
+  })
+
+  it('prévient quand l’OS refuse les notifications, sans perdre le réglage', async () => {
+    mockSyncReminders.mockResolvedValue({ status: 'permission_denied' })
+    renderHub()
+    fireEvent.press(await screen.findByTestId('breathing-reminder-action'))
+    fireEvent(screen.getByTestId('breathing-reminder-toggle-switch'), 'valueChange', true)
+    fireEvent.press(screen.getByTestId('breathing-reminder-day-1'))
+    fireEvent.press(screen.getByTestId('breathing-reminder-save'))
+    await waitFor(() => {
+      expect(mockSaveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({ reminder_enabled: true }),
+      )
+    })
+  })
+
+  it('remonte un échec de programmation (jamais avalé)', async () => {
+    mockSyncReminders.mockRejectedValueOnce(new Error('os refused'))
+    renderHub()
+    fireEvent.press(await screen.findByTestId('breathing-reminder-action'))
+    fireEvent.press(screen.getByTestId('breathing-reminder-save'))
+    await waitFor(() => {
+      expect(mockReport).toHaveBeenCalledWith(
+        'module/breathing_techniques/reminder', 'breathing reminder scheduling failed', 'os refused',
       )
     })
   })

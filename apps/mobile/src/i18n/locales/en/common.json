@@ -1328,7 +1328,10 @@
       "summary_skip": "Skip",
       "feeling_calmer": "Calmer",
       "feeling_same": "The same",
-      "feeling_tenser": "More tense"
+      "feeling_tenser": "More tense",
+      "reminder_notification_title": "A moment to breathe?",
+      "reminder_notification_body": "Your breathing reminder. Take the time if the moment suits you.",
+      "reminder_denied_toast": "Notifications are turned off for Kær. Your reminder is saved but will not appear."
     },
     "cognitive_saturation": {
       "label": "Unhooking from a thought",
