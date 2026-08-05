@@ -1360,7 +1360,12 @@
       "config_set_in_session": "Désigner comme travaillée en séance",
       "config_goal_label": "Objectif proposé",
       "config_goal_unit": "sessions / semaine",
-      "config_goal_note": "Le patient peut l’ajuster librement dans son app."
+      "config_goal_note": "Le patient peut l’ajuster librement dans son app.",
+      "coherence_cardiaque_name": "Cohérence cardiaque",
+      "diaphragmatique_name": "Respiration diaphragmatique",
+      "carree_name": "Respiration carrée",
+      "quatre_sept_huit_name": "Technique 4-7-8",
+      "pleine_conscience_name": "Pleine conscience respiratoire"
     },
     "cognitive_saturation": {
       "label": "Décrocher d'une pensée",

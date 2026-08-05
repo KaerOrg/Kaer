@@ -80,6 +80,16 @@ describe('BreathingConfigPanel : W0', () => {
     expect(screen.getByText('5s · 5s')).toBeTruthy()
   })
 
+  // Ce test manquait, et c'est ce qui a laissé passer des clés i18n brutes à
+  // l'écran : les locales web ne portaient aucun nom de technique. Asserter sur le
+  // NOM, pas seulement sur le rythme et les testid, est ce qui l'attrape.
+  it('affiche le nom traduit des techniques, jamais leur clé i18n', async () => {
+    renderPanel()
+    expect(await screen.findByText('Cohérence cardiaque')).toBeTruthy()
+    expect(screen.getByText('Respiration diaphragmatique')).toBeTruthy()
+    expect(screen.queryByText(/modules\.breathing_techniques\./)).toBeNull()
+  })
+
   it('marque la technique de séance et n’en marque qu’une', async () => {
     renderPanel()
     await screen.findByText('5s · 5s')

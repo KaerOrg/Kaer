@@ -1638,7 +1638,12 @@
       "config_set_in_session": "Set as worked on in session",
       "config_goal_label": "Suggested goal",
       "config_goal_unit": "sessions / week",
-      "config_goal_note": "The patient can adjust it freely in their app."
+      "config_goal_note": "The patient can adjust it freely in their app.",
+      "coherence_cardiaque_name": "Cardiac coherence",
+      "diaphragmatique_name": "Diaphragmatic breathing",
+      "carree_name": "Box breathing",
+      "quatre_sept_huit_name": "4-7-8 Technique",
+      "pleine_conscience_name": "Mindful breathing"
     },
     "cognitive_saturation": {
       "label": "Unhooking from a thought",
