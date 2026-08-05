@@ -32,6 +32,12 @@ jest.mock('@services/breathingService', () => {
       durationsMin: [2, 5, 10],
       ambientSounds: ['river', 'waves', 'rain', 'wind', 'bowl'],
     }),
+    // La lecture réelle des blocs a son propre test : ici on vérifie le câblage,
+    // donc on rend des blocs pour la technique demandée.
+    techniqueInfoFromFields: (_fields: unknown, techniqueKey: string) => [
+      { id: `${techniqueKey}.what`, labelCode: 'label.what', textCode: `${techniqueKey}.what`, section: 'body' },
+      { id: `${techniqueKey}.src`, labelCode: null, textCode: `${techniqueKey}.evidence`, section: 'sources' },
+    ],
     fetchBreathingSessions: () => mockFetchSessions(),
     fetchBreathingSettings: () => mockFetchSettings(),
     saveBreathingSettings: (...a: unknown[]) => mockSaveSettings(...a),
@@ -160,6 +166,25 @@ describe('BreathingPacerLayout : hub', () => {
     expect(screen.queryByTestId('breathing-info-sources')).toBeNull()
     fireEvent.press(screen.getByTestId('breathing-info-sources-toggle'))
     expect(screen.getByTestId('breathing-info-sources')).toBeTruthy()
+  })
+
+  it('ouvre « En savoir plus » depuis une technique de la liste, sans lancer de session', async () => {
+    mockFetchSettings.mockResolvedValue({
+      ...SETTINGS, enabled_techniques: ['coherence_cardiaque', 'carree'], primary_technique: 'coherence_cardiaque',
+    })
+    renderHub()
+    fireEvent.press(await screen.findByTestId('breathing-info-carree'))
+    expect(await screen.findByTestId('breathing-info-sheet')).toBeTruthy()
+    expect(screen.queryByTestId('breathing-prep-sheet')).toBeNull()
+  })
+
+  it('sert à la feuille les blocs de la technique demandée', async () => {
+    mockFetchSettings.mockResolvedValue({
+      ...SETTINGS, enabled_techniques: ['coherence_cardiaque', 'carree'], primary_technique: 'coherence_cardiaque',
+    })
+    renderHub()
+    fireEvent.press(await screen.findByTestId('breathing-info-carree'))
+    expect(await screen.findByTestId('breathing-info-block-carree.what')).toBeTruthy()
   })
 
   it('ouvre la préparation, et non le lecteur, au démarrage de la technique de séance', async () => {

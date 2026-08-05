@@ -28,6 +28,7 @@ import {
   techniquesFromFields,
   getCycleDuration,
   breathingConfigFromFields,
+  techniqueInfoFromFields,
   resolveActivation,
 } from './breathingService'
 import type { BreathingSettings, BreathingTechnique, BreathingModuleConfig } from './breathingService'
@@ -296,6 +297,92 @@ describe('breathingService : breathingConfigFromFields', () => {
   it('rend une config vide quand le field existe sans aucune clé', () => {
     expect(breathingConfigFromFields([configField({})]))
       .toEqual({ defaultTechniqueKey: null, durationsMin: [], ambientSounds: [] })
+  })
+})
+
+describe('breathingService : techniqueInfoFromFields', () => {
+  const info = (id: string, textCode: string, sort: number, props: Record<string, string>) =>
+    makeField({ id, field_type: 'technique_info', text_code: textCode, sort_order: sort, props })
+
+  const technique = (children: ContentField[]) => makeField({
+    id: 'bt.tech.coherence_cardiaque',
+    props: { technique_key: 'coherence_cardiaque', color: '#4A9EA3', recommended_duration_min: '5' },
+    children,
+  })
+
+  it('lit les blocs déclarés en base, dans l’ordre du sort_order', () => {
+    const blocks = techniqueInfoFromFields([technique([
+      info('b.how', 'modules.x.how', 30, { info_label: 'modules.x.label_how', info_section: 'body' }),
+      info('b.what', 'modules.x.what', 10, { info_label: 'modules.x.label_what', info_section: 'body' }),
+    ])], 'coherence_cardiaque')
+
+    expect(blocks.map(b => b.id)).toEqual(['b.what', 'b.how'])
+    expect(blocks[0]).toEqual({
+      id: 'b.what', labelCode: 'modules.x.label_what', textCode: 'modules.x.what', section: 'body',
+    })
+  })
+
+  it('range les références dans la section repliée', () => {
+    const blocks = techniqueInfoFromFields([technique([
+      info('b.src', 'modules.x.evidence', 90, { info_section: 'sources' }),
+    ])], 'coherence_cardiaque')
+    expect(blocks[0]).toMatchObject({ section: 'sources', labelCode: null })
+  })
+
+  it('range dans le corps par défaut, sans section déclarée', () => {
+    const blocks = techniqueInfoFromFields([technique([info('b', 'modules.x.a', 10, {})])], 'coherence_cardiaque')
+    expect(blocks[0].section).toBe('body')
+  })
+
+  it('ignore les phases : elles ne sont pas des blocs d’information', () => {
+    const blocks = techniqueInfoFromFields([technique([
+      phase('inhale', 5, 1),
+      info('b.what', 'modules.x.what', 10, { info_section: 'body' }),
+    ])], 'coherence_cardiaque')
+    expect(blocks).toHaveLength(1)
+  })
+
+  it('ignore un bloc sans text_code (rien à afficher)', () => {
+    const orphan = makeField({ id: 'b', field_type: 'technique_info', text_code: null, sort_order: 10 })
+    expect(techniqueInfoFromFields([technique([orphan])], 'coherence_cardiaque')).toEqual([])
+  })
+
+  it('rend [] pour une technique inconnue', () => {
+    expect(techniqueInfoFromFields([technique([])], 'inexistante')).toEqual([])
+  })
+
+  it('ne mélange pas les blocs de deux techniques', () => {
+    const other = makeField({
+      id: 'bt.tech.carree',
+      props: { technique_key: 'carree', color: '#D97706', recommended_duration_min: '4' },
+      children: [info('autre', 'modules.x.autre', 10, { info_section: 'body' })],
+    })
+    const blocks = techniqueInfoFromFields([
+      technique([info('mien', 'modules.x.mien', 10, { info_section: 'body' })]),
+      other,
+    ], 'coherence_cardiaque')
+    expect(blocks.map(b => b.id)).toEqual(['mien'])
+  })
+})
+
+describe('breathingService : techniquesFromFields avec des blocs d’information', () => {
+  it('ne prend pas les blocs « En savoir plus » pour des phases', () => {
+    const techs = techniquesFromFields([makeField({
+      id: 'bt.tech.coherence_cardiaque',
+      props: { technique_key: 'coherence_cardiaque', color: '#4A9EA3', recommended_duration_min: '5' },
+      children: [
+        phase('inhale', 5, 1),
+        phase('exhale', 5, 2),
+        makeField({
+          id: 'bt.tech.coherence_cardiaque.info_what', field_type: 'technique_info',
+          text_code: 'modules.x.what', sort_order: 10,
+        }),
+      ],
+    })])
+    expect(techs[0].phases).toEqual([
+      { type: 'inhale', seconds: 5 },
+      { type: 'exhale', seconds: 5 },
+    ])
   })
 })
 

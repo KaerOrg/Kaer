@@ -74,7 +74,10 @@ function toPhase(field: ContentField): BreathingPhase {
 }
 
 function toTechnique(field: ContentField): BreathingTechnique {
-  const phases = [...field.children]
+  // Filtrer sur le type : une technique porte aussi des enfants `technique_info`
+  // (« En savoir plus », M6), qui ne sont pas des phases.
+  const phases = field.children
+    .filter((child) => child.field_type === 'breathing_phase')
     .sort((a, b) => a.sort_order - b.sort_order)
     .map(toPhase)
   return {
@@ -140,6 +143,57 @@ export function breathingConfigFromFields(fields: ContentField[]): BreathingModu
     durationsMin: collectIndexed(props, 'duration').map(Number).filter((min) => min > 0),
     ambientSounds: collectIndexed(props, 'ambient_sound').filter(isAmbientSound),
   }
+}
+
+// ─── « En savoir plus » (epic #195, M6) ──────────────────────────────────────
+
+/** Où s'affiche un bloc : d'emblée, ou dans la section repliée des références. */
+export type TechniqueInfoSection = 'body' | 'sources'
+
+/** Un bloc de la feuille « En savoir plus », déclaré en base. */
+export interface TechniqueInfoBlock {
+  id: string
+  /** Clé i18n du titre du bloc. `null` quand le bloc n'en porte pas. */
+  labelCode: string | null
+  /** Clé i18n du texte du bloc. */
+  textCode: string
+  section: TechniqueInfoSection
+}
+
+/**
+ * Blocs « En savoir plus » d'une technique, dans l'ordre déclaré en base.
+ *
+ * Le contenu vit dans `module_content_fields` (enfants `technique_info`), pas dans
+ * le code : ajouter un paragraphe à une technique est un INSERT, pas un
+ * déploiement. Le composant reçoit des clés i18n, il n'en dérive aucune lui-même.
+ *
+ * Pure : aucun I/O.
+ */
+export function techniqueInfoFromFields(
+  fields: ContentField[],
+  techniqueKey: string,
+): TechniqueInfoBlock[] {
+  const technique = fields.find(
+    (f) => f.field_type === 'breathing_technique' && f.props.technique_key === techniqueKey,
+  )
+  if (technique == null) return []
+
+  const ordered = [...technique.children].sort((a, b) => a.sort_order - b.sort_order)
+  const blocks: TechniqueInfoBlock[] = []
+  for (const child of ordered) {
+    if (child.field_type !== 'technique_info') continue
+    // Un bloc sans `text_code` n'a rien à afficher : on l'ignore plutôt que de rendre
+    // une clé vide. Lu dans une variable pour que le typage suive, sans cast.
+    const textCode = child.text_code
+    if (textCode == null) continue
+    blocks.push({
+      id: child.id,
+      labelCode: child.props.info_label ?? null,
+      textCode,
+      section: child.props.info_section === 'sources' ? 'sources' : 'body',
+    })
+  }
+  return blocks
 }
 
 /** Ce que le patient voit : sa technique de séance, et les autres techniques activées. */
