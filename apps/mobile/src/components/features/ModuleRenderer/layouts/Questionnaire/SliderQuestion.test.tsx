@@ -26,15 +26,18 @@ const PROPS = {
 
 // t simplifié : renvoie une étiquette lisible par clé.
 const t = (k: string) =>
-  ({ 'modules.mood_tracker.dim_mood': 'Humeur', low: 'Très basse', normal: 'Normal', high: 'Très élevée' }[k] ?? k)
+  ({ 'modules.mood_tracker.dim_mood': 'Humeur', low: 'Très basse', normal: 'Intermédiaire', high: 'Très élevée' }[k] ?? k)
 
 describe('SliderQuestion', () => {
-  it('affiche le libellé, la valeur et les ancres bas/Normal/haut', () => {
+  // L'ancre du milieu ne dit PAS « Normal » : étiqueter le milieu d'une échelle
+  // introduirait une norme (interdit MDR), et n'a aucun sens clinique sur une
+  // dimension comme l'anxiété (« Aucune … Normal … Très intense »).
+  it('affiche le libellé, la valeur et les trois ancres', () => {
     render(<SliderQuestion field={makeField(PROPS)} index={0} value={7} onAnswer={jest.fn()} t={t} />)
     expect(screen.getByText('Humeur')).toBeTruthy()
     expect(screen.getByText('7')).toBeTruthy()
     expect(screen.getByText('Très basse')).toBeTruthy()
-    expect(screen.getByText('Normal')).toBeTruthy()
+    expect(screen.getByText('Intermédiaire')).toBeTruthy()
     expect(screen.getByText('Très élevée')).toBeTruthy()
   })
 
