@@ -655,7 +655,9 @@
     "breathing_reminder_time": "Time",
     "breathing_reminder_days": "Days",
     "breathing_reminder_set_on": "Set by the patient on",
-    "breathing_reminder_summary": "Patient reminder set at {{time}} · chosen days: {{days}}"
+    "breathing_reminder_summary": "Patient reminder set at {{time}} · chosen days: {{days}}",
+    "breathing_evidence_title": "Evidence level by technique",
+    "breathing_evidence_note": "Grades taken from the literature cited below. To be validated by the clinical lead before production."
   },
   "modules": {
     "nav_link": "Library",
@@ -1688,7 +1690,13 @@
       "diaphragmatique_name": "Diaphragmatic breathing",
       "carree_name": "Box breathing",
       "quatre_sept_huit_name": "4-7-8 Technique",
-      "pleine_conscience_name": "Mindful breathing"
+      "pleine_conscience_name": "Mindful breathing",
+      "coherence_cardiaque_evidence": "Lehrer & Gevirtz (2014), Goessl et al. (2017)",
+      "diaphragmatique_evidence": "HAS, Conrad et al. (2007), Fincham et al. (2023)",
+      "carree_evidence": "VA/DoD PTSD Guidelines, expert consensus",
+      "quatre_sept_huit_evidence": "International expert consensus",
+      "pleine_conscience_evidence": "NICE CG90, Segal et al. (2002)",
+      "evidence_scope_relapse": "depression relapse"
     },
     "cognitive_saturation": {
       "label": "Unhooking from a thought",

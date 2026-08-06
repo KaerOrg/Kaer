@@ -2131,6 +2131,18 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('bt.tech.pleine_conscience',           'technique_key',            'pleine_conscience'),
   ('bt.tech.pleine_conscience',           'color',                    '#0EA5E9'),
   ('bt.tech.pleine_conscience',           'recommended_duration_min', '10'),
+  -- Niveau de preuve par technique (W4 #376), lu par l'onglet Sources praticien.
+  -- `evidence_scope` precise le perimetre quand le grade ne vaut que pour une
+  -- indication : la pleine conscience est grade A sur la rechute depressive, pas
+  -- au-dela. Les references, elles, restent en i18n (`<cle>_evidence`).
+  -- ⚠️ Grades repris de l'existant, A FAIRE VALIDER par le referent clinique
+  -- avant mise en production (demande explicite du ticket).
+  ('bt.tech.coherence_cardiaque',         'evidence_grade',           'B'),
+  ('bt.tech.diaphragmatique',             'evidence_grade',           'B'),
+  ('bt.tech.carree',                      'evidence_grade',           'C'),
+  ('bt.tech.quatre_sept_huit',            'evidence_grade',           'C'),
+  ('bt.tech.pleine_conscience',           'evidence_grade',           'A'),
+  ('bt.tech.pleine_conscience',           'evidence_scope',           'modules.breathing_techniques.evidence_scope_relapse'),
   ('bt.tech.pleine_conscience.phase_1',   'phase_type',               'inhale'),
   ('bt.tech.pleine_conscience.phase_1',   'phase_seconds',            '4'),
   ('bt.tech.pleine_conscience.phase_2',   'phase_type',               'hold_in'),
