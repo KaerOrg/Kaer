@@ -39,7 +39,7 @@ Pattern générique : `ScaleHistoryScreen` + `ScaleEntryScreen` + `SCALE_SCORING
 
 | Clé | Nom | Items | Score | Particularités | Doc |
 |-----|-----|-------|-------|----------------|-----|
-| `phq9` | PHQ-9 — Dépression | 9 | 0–27 | — | — |
+| `phq9` | Mon humeur ces 2 semaines (PHQ-9) | 9 | 0–27 | Renommé côté patient (#405). Sous-titre « Questionnaire PHQ-9 · 10 questions, 4 min » ; l'item 10 arrive avec #410 | — |
 | `gad7` | GAD-7 — Anxiété généralisée | 7 | 0–21 | — | — |
 | `bsl23` | BSL-23 — Symptômes borderline | 23 | 0–4 (moyen) | 🔒 **Masquée** (#247) | — |
 | `rcads` | RCADS-25 — Anxiété & dépression (enfant/ado) | 25 | 6 sous-échelles | 🔒 **Masquée** (#247). Ebesutani (2012) | — |

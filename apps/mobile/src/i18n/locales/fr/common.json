@@ -63,6 +63,8 @@
     "done_title": "Exercice terminé",
     "saving": "Enregistrement…",
     "reuse_last_values": "Reprendre les valeurs du {{date}}",
+    "unanswered_count_one": "{{count}} question sans réponse.",
+    "unanswered_count_other": "{{count}} questions sans réponse.",
     "save_and_finish": "Enregistrer et terminer",
     "in_case_of_distress": "En cas de détresse",
     "phone_3114": "3114, Numéro national prévention suicide",
@@ -1449,8 +1451,8 @@
       "missing_intensity_msg": "Indiquez l'intensité de l'envie avant d'enregistrer."
     },
     "phq9": {
-      "label": "PHQ-9",
-      "description": "",
+      "label": "Mon humeur ces 2 semaines",
+      "description": "Questionnaire PHQ-9 · 10 questions, 4 min",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
       "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier PHQ-9.",

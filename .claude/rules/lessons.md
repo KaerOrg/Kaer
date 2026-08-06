@@ -67,6 +67,41 @@ jest.mock('hooks/useModuleT', () => ({ useModuleTranslation: () => k => k }))
 
 → Avant de commiter un renommage : `grep -r "useModuleT\b" apps/mobile --include="*.test.*"`
 
+**refonte/phq9-renommage-textes-q1 (2026-08-06) — le mock a dérivé de la BIBLIOTHÈQUE,
+pas d'un export du projet.**
+Le cas ci-dessus porte sur un renommage interne, d'où l'angle mort : ici rien n'avait
+été renommé côté projet, c'est **i18next qui a changé de contrat** entre deux versions.
+Le mock global `src/__mocks__/react-i18next.ts` (branché par `jest.moduleNameMapper`,
+donc actif dans **tous** les tests de rendu mobile) résolvait les pluriels avec le
+suffixe `_plural` de i18next v20, alors que `package.json` est en **v26**, où la règle
+est `_one` / `_other`.
+```ts
+// ❌ mock figé sur la v20 : la clé plurielle n'est jamais trouvée…
+if (typeof count === 'number' && count !== 1) {
+  const pluralKey = `${key}_plural`
+  if (TRANSLATIONS[pluralKey] !== undefined) resolvedKey = pluralKey
+}
+// …et `TRANSLATIONS[key] ?? key` renvoie alors la CLÉ BRUTE, sans rien casser :
+// un écran affichant « common.unanswered_count » passe le test au vert.
+// ✅ suffixes de la v21+, la forme héritée restant en second recours
+function pluralSuffixes(count: number): string[] {
+  return count === 1 ? ['_one'] : ['_other', '_plural']
+}
+```
+Deux pièges spécifiques :
+1. **Un mock qui « dégrade proprement » ne casse jamais un test, il le rend faux.** Le
+   fallback `?? key` transforme une résolution ratée en chaîne plausible. Aucune suite
+   ne rougit : le premier consommateur d'une clé plurielle aurait été vu vert en
+   affichant la clé technique au patient.
+2. **Un mock qui porte de la logique doit être testé comme du code.** Celui-ci fait de
+   la résolution de clé, du pluriel et de l'interpolation, et n'avait aucun test :
+   c'est un témoin non vérifié dont dépendent 200 suites. Couvert depuis par
+   `apps/mobile/src/__tests__/reactI18nextMock.test.ts`.
+→ Réflexe review : devant un mock qui **réimplémente le comportement d'une
+bibliothèque** (i18next, navigation, date), comparer sa logique à la **version
+installée** dans `package.json`, pas à la mémoire qu'on en a. Et lui exiger un test
+direct dès qu'il contient un `if`.
+
 ---
 
 ## Architecture `ui/` vs `features/`

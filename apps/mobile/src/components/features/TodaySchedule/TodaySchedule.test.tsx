@@ -37,7 +37,7 @@ describe('TodaySchedule', () => {
 
   it('affiche le nom du module via la clé i18n', () => {
     const { getByText } = render(<TodaySchedule {...defaultProps} />)
-    expect(getByText('PHQ-9')).toBeTruthy()
+    expect(getByText('Mon humeur ces 2 semaines')).toBeTruthy()
   })
 
   it("affiche l'heure effective (override si présente)", () => {

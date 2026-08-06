@@ -136,8 +136,9 @@ export default function ScaleEntryScreen() {
 
   const handleSubmit = useCallback(async () => {
     if (!allAnswered) {
-      const remaining = totalItems - answeredCount
-      showToast(`${remaining} question${remaining > 1 ? 's' : ''} sans réponse.`, 'info')
+      // Pluriel délégué à i18next (clés `_one` / `_other`) : la règle d'accord
+      // n'est pas la même d'une langue à l'autre, elle n'a rien à faire ici.
+      showToast(t('common.unanswered_count', { count: totalItems - answeredCount }), 'info')
       return
     }
     if (config == null) return
@@ -179,7 +180,7 @@ export default function ScaleEntryScreen() {
     })
     if (isMounted.current) setSaving(false)
     navigation.goBack()
-  }, [allAnswered, answers, config, entry_id, entryDate, navigation, scale_id, totalItems, answeredCount, loadState, textInputValues, showToast])
+  }, [allAnswered, answers, config, entry_id, entryDate, navigation, scale_id, totalItems, answeredCount, loadState, textInputValues, showToast, t])
 
   const reuseBtnLabel = useMemo(
     () => (lastEntry != null
