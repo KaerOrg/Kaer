@@ -60,12 +60,15 @@ describe('ModuleContentScreen — previewKindOverride', () => {
   })
 })
 
-describe('ModuleContentScreen — bascule config-first quand le plan est vide', () => {
-  it('ouverture nue + plan vide → paramétrage (editable_steps)', async () => {
+describe('ModuleContentScreen — ouverture du plan de sécurité', () => {
+  // P-1 : un plan vide n'ouvre PLUS l'Édition. Le praticien écrit désormais dans le
+  // plan depuis le web, et le patient qui ouvre « Mon plan » veut relire, pas tomber
+  // sur un formulaire un jour où il n'a rien écrit.
+  it('ouverture nue + plan vide → consultation, jamais le paramétrage', async () => {
     mockGetPlanItems.mockResolvedValue([])
     renderScreen({ moduleType: 'crisis_plan' })
-    await waitFor(() => expect(screen.getByText('renderer:editable_steps')).toBeTruthy())
-    expect(screen.queryByText('renderer:safety_plan')).toBeNull()
+    await waitFor(() => expect(screen.getByText('renderer:safety_plan')).toBeTruthy())
+    expect(screen.queryByText('renderer:editable_steps')).toBeNull()
   })
 
   it('ouverture nue + plan rempli → consultation (safety_plan)', async () => {

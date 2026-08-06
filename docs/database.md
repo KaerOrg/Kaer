@@ -303,6 +303,55 @@ le praticien a une **lecture seule** sur les patients liés **et consentants**
 
 ---
 
+### `safety_plan_items` — Plan de sécurité, document co-édité (PW-1 #320)
+
+Les items du plan de sécurité vivaient dans `patient_entries`. C'était une **erreur de
+nature** : `patient_entries` est un journal de saisies produites par l'appareil, drainé
+par une outbox **strictement montante** (`RemoteSyncService` ne contient aucun `pull`,
+aucun `select`, vérifié dans le code). Or un plan de sécurité est un **document co-édité
+par deux acteurs**, écrit d'un côté et lu de l'autre. Un item ajouté par le praticien
+depuis le web n'atteignait jamais le téléphone.
+
+| Colonne | Type | Rôle |
+|---|---|---|
+| `id` | uuid PK | – |
+| `patient_id` | uuid NOT NULL → `patients(id)` | Propriétaire du plan |
+| `section_id` | text NOT NULL | `step_1` … `step_6` |
+| `text` | text NOT NULL | Dans les mots de son auteur |
+| `kind` | text, nullable | `person` \| `place` (P-14) |
+| `role` | text, nullable | Lien au patient ou fonction (P-14) |
+| `note` | text, nullable | Une ligne libre (P-14) |
+| `phone` | text, nullable | – |
+| `sort_order` | int NOT NULL, default 0 | Ordre d'affichage dans l'étape |
+| `authored_by` | text NOT NULL, default `patient` | `patient` \| `practitioner` |
+| `created_at` / `updated_at` | timestamptz NOT NULL | – |
+
+**RLS : le patient et le praticien lisent ET écrivent.** Deux politiques `for all`, l'une
+sur `auth.uid() = patient_id`, l'autre sur la jointure `practitioner_patients`.
+
+> ⚠️ **Pas de garde `share_consent`, contrairement à `patient_entries`, et c'est
+> délibéré.** Le plan est construit **en consultation, à deux** : le praticien en est
+> co-auteur, et le lui masquer derrière le consentement de partage lui retirerait
+> l'accès à ce qu'il a écrit lui-même. La ligne de confidentialité passe ailleurs, et
+> elle est nette : les **ancres** (photos, phrase personnelle) restent dans
+> `patient_entries` sous la garde du consentement, parce que ce sont des contenus
+> intimes que le praticien n'a pas à lire. Même motif que `crisis_plan_configs`, dont
+> la RLS est calquée ici.
+
+**MDR 2017/745** : `authored_by` est **descriptif, jamais interprété**. Il sert à
+l'affichage (« ajouté par le patient le 11 juin ») et au diff de PW-8. Aucune règle de
+priorité, aucun verrou : chacun peut modifier ce que l'autre a écrit, c'est un document
+commun.
+
+> **`plan_item` reste dans `EntryKind`, contrairement à ce qu'annonce #320.** La table
+> SQLite `plan_items` n'est pas propre au plan de sécurité : le module **Balance
+> décisionnelle** (`decisional_balance`, layout `decision_grid`) y stocke ses arguments
+> et les synchronise par le même `entry_kind`. Le retirer casserait ce module. Seuls les
+> items de `crisis_plan` migrent vers la table dédiée ; le reste continue de passer par
+> `patient_entries`.
+
+---
+
 ### `breathing_settings` — Config du module respiration par patient (T0 #195)
 
 Une ligne par patient. `enabled_techniques` / `primary_technique` sont posés par le
