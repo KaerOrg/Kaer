@@ -660,7 +660,7 @@
       "score_max": "/ 27",
       "footer": "The score is shared with your clinician. Interpretation is their responsibility.",
       "progress": "{answered} / {total} answers",
-      "submit": "Submit questionnaire"
+      "submit": "Send my answers"
     },
     "gad7": {
       "label": "GAD-7",

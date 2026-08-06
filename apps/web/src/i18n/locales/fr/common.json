@@ -1406,7 +1406,7 @@
       "score_max": "/ 27",
       "footer": "Le score est transmis à votre soignant. Son interprétation lui appartient.",
       "progress": "{answered} / {total} réponses",
-      "submit": "Valider le questionnaire"
+      "submit": "Envoyer mes réponses"
     },
     "gad7": {
       "label": "GAD-7",

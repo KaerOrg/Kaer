@@ -1,15 +1,18 @@
 import React from 'react'
 import { View, Text, Pressable, type StyleProp, type ViewStyle } from 'react-native'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import { styles } from './Radio.styles'
 import type { RadioOption, RadioProps } from './Radio.types'
 
 /**
- * Sélecteur à choix exclusif (radio). Trois habillages via `variant` :
+ * Sélecteur à choix exclusif (radio). Quatre habillages via `variant` :
  * - `list` (défaut) : rangées rond + label (+ sous-label optionnel) ;
  * - `pills` : pilules en ligne, remplissage couleur sur l'option active ;
  * - `grid` : colonnes de largeur égale, label centré multiligne, remplissage
- *   couleur sur l'option active (échelle Likert d'un questionnaire clinique).
+ *   couleur sur l'option active (échelle Likert d'un questionnaire clinique) ;
+ * - `stack` : rangées encadrées pleine largeur, cible d'au moins 44 pt, libellé
+ *   jamais tronqué, coche sur l'option active (saisie un item par écran).
  *
  * `readonly` rend le même visuel sans interaction (options en `View`, pas en
  * `Pressable`) — pour un aperçu / affichage. Tout sélecteur mono-sélection passe
@@ -73,6 +76,25 @@ export const Radio = React.memo(function Radio({
             <Text style={[styles.gridLabel, active && styles.gridLabelActive]} numberOfLines={2}>
               {opt.label}
             </Text>,
+          )
+        })}
+      </View>
+    )
+  }
+
+  if (variant === 'stack') {
+    return (
+      <View style={styles.stack} testID={testID}>
+        {options.map(opt => {
+          const active = value === opt.value
+          return renderOption(
+            opt,
+            active,
+            [styles.stackOption, active && { borderColor: color }],
+            <>
+              <Text style={[styles.stackLabel, active && styles.stackLabelActive]}>{opt.label}</Text>
+              {active ? <MaterialCommunityIcons name="check" size={20} color={color} /> : null}
+            </>,
           )
         })}
       </View>

@@ -32,7 +32,9 @@ type Bundle = Record<string, string>
 /** Bloc JSON de référence extrait de `docs/instruments/phq9.md`. */
 function readReference(): { en: Bundle; fr: Bundle } {
   const doc = readFileSync(join(repoRoot, 'docs', 'instruments', 'phq9.md'), 'utf8')
-  const fence = /```json\n([\s\S]*?)\n```/.exec(doc)
+  // `\r?` : git restitue le fichier en CRLF sur un poste Windows, en LF en CI.
+  // Sans cette tolérance, le garde-fou passe en CI et échoue sur la machine du dev.
+  const fence = /```json\r?\n([\s\S]*?)\r?\n```/.exec(doc)
   if (!fence) throw new Error('bloc json de référence introuvable dans docs/instruments/phq9.md')
   return JSON.parse(fence[1]) as { en: Bundle; fr: Bundle }
 }

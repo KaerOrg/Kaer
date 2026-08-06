@@ -70,6 +70,7 @@ jest.mock('@theme', () => ({
   },
   spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
   radius: { sm: 4, md: 8, lg: 16, full: 999 },
+  fontSize: { xxs: 11, xs: 12, sm: 13, caption: 14, label: 15, body: 16, h3: 18, h2: 22, h1: 28, display: 32 },
   typography: { h2: {}, h3: {}, caption: {} },
 }))
 

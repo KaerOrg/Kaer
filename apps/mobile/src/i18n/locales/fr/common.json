@@ -208,6 +208,12 @@
       "evolution_label": "Évolution du score",
       "avg": "Moy. : {{value}}"
     },
+    "scale_entry": {
+      "progress": "{{current}} / {{total}}",
+      "review_title": "Avant d'envoyer",
+      "review_hint": "Touchez une ligne pour la modifier.",
+      "unanswered": "Sans réponse"
+    },
     "crisis_plan": {
       "sequence_home_title": "Je suis là avec vous.",
       "sequence_resources_title": "Voici ce qui est disponible tout de suite",
@@ -1480,7 +1486,7 @@
       "score_max": "/ 27",
       "footer": "Le score est transmis à votre soignant. Son interprétation lui appartient.",
       "progress": "{{answered}} / {{total}} réponses",
-      "submit": "Valider le questionnaire"
+      "submit": "Envoyer mes réponses"
     },
     "bsl23": {
       "label": "BSL-23",

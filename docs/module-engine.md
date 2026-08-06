@@ -759,6 +759,20 @@ Les attributs structurés sont stockés dans **`field_props`** (une ligne par at
 | `no_toggle` | `'true'` ou `'false'` | Si `'true'` : remplace le toggle par un bouton d'action custom (ex. C-SSRS) |
 | `reference_label` | `'Kroenke et al., 2001'` | Label de la référence bibliographique |
 | `reference_url` | URL vers la publication | Lien vers la source |
+| `entry_mode` | `'scrolling_list'` (défaut) ou `'one_per_screen'` | Mode de saisie patient, lu par `ScaleEntryScreen` (#409) |
+
+**`entry_mode` : le mode de saisie est une configuration, pas une règle globale.**
+`ScaleEntryScreen` est partagé par les neuf modules d'échelle : un `if (moduleId === 'phq9')`
+y est une violation bloquante. Le mode vit donc en base, échelle par échelle.
+
+| Valeur | Rendu | Quand |
+|---|---|---|
+| `scrolling_list` | Tous les items sur une page défilante (`QuestionnaireLayout`) | Défaut, et le seul tenable au-delà d'une vingtaine d'items : un item par écran y devient punitif |
+| `one_per_screen` | Un item par écran, avance automatique, relecture avant envoi (`StepperEntry`) | Instrument court, où le straight-lining coûte plus cher que quelques secondes |
+
+Toute valeur absente ou inconnue retombe sur `scrolling_list` : une configuration
+erronée dégrade vers le comportement historique, elle ne casse pas la saisie. La
+lecture est isolée dans `readEntryMode` (`ScaleEntryScreen/entryConfig.ts`), testée à part.
 
 La clé i18n `modules.<id>.full_title` porte le titre complet de l'échelle (ex. `"Patient Health Questionnaire-9"`). La clé `modules.<id>.label` (déjà utilisée par le moteur générique) porte le nom court.
 

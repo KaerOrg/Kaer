@@ -1,28 +1,20 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Pressable,
-  Platform,
-  type ViewStyle,
-} from 'react-native'
+import { View, Text, StyleSheet, ScrollView, type ViewStyle } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import DateTimePicker from '@react-native-community/datetimepicker'
 import { fetchModuleFields, type ContentField } from '@services/moduleService'
-import { getScaleEntryById, getLatestScaleEntry, generateId, type ScaleEntry } from '../../../lib/database'
+import { getScaleEntryById, generateId, type ScaleEntry } from '../../../lib/database'
 import { saveScaleEntry } from '@services/scaleEntryService'
 import { FieldRenderer } from '../../../components/features/ModuleRenderer/FieldRenderer'
 import { AppStackParamList } from '../../../navigation/AppStack'
-import { colors, spacing, radius } from '@theme'
+import { colors, spacing } from '@theme'
 import { Button } from '@ui/Button'
 import { ScreenLoader } from '@ui/ScreenLoader'
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useToast } from '../../../contexts/ToastContext'
 import { useScaleScreen } from '../../../hooks/useScaleScreen'
+import { StepperEntry } from './StepperEntry'
+import { buildStepperQuestions, readEntryMode, readInstructions } from './entryConfig'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type RouteT = RouteProp<AppStackParamList, 'ScaleEntry'>
@@ -32,42 +24,28 @@ type LoadState =
   | { status: 'error'; message: string }
   | { status: 'ready'; fields: ContentField[] }
 
-const COPY_ICON = <MaterialCommunityIcons name="content-copy" size={14} color={colors.primary} />
-
-function formatEntryDate(d: Date, locale: string): string {
-  return d.toLocaleDateString(locale, {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-  })
-}
-
 export default function ScaleEntryScreen() {
   const navigation = useNavigation<Nav>()
   const { params } = useRoute<RouteT>()
   const { scale_id, entry_id } = params
   const isEditing = entry_id != null
-  const { config, accentColor, activeColor, t, i18n } = useScaleScreen(scale_id)
+  const { config, accentColor, activeColor, t } = useScaleScreen(scale_id)
   const { showToast } = useToast()
 
   const [loadState, setLoadState] = useState<LoadState>({ status: 'loading' })
   const [answers, setAnswers] = useState<(number | null)[]>([])
   const [textInputValues, setTextInputValues] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
-  const [entryDate, setEntryDate] = useState(new Date())
-  const [showDatePicker, setShowDatePicker] = useState(false)
-  const [lastEntry, setLastEntry] = useState<ScaleEntry | null>(null)
-  const [reuseApplied, setReuseApplied] = useState(false)
   const isMounted = useRef(true)
+  // Horodatage de la saisie en cours d'édition. Une passation porte la date à
+  // laquelle elle a été remplie et cette date ne se change pas : antidater ne
+  // recrée pas la fenêtre de deux semaines que l'instrument mesure (#409).
+  const editedCreatedAt = useRef<string | null>(null)
 
   useEffect(() => {
     isMounted.current = true
     return () => { isMounted.current = false }
   }, [])
-
-  useEffect(() => {
-    navigation.setOptions({
-      title: isEditing ? t('common.modify') : t('common.new_entry', { defaultValue: '' }),
-    })
-  }, [isEditing, navigation, t])
 
   const loadFields = useCallback(async () => {
     setLoadState({ status: 'loading' })
@@ -88,28 +66,14 @@ export default function ScaleEntryScreen() {
   // Load fields first, then pre-fill from existing entry if editing
   useEffect(() => { void loadFields() }, [loadFields])
 
-  // Charger la dernière saisie pour le bouton "Reprendre les valeurs" (nouveau seulement)
-  useEffect(() => {
-    if (isEditing) return
-    getLatestScaleEntry(scale_id).then(entry => {
-      if (isMounted.current) setLastEntry(entry)
-    }).catch(() => {})
-  }, [scale_id, isEditing])
-
   useEffect(() => {
     if (!isEditing || !entry_id) return
-    getScaleEntryById(entry_id).then(existing => {
+    getScaleEntryById(entry_id).then((existing: ScaleEntry | null) => {
       if (!existing || !isMounted.current) return
       setAnswers(existing.answers.map(v => v ?? null))
-      setEntryDate(new Date(existing.created_at))
+      editedCreatedAt.current = existing.created_at
     }).catch(() => {/* silent — entry not found, keep empty form */})
   }, [entry_id, isEditing])
-
-  const handleReuseLastEntry = useCallback(() => {
-    if (!lastEntry) return
-    setAnswers(lastEntry.answers.map(v => (typeof v === 'number' ? v : null)))
-    setReuseApplied(true)
-  }, [lastEntry])
 
   const handleAnswer = useCallback((index: number, value: number) => {
     setAnswers(prev => {
@@ -122,13 +86,6 @@ export default function ScaleEntryScreen() {
   const handleTextInput = useCallback((fieldId: string, value: string) => {
     setTextInputValues(prev => ({ ...prev, [fieldId]: value }))
   }, [])
-
-  const handleDateChange = useCallback((_: unknown, date?: Date) => {
-    if (Platform.OS === 'android') setShowDatePicker(false)
-    if (date) setEntryDate(date)
-  }, [])
-
-  const toggleDatePicker = useCallback(() => setShowDatePicker(v => !v), [])
 
   const answeredCount = answers.filter(a => a !== null).length
   const totalItems = config?.items_count ?? answers.length
@@ -176,22 +133,37 @@ export default function ScaleEntryScreen() {
       answers: answers as number[],
       total_score: totalScore,
       subscale_scores: subscaleScores,
-      created_at: entryDate.toISOString(),
+      // Horodatage d'ÉVÉNEMENT (l'instant de la passation), seul cas où l'UTC est
+      // légitime : ce n'est pas une date métier choisie par le patient.
+      created_at: editedCreatedAt.current ?? new Date().toISOString(),
     })
     if (isMounted.current) setSaving(false)
     navigation.goBack()
-  }, [allAnswered, answers, config, entry_id, entryDate, navigation, scale_id, totalItems, answeredCount, loadState, textInputValues, showToast, t])
+  }, [allAnswered, answers, config, entry_id, navigation, scale_id, totalItems, answeredCount, loadState, textInputValues, showToast, t])
 
-  const reuseBtnLabel = useMemo(
-    () => (lastEntry != null
-      ? t('common.reuse_last_values', {
-          date: new Date(lastEntry.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
-        })
-      : ''),
-    [lastEntry, t],
-  )
+  const handleExit = useCallback(() => navigation.goBack(), [navigation])
 
   const submitBtnStyle = useMemo<ViewStyle>(() => ({ backgroundColor: activeColor }), [activeColor])
+
+  const fields = loadState.status === 'ready' ? loadState.fields : null
+  const entryMode = useMemo(() => readEntryMode(fields), [fields])
+  const stepperQuestions = useMemo(
+    () => (entryMode === 'one_per_screen' && fields ? buildStepperQuestions(fields, t) : []),
+    [entryMode, fields, t],
+  )
+  const instructions = useMemo(
+    () => (entryMode === 'one_per_screen' && fields ? readInstructions(fields, t) : []),
+    [entryMode, fields, t],
+  )
+
+  useEffect(() => {
+    // L'écran par item porte sa propre progression : l'en-tête natif ferait doublon.
+    navigation.setOptions(
+      entryMode === 'one_per_screen'
+        ? { headerShown: false }
+        : { headerShown: true, title: isEditing ? t('common.modify') : t('common.new_entry', { defaultValue: '' }) },
+    )
+  }, [entryMode, isEditing, navigation, t])
 
   if (loadState.status === 'loading') {
     return <ScreenLoader />
@@ -206,6 +178,23 @@ export default function ScaleEntryScreen() {
     )
   }
 
+  if (entryMode === 'one_per_screen' && stepperQuestions.length > 0) {
+    return (
+      <StepperEntry
+        questions={stepperQuestions}
+        instructions={instructions}
+        answers={answers}
+        onAnswer={handleAnswer}
+        onSubmit={handleSubmit}
+        onExit={handleExit}
+        submitLabel={t(`modules.${scale_id}.submit`)}
+        saving={saving}
+        accentColor={activeColor}
+        t={t}
+      />
+    )
+  }
+
   return (
     <SafeAreaView style={styles.safe} edges={['bottom']}>
       {/* Progression — sticky en haut, toujours visible pendant la saisie */}
@@ -216,42 +205,6 @@ export default function ScaleEntryScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>
-
-        {/* Date row — toujours visible, permet de corriger la date */}
-        <Pressable
-          style={styles.dateRow}
-          onPress={toggleDatePicker}
-          accessibilityRole="button"
-        >
-          <MaterialCommunityIcons name="calendar-edit" size={18} color={activeColor} />
-          <Text style={styles.dateLabelText}>{t('common.entry_date')}</Text>
-          <Text style={[styles.dateValue, { color: activeColor }]}>
-            {formatEntryDate(entryDate, i18n.language)}
-          </Text>
-          <MaterialCommunityIcons name="chevron-down" size={16} color={colors.textMuted} />
-        </Pressable>
-
-        {showDatePicker && (
-          <DateTimePicker
-            value={entryDate}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'inline' : 'default'}
-            maximumDate={new Date()}
-            onChange={handleDateChange}
-          />
-        )}
-
-        {!isEditing && lastEntry != null && !reuseApplied && (
-          <Button
-            variant="secondary"
-            size="sm"
-            label={reuseBtnLabel}
-            onPress={handleReuseLastEntry}
-            iconLeft={COPY_ICON}
-            style={styles.reuseBtn}
-          />
-        )}
-
         <FieldRenderer
           preview_kind="questionnaire"
           fields={loadState.fields}
@@ -263,7 +216,6 @@ export default function ScaleEntryScreen() {
             accentColor: accentColor ?? undefined,
           }}
         />
-
       </ScrollView>
 
       {/* Bouton Enregistrer — sticky en bas, toujours accessible */}
@@ -284,18 +236,6 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.lg },
   container: { padding: spacing.md, paddingBottom: spacing.xl, gap: spacing.md },
-  dateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.card,
-    borderRadius: radius.md,
-    padding: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  dateLabelText: { fontSize: 13, color: colors.textMuted, flex: 0 },
-  dateValue: { flex: 1, fontSize: 13, fontWeight: '600', textAlign: 'right' },
   progressBar: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -311,5 +251,4 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
   },
   errorText: { fontSize: 15, color: colors.textMuted, textAlign: 'center', marginBottom: 16 },
-  reuseBtn: { alignSelf: 'flex-start' },
 })
