@@ -130,7 +130,8 @@ Une ligne par module. `preview_kind` pilote le moteur de rendu.
 | `preview_kind` | text | Layout cible (voir `docs/module-engine.md` pour la table complète) |
 | `sort_order` | int | Ordre dans la catégorie |
 | `is_invite_excluded` | boolean | Si true : exclu de la pré-sélection à l'invitation (config spéciale requise) |
-| `is_hidden` | boolean | Si true : module retiré de l'app sans suppression (droits non acquis). Voir ci-dessous |
+| `is_hidden` | boolean | Si true : module retiré de l'app sans suppression. Voir ci-dessous |
+| `hidden_reason` | text nullable | Motif de la mise en veille : `rights` ou `beta_scope`. Null si visible (#406) |
 | `icon` | text nullable | Icône Lucide (web) |
 | `mobile_icon` | text nullable | Icône MaterialCommunityIcons (mobile) |
 | `color` | text nullable | Couleur accent hex |
@@ -151,13 +152,36 @@ et les saisies déjà faites par les patients. Un module masqué disparaît du
 catalogue praticien, de l'invitation, de l'aperçu, de la liste patient mobile et
 des routines de rappel.
 
-Modules actuellement masqués : `asrs18`, `epds`, `snap_iv`, `rcads`, `nsi`,
-`bsl23`. Le motif juridique de chacun est documenté dans `supabase/seed.sql`,
-au-dessus de l'instruction de masquage.
+**`hidden_reason` : deux motifs qui ne se confondent pas** (issue #406). Le drapeau
+dit *qu'un* module est en veille, le motif dit *pourquoi*, et rien ne permet de le
+déduire de l'identifiant.
 
-**Réactivation** le jour où les droits sont acquis : retirer l'id de la liste du
-seed **et** de `MUST_BE_HIDDEN` dans `apps/web/src/test/hiddenModules.guard.test.ts`,
-puis rejouer le seed. Rien d'autre à toucher.
+| Motif | Modules | Ce que ça implique |
+|---|---|---|
+| `rights` | `asrs18`, `epds`, `snap_iv`, `rcads`, `nsi`, `bsl23` | Droits de reproduction non acquis en usage commercial. Réactivation conditionnée à une démarche juridique aboutie |
+| `beta_scope` | `gad7`, `asrs6` | Droits acquis, hors périmètre de la bêta (PHQ-9 seul). Réactivation = décision produit, aucune démarche |
+
+Le motif est ce que lit la zone « En veille » du praticien : annoncer « droits d'usage
+en cours de vérification » devant le GAD-7, qui est libre au même titre que le PHQ-9,
+serait faux. Le détail du régime de chaque échelle est documenté dans
+`supabase/seed.sql`, au-dessus de l'instruction de mise en veille.
+
+La contrainte `modules_hidden_reason_ck` rend le couple incohérent impossible : masqué
+sans motif, ou motif sans masquage, ne peuvent pas être écrits. Le seed pose le motif
+et **dérive** `is_hidden`, en une seule instruction (la contrainte est vérifiée à la
+fin de chaque instruction, deux `update` successifs échoueraient).
+
+**Un module en veille n'est pas assignable.** Le filtre `is_hidden` des services de
+catalogue est un confort d'interface ; la barrière réelle est le trigger
+`trg_guard_hidden_module_assignment` sur `patient_modules`, qui refuse l'insertion et
+le changement de `module_type` vers un module en veille. Les lignes déjà débloquées
+avant la mise en veille restent intactes et modifiables : le patient ne voit plus le
+module, son historique reste consultable par le praticien.
+
+**Réactivation** : retirer l'id de la liste de son motif dans le seed et rejouer le
+seed. Rien d'autre, aucune migration. Pour une échelle sous `rights`, retirer aussi son
+id de `MUST_BE_HIDDEN` dans `apps/web/src/test/hiddenModules.guard.test.ts`, dans le
+même commit, avec la preuve du droit obtenu.
 
 **Pourquoi le filtre est dans les services et non dans la policy RLS.** Descendre
 `is_hidden = false` dans `modules_read` semble plus sûr (impossible à oublier), mais

@@ -812,6 +812,7 @@ create table if not exists public.modules (
   sort_order         int     not null default 0,
   is_invite_excluded boolean not null default false,
   is_hidden          boolean not null default false,
+  hidden_reason      text,
   icon               text    not null default '',
   mobile_icon        text    not null default '',
   color              text    not null default '#6366F1'
@@ -830,6 +831,22 @@ begin
                  where table_schema = 'public' and table_name = 'modules' and column_name = 'is_hidden') then
     alter table public.modules add column is_hidden boolean not null default false;
   end if;
+  -- #406. `hidden_reason` arrive après `is_hidden` : les bases déjà semées portent des
+  -- modules masqués sans motif, tous pour cause de droits (c'était le seul motif à
+  -- l'époque). On rétro-remplit AVANT de poser la contrainte, sinon elle est rejetée.
+  if not exists (select 1 from information_schema.columns
+                 where table_schema = 'public' and table_name = 'modules' and column_name = 'hidden_reason') then
+    alter table public.modules add column hidden_reason text;
+    update public.modules set hidden_reason = 'rights' where is_hidden;
+  end if;
+  if not exists (select 1 from information_schema.table_constraints
+                 where table_schema = 'public' and table_name = 'modules'
+                   and constraint_name = 'modules_hidden_reason_ck') then
+    alter table public.modules add constraint modules_hidden_reason_ck check (
+      (is_hidden and hidden_reason in ('rights', 'beta_scope'))
+      or (not is_hidden and hidden_reason is null)
+    );
+  end if;
 end $$;
 
 -- Les trois drapeaux de `modules` répondent à trois questions distinctes. Ne pas
@@ -843,6 +860,19 @@ end $$;
 --   preview_kind       : COMMENT le module se rend ('coming_soon' = pas encore d'écran).
 comment on column public.modules.is_hidden is
   'Module retiré de l''app sans suppression de code ni de données (droits non acquis). Voir issue #247.';
+
+-- #406. Un module peut être en veille pour deux raisons qui n'ont rien à voir, et que
+-- rien ne permettait de distinguer : le motif ne se déduit pas de l'identifiant.
+--   'rights'     : droits de reproduction non acquis en usage commercial. La
+--                  réactivation suppose une démarche juridique aboutie.
+--   'beta_scope' : droits acquis, mais hors du périmètre de la bêta. La réactivation
+--                  est une décision produit, sans aucune démarche.
+-- Le motif est ce que lit la zone « En veille » du praticien (#421) : afficher
+-- « droits en cours de vérification » devant une échelle libre serait faux.
+-- La contrainte `modules_hidden_reason_ck` rend le couple incohérent impossible :
+-- masqué sans motif, ou motif sans masquage, ne peuvent pas être écrits.
+comment on column public.modules.hidden_reason is
+  'Motif de mise en veille : ''rights'' (droits non acquis) ou ''beta_scope'' (hors périmètre bêta). Null si visible. Voir issue #406.';
 
 alter table public.modules enable row level security;
 
@@ -866,6 +896,35 @@ begin
       foreign key (module_type) references public.modules(id);
   end if;
 end $$;
+
+-- #406. Un module en veille ne doit pas pouvoir être assigné à un patient : sinon il
+-- réapparaît chez lui et le masquage ne sert à rien. Le catalogue praticien filtre déjà
+-- `is_hidden` côté lecture, mais un filtre de lecture n'est qu'un confort d'interface :
+-- la barrière réelle est ici, en base, comme pour `is_admin` (trg_guard_is_admin_write).
+--
+-- Le trigger ne se déclenche que sur INSERT et sur les UPDATE qui TOUCHENT
+-- `module_type` : les lignes déjà débloquées avant la mise en veille restent
+-- modifiables (config, notes), et les saisies du patient ne sont jamais supprimées.
+-- C'est la décision du ticket : le patient ne voit plus le module, son historique
+-- reste consultable par le praticien.
+create or replace function public.fn_guard_hidden_module_assignment()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if exists (select 1 from public.modules m where m.id = new.module_type and m.is_hidden) then
+    raise exception 'module % est en veille et ne peut pas être assigné', new.module_type
+      using errcode = 'check_violation';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_guard_hidden_module_assignment on public.patient_modules;
+create trigger trg_guard_hidden_module_assignment
+  before insert or update of module_type on public.patient_modules
+  for each row execute function public.fn_guard_hidden_module_assignment();
 
 
 -- ============================================================
