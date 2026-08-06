@@ -75,6 +75,25 @@ describe('homeService.fetchUnlockedModules', () => {
     expect(result.map(m => m.module_type)).toEqual(['sleep_diary'])
   })
 
+  // #406. Deux motifs de mise en veille coexistent (droits non acquis, périmètre
+  // bêta). Côté patient ils ne se distinguent pas : le module disparaît dans les deux
+  // cas, sans mention. Un patient n'a à connaître ni nos questions de licence ni notre
+  // périmètre de bêta, et le service ne lit d'ailleurs même pas `hidden_reason`.
+  it('écarte un module en veille quel que soit le motif', async () => {
+    mockOrder.mockResolvedValue({
+      data: [
+        { id: 'pm-1', module_type: 'phq9',   config: {}, unlocked_at: '2026-01-01', module: { mobile_icon: 'hp', color: '#fff', preview_kind: 'questionnaire', category_id: 'c', is_hidden: false } },
+        { id: 'pm-2', module_type: 'bsl23',  config: {}, unlocked_at: '2026-02-01', module: { mobile_icon: 'hp', color: '#fff', preview_kind: 'questionnaire', category_id: 'c', is_hidden: true } },
+        { id: 'pm-3', module_type: 'gad7',   config: {}, unlocked_at: '2026-03-01', module: { mobile_icon: 'hp', color: '#fff', preview_kind: 'questionnaire', category_id: 'c', is_hidden: true } },
+      ],
+      error: null,
+    })
+
+    const result = await fetchUnlockedModules('pat-1')
+
+    expect(result.map(m => m.module_type)).toEqual(['phq9'])
+  })
+
   it('garde un module dont le join modules est absent (module null)', async () => {
     mockOrder.mockResolvedValue({
       data: [{ id: 'pm-1', module_type: 'sleep_diary', config: {}, unlocked_at: '2026-01-01', module: null }],

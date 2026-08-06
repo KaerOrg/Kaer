@@ -1,5 +1,18 @@
 export type ModuleType = string
 
+/**
+ * Motif de mise en veille d'un module (`modules.hidden_reason`, issue #406).
+ *
+ * `rights`     : droits de reproduction non acquis en usage commercial. Réactivation
+ *                conditionnée à une démarche juridique aboutie.
+ * `beta_scope` : droits acquis, mais hors du périmètre de la bêta. Réactivation =
+ *                décision produit, sans aucune démarche.
+ *
+ * Les deux ne se confondent pas : c'est ce motif que lit la zone « En veille » du
+ * praticien, et annoncer une question de licence devant une échelle libre serait faux.
+ */
+export type HiddenReason = 'rights' | 'beta_scope'
+
 export interface Database {
   public: {
     Tables: {
@@ -353,6 +366,8 @@ export interface Database {
           is_invite_excluded: boolean
           /** Module retiré de l'app sans suppression (droits non acquis), issue #247. */
           is_hidden: boolean
+          /** Motif de mise en veille, null si visible. Issue #406. */
+          hidden_reason: HiddenReason | null
           icon: string
           mobile_icon: string
           color: string
@@ -364,6 +379,7 @@ export interface Database {
           sort_order?: number
           is_invite_excluded?: boolean
           is_hidden?: boolean
+          hidden_reason?: HiddenReason | null
           icon?: string
           mobile_icon?: string
           color?: string
@@ -373,6 +389,7 @@ export interface Database {
           sort_order?: number
           is_invite_excluded?: boolean
           is_hidden?: boolean
+          hidden_reason?: HiddenReason | null
           icon?: string
           mobile_icon?: string
           color?: string
