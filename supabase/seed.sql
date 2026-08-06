@@ -1597,8 +1597,11 @@ on conflict (module_id, tag_id) do nothing;
 
 -- ── module_content_fields : crisis_plan (editable_steps) ─────────────────────
 insert into public.module_content_fields (id, module_id, section_id, parent_field_id, field_type, text_code, sort_order) values
-  ('crisis_plan.label', 'crisis_plan', NULL, NULL, 'module_label', 'module.crisis_plan.label', 0),
-  ('crisis_plan.description', 'crisis_plan', NULL, NULL, 'module_description', 'module.crisis_plan.description', 1),
+  -- Un seul namespace pour ce module (P-2) : `modules.crisis_plan.*`. Le doublon
+  -- `module.crisis_plan.*` n'existait qu'en français, donc ces trois libellés
+  -- s'affichaient en clé brute pour un utilisateur anglophone.
+  ('crisis_plan.label', 'crisis_plan', NULL, NULL, 'module_label', 'modules.crisis_plan.label', 0),
+  ('crisis_plan.description', 'crisis_plan', NULL, NULL, 'module_description', 'modules.crisis_plan.description', 1),
   ('crisis_plan.step_1.title', 'crisis_plan', 'step_1', NULL, 'step_title', 'modules.crisis_plan.step_1_title', 10),
   ('crisis_plan.step_1.hint', 'crisis_plan', 'step_1', NULL, 'step_hint', 'modules.crisis_plan.step_1_hint', 11),
   ('crisis_plan.step_2.title', 'crisis_plan', 'step_2', NULL, 'step_title', 'modules.crisis_plan.step_2_title', 20),
@@ -1613,10 +1616,14 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('crisis_plan.step_6.hint', 'crisis_plan', 'step_6', NULL, 'step_hint', 'modules.crisis_plan.step_6_hint', 61),
   -- Section VHB-EF « Mes raisons de tenir » (sort_order 70 : après les étapes, avant le footer)
   ('crisis_plan.anchors', 'crisis_plan', NULL, NULL, 'crisis_anchors_preview', 'modules.crisis_plan.anchors_title', 70),
-  ('crisis_plan.footer', 'crisis_plan', NULL, NULL, 'footer_note', 'module.crisis_plan.footer', 99),
-  -- Numéros d'urgence (exercise_safety) : affichés en tête de la vue de consultation
-  ('crisis_plan.emergency_15', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_samu', 130),
-  ('crisis_plan.emergency_3114', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_3114', 140)
+  ('crisis_plan.footer', 'crisis_plan', NULL, NULL, 'footer_note', 'modules.crisis_plan.footer', 99),
+  -- Ressources d'urgence (exercise_safety), dans leur ordre de présentation : le 3114
+  -- (parler à quelqu'un) avant les secours vitaux. Le 114 est le MÊME secours que le
+  -- 15 pour qui ne peut pas passer un appel vocal : même rang, même traitement rouge,
+  -- action `sms` au lieu de `tel`.
+  ('crisis_plan.emergency_3114', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_3114', 130),
+  ('crisis_plan.emergency_15', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_samu', 140),
+  ('crisis_plan.emergency_114', 'crisis_plan', NULL, NULL, 'exercise_safety', 'modules.crisis_plan.emergency_114', 150)
 on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- ── module_content_fields : EPDS ─────────────────────────────────────────────
@@ -2141,15 +2148,37 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('bt.tech.pleine_conscience.phase_4',   'phase_seconds',            '1')
 on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
--- crisis_plan : couleurs/icônes par étape + boutons urgence + sections VHB-EF
+-- crisis_plan : couleurs/icônes par étape + ressources d'urgence + sections VHB-EF
+--
+-- Les `bgColor` des ressources d'urgence ont été RETIRÉS (P-3) : la couleur est portée
+-- par le composant, qui traduit une `tone` sémantique en variante du design system.
+-- Une teinte en dur dans la donnée court-circuitait les tokens et rendait impossible
+-- l'arbitrage de contraste. Le `delete` ci-dessous les enlève des bases déjà semées,
+-- qu'un `on conflict do update` ne saurait pas supprimer.
+delete from public.field_props
+  where field_id in ('crisis_plan.emergency_15', 'crisis_plan.emergency_3114')
+    and prop_key = 'bgColor';
+
 insert into public.field_props (field_id, prop_key, prop_value) values
-  -- Boutons urgence
-  ('crisis_plan.emergency_15', 'bgColor', '#0D9488'),
-  ('crisis_plan.emergency_15', 'label_code', 'modules.crisis_plan.emergency_samu_label'),
-  ('crisis_plan.emergency_15', 'phone', '15'),
-  ('crisis_plan.emergency_3114', 'bgColor', '#7C3AED'),
-  ('crisis_plan.emergency_3114', 'label_code', 'modules.crisis_plan.emergency_3114_label'),
+  -- Ressources d'urgence : `tone` code la gravité (pas le public), `action` le canal.
   ('crisis_plan.emergency_3114', 'phone', '3114'),
+  ('crisis_plan.emergency_3114', 'action', 'tel'),
+  ('crisis_plan.emergency_3114', 'tone', 'primary'),
+  ('crisis_plan.emergency_3114', 'label_code', 'modules.crisis_plan.emergency_3114_label'),
+  ('crisis_plan.emergency_3114', 'action_label_code', 'modules.crisis_plan.emergency_3114_action'),
+  ('crisis_plan.emergency_3114', 'detail_label_code', 'modules.crisis_plan.emergency_3114_detail'),
+  ('crisis_plan.emergency_15', 'phone', '15'),
+  ('crisis_plan.emergency_15', 'action', 'tel'),
+  ('crisis_plan.emergency_15', 'tone', 'danger'),
+  ('crisis_plan.emergency_15', 'label_code', 'modules.crisis_plan.emergency_samu_label'),
+  ('crisis_plan.emergency_15', 'action_label_code', 'modules.crisis_plan.emergency_samu_action'),
+  ('crisis_plan.emergency_15', 'detail_label_code', 'modules.crisis_plan.emergency_samu_detail'),
+  ('crisis_plan.emergency_114', 'phone', '114'),
+  ('crisis_plan.emergency_114', 'action', 'sms'),
+  ('crisis_plan.emergency_114', 'tone', 'danger'),
+  ('crisis_plan.emergency_114', 'label_code', 'modules.crisis_plan.emergency_114_label'),
+  ('crisis_plan.emergency_114', 'action_label_code', 'modules.crisis_plan.emergency_114_action'),
+  ('crisis_plan.emergency_114', 'detail_label_code', 'modules.crisis_plan.emergency_114_detail'),
   ('crisis_plan.step_1.hint', 'color', '#D97706'),
   ('crisis_plan.step_1.hint', 'step_number', '1'),
   ('crisis_plan.step_1.title', 'bgColor', '#FFFBEB'),
@@ -2162,6 +2191,10 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('crisis_plan.step_2.title', 'color', '#059669'),
   ('crisis_plan.step_2.title', 'icon', 'heart-pulse'),
   ('crisis_plan.step_2.title', 'step_number', '2'),
+  -- Sous-titres de la Séquence (P-7) : une ligne, uniquement là où deux étapes
+  -- voisines se confondent. L'étape 2 se fait seul, l'étape 3 sans se confier.
+  ('crisis_plan.step_2.title', 'subtitle_code', 'modules.crisis_plan.step_2_subtitle'),
+  ('crisis_plan.step_3.title', 'subtitle_code', 'modules.crisis_plan.step_3_subtitle'),
   ('crisis_plan.step_3.hint', 'color', '#4F46E5'),
   ('crisis_plan.step_3.hint', 'step_number', '3'),
   ('crisis_plan.step_3.title', 'bgColor', '#EEF2FF'),
@@ -2183,12 +2216,26 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('crisis_plan.step_5.title', 'icon', 'hospital-box-outline'),
   ('crisis_plan.step_5.title', 'step_number', '5'),
   ('crisis_plan.step_5.title', 'contactable', 'true'),
+  -- Étape 5 : équipe soignante. Pas de bouton « Envoyer un message » — un CMP ne se
+  -- joint pas par SMS (P-8).
+  ('crisis_plan.step_5.title', 'professional', 'true'),
   ('crisis_plan.step_6.hint', 'color', '#15803D'),
   ('crisis_plan.step_6.hint', 'step_number', '6'),
   ('crisis_plan.step_6.title', 'bgColor', '#F0FDF4'),
   ('crisis_plan.step_6.title', 'color', '#15803D'),
   ('crisis_plan.step_6.title', 'icon', 'shield-home-outline'),
-  ('crisis_plan.step_6.title', 'step_number', '6')
+  ('crisis_plan.step_6.title', 'step_number', '6'),
+  -- Raccourci de l'écran d'arrivée de la Séquence (P-6) : l'étape 6 est un plancher,
+  -- disponible à toutes les intensités, sans avoir à épuiser les cinq autres. La
+  -- config le déclare ; le layout ne connaît aucun numéro d'étape.
+  ('crisis_plan.step_6.title', 'direct_access_label_code', 'modules.crisis_plan.sequence_home_shelter'),
+  ('crisis_plan.step_6.title', 'direct_access_hint_code', 'modules.crisis_plan.sequence_home_shelter_hint'),
+  -- L'étape 6 porte le lien « Traverser la vague » (P-9), qui n'apparaît que si le
+  -- module distress_tolerance est déverrouillé pour ce patient.
+  ('crisis_plan.step_6.title', 'crisis_link', 'true'),
+  -- L'étape 6 accepte des contacts (le tiers à qui l'on confie un moyen) : ses items
+  -- se rendent avec leurs gestes, comme aux étapes 4 et 5.
+  ('crisis_plan.step_6.title', 'contactable', 'true')
 on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- EPDS : valeurs (certaines questions sont à scoring inversé : opt0=3 ... opt3=0)

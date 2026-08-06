@@ -4,8 +4,19 @@
   gap: var(--spacing-sm);
   border-radius: var(--radius-sm);
   padding: var(--spacing-sm) var(--spacing-md);
-  color: #fff;
   cursor: default;
+}
+
+/* Teintes de ressource : la gravité, jamais le public (P-3). Le turquoise porte un
+   libellé sombre (le blanc y échoue AA), le rouge de crise un libellé blanc. */
+.exercise-safety-field--primary {
+  background: var(--color-primary);
+  color: var(--color-text);
+}
+
+.exercise-safety-field--danger {
+  background: var(--color-danger-text);
+  color: var(--color-white);
 }
 
 .exercise-safety-field__content {

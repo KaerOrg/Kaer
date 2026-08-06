@@ -68,22 +68,61 @@ describe('SafetyPlanLayout', () => {
     await waitFor(() => expect(mockGetPlanItems).toHaveBeenCalledWith('crisis_plan'))
   })
 
-  it('affiche le titre de consultation, les étapes et les ancres', async () => {
+  // La Consultation nomme l'OBJET (« mon plan »). « Je suis en crise » y est une
+  // ESCALADE, plus le titre de l'écran : c'est ce que P-1 sépare.
+  it('affiche le titre du plan, les étapes remplies et les ancres', async () => {
+    mockGetPlanItems.mockResolvedValue([
+      { id: 'i1', module_id: 'crisis_plan', section_id: 'step_1', text: 'Je me sens tendu', sort_order: 0, weight: null, created_at: '' },
+      { id: 'i2', module_id: 'crisis_plan', section_id: 'step_2', text: 'Marcher', sort_order: 0, weight: null, created_at: '' },
+    ])
     render(<SafetyPlanLayout sections={SECTIONS} uiFields={UI_FIELDS} moduleId="crisis_plan" />)
-    await waitFor(() => expect(screen.getByText('modules.crisis_plan.consultation_title')).toBeTruthy())
+    await waitFor(() => expect(screen.getByText('modules.crisis_plan.title')).toBeTruthy())
     expect(screen.getByText('modules.crisis_plan.step_1_title')).toBeTruthy()
     expect(screen.getByText('modules.crisis_plan.step_2_title')).toBeTruthy()
     expect(screen.getByTestId('anchors-stub')).toBeTruthy()
   })
 
-  it('affiche les items saisis dans leur étape et un placeholder pour les étapes vides', async () => {
+  // Une carte vide en crise ne dit pas « rien ici », elle dit « tu n'as rien » — et sur
+  // un plan neuf, elle le disait six fois.
+  it('ne rend PAS une étape sans item, et n\'affiche aucun placeholder', async () => {
     mockGetPlanItems.mockResolvedValue([
       { id: 'i1', module_id: 'crisis_plan', section_id: 'step_1', text: 'Je me sens tendu', sort_order: 0, weight: null, created_at: '' },
     ])
     render(<SafetyPlanLayout sections={SECTIONS} uiFields={UI_FIELDS} moduleId="crisis_plan" />)
     await waitFor(() => expect(screen.getByText('Je me sens tendu')).toBeTruthy())
-    // step_2 n'a aucun item → placeholder
-    expect(screen.getByText('modules.crisis_plan.step_empty')).toBeTruthy()
+    expect(screen.getByText('modules.crisis_plan.step_1_title')).toBeTruthy()
+    // step_2 n'a aucun item : ni carte, ni placeholder.
+    expect(screen.queryByText('modules.crisis_plan.step_2_title')).toBeNull()
+    expect(screen.queryByText('modules.crisis_plan.step_empty')).toBeNull()
+  })
+
+  it('n\'affiche aucune étape quand le plan est vide, sans texte de manque', async () => {
+    mockGetPlanItems.mockResolvedValue([])
+    render(<SafetyPlanLayout sections={SECTIONS} uiFields={UI_FIELDS} moduleId="crisis_plan" />)
+    await waitFor(() => expect(screen.getByText('modules.crisis_plan.title')).toBeTruthy())
+    expect(screen.queryByText('modules.crisis_plan.step_1_title')).toBeNull()
+    expect(screen.queryByText('modules.crisis_plan.step_empty')).toBeNull()
+  })
+
+  // Le point d'entrée vers l'Édition est un LIBELLÉ, pas une roue crantée : un
+  // engrenage signifie « réglages techniques », contresens pour « je change mon plan ».
+  it('ouvre l\'Édition par un libellé « Modifier », pas par une icône seule', async () => {
+    render(<SafetyPlanLayout sections={SECTIONS} uiFields={UI_FIELDS} moduleId="crisis_plan" />)
+    await waitFor(() => expect(screen.getByTestId('safety-plan-configure')).toBeTruthy())
+    expect(screen.getByText('modules.crisis_plan.edit_plan')).toBeTruthy()
+    fireEvent.press(screen.getByTestId('safety-plan-configure'))
+    expect(mockPush).toHaveBeenCalledWith('ModuleContent', {
+      moduleType: 'crisis_plan', previewKindOverride: 'editable_steps',
+    })
+  })
+
+  it('escalade vers la Séquence depuis la relecture', async () => {
+    render(<SafetyPlanLayout sections={SECTIONS} uiFields={UI_FIELDS} moduleId="crisis_plan" />)
+    await waitFor(() => expect(screen.getByTestId('safety-plan-escalate')).toBeTruthy())
+    fireEvent.press(screen.getByTestId('safety-plan-escalate'))
+    expect(mockPush).toHaveBeenCalledWith('ModuleContent', {
+      moduleType: 'crisis_plan', previewKindOverride: 'safety_sequence',
+    })
   })
 
   it('appelle le numéro d\'urgence au tap', async () => {
@@ -104,7 +143,8 @@ describe('SafetyPlanLayout', () => {
     ])
     render(<SafetyPlanLayout sections={sections} uiFields={[]} moduleId="crisis_plan" />)
     await waitFor(() => expect(screen.getByText('Marie')).toBeTruthy())
-    expect(screen.getByText('0102030405')).toBeTruthy()
+    // Le numéro n'est plus affiché : le bouton porte un verbe (P-8).
+    expect(screen.queryByText('0102030405')).toBeNull()
     fireEvent.press(screen.getByTestId('contact-ct1-call'))
     expect(Linking.openURL).toHaveBeenCalledWith('tel:0102030405')
   })

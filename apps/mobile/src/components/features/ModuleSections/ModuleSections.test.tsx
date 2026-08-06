@@ -31,21 +31,21 @@ describe('ModuleSections', () => {
       />,
     )
     expect(screen.getByText('Sécurité & Gestion de Crise')).toBeTruthy()
-    expect(screen.getByText('Surveillance Iatrogénique & Somatique')).toBeTruthy()
-    expect(screen.getByText('Plan de crise')).toBeTruthy()
+    expect(screen.getByText('Mon traitement au quotidien')).toBeTruthy()
+    expect(screen.getByText('Mon plan de sécurité')).toBeTruthy()
   })
 
   it('masque le libellé de section quand il n\'y a qu\'un groupe', () => {
     render(<ModuleSections {...baseProps} modules={[mk('crisis_plan', 'safety')]} />)
     expect(screen.queryByText('Sécurité & Gestion de Crise')).toBeNull()
-    expect(screen.getByText('Plan de crise')).toBeTruthy()
+    expect(screen.getByText('Mon plan de sécurité')).toBeTruthy()
   })
 
   it('appelle onModulePress avec le bon module au tap', () => {
     const onModulePress = jest.fn()
     const mod = mk('crisis_plan', 'safety')
     render(<ModuleSections {...baseProps} onModulePress={onModulePress} modules={[mod]} />)
-    fireEvent.press(screen.getByLabelText('Plan de crise'))
+    fireEvent.press(screen.getByLabelText('Mon plan de sécurité'))
     expect(onModulePress).toHaveBeenCalledWith(mod)
   })
 })

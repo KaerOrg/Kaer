@@ -6,7 +6,7 @@ jest.mock('../lib/supabase', () => ({
   },
 }))
 
-import { fetchPatientModuleConfig } from './moduleService'
+import { fetchPatientModuleConfig, isModuleUnlocked } from './moduleService'
 
 // Note : fetchModuleFields est testé dans @kaer/shared (packages/shared/src/services/moduleFields.test.ts)
 // car la logique est partagée entre web et mobile via le service injecté.
@@ -49,5 +49,27 @@ describe('moduleService.fetchPatientModuleConfig', () => {
     const result = await fetchPatientModuleConfig('pat-1', 'rim')
 
     expect(result).toBeNull()
+  })
+})
+
+describe('moduleService.isModuleUnlocked', () => {
+  beforeEach(() => jest.clearAllMocks())
+
+  it('confirme le déverrouillage quand la ligne existe', async () => {
+    mockFrom.mockReturnValueOnce(makeChain({ data: { id: 'pm-1' } }))
+    await expect(isModuleUnlocked('pat-1', 'distress_tolerance')).resolves.toBe(true)
+    expect(mockFrom).toHaveBeenCalledWith('patient_modules')
+  })
+
+  it('renvoie false quand le module n\'est pas déverrouillé', async () => {
+    mockFrom.mockReturnValueOnce(makeChain({ data: null }))
+    await expect(isModuleUnlocked('pat-1', 'distress_tolerance')).resolves.toBe(false)
+  })
+
+  // Hors ligne, mieux vaut ne pas proposer une porte que d'en proposer une qui ne
+  // s'ouvrirait pas : l'échec de lecture fait disparaître le lien, il ne le grise pas.
+  it('renvoie false quand la lecture échoue', async () => {
+    mockFrom.mockReturnValueOnce(makeChain({ data: null, error: { message: 'offline' } }))
+    await expect(isModuleUnlocked('pat-1', 'distress_tolerance')).resolves.toBe(false)
   })
 })

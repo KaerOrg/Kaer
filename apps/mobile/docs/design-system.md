@@ -173,12 +173,20 @@ Jamais de composant `.tsx` plat à la racine de `src/components/` — toujours d
 | `secondary` | `colors.primaryLight` | `colors.primary` (1.5px) | `colors.primary` |
 | `ghost` | transparent | — | `colors.primary` |
 | `danger` | `colors.dangerLight` | `colors.danger` (1px) | `colors.danger` |
+| `dangerSolid` | `colors.dangerText` | — | `colors.white` |
 | `ghostDanger` | transparent | — | `colors.danger` |
 
 | Taille | paddingV | paddingH | minHeight | label |
 |---|---|---|---|---|
 | `md` (défaut) | 12 | 24 | 50 | 16 |
 | `sm` | 8 | 16 | 36 | 14 |
+
+`dangerSolid` est l'alerte pleine, réservée aux secours vitaux (appel du 15, écriture
+au 114) : là où `danger` reste un habillage discret pour une action destructive,
+`dangerSolid` doit se voir avant tout le reste. Son fond est `colors.dangerText`
+(#DC2626) et non `colors.danger` (#EF4444) : c'est le seul des deux rouges qui porte
+un libellé blanc à un contraste AA (≈ 4,8:1). Ne pas l'employer pour une donnée
+clinique : la teinte y coderait une gravité, ce qu'interdit la règle d'or MDR.
 
 `ghostDanger` est le pendant discret de `danger` : action destructive sans habillage,
 seul le libellé porte la couleur d'alerte (ex. « Annuler » dans une carte de rendez-vous,
@@ -908,7 +916,34 @@ passe par `crisisPlanService` (jamais Supabase/SQLite direct), avec `@ui/Button`
 | Widget | `field_type` | Rôle | Persistance |
 |---|---|---|---|
 | `CrisisAnchorsWidget` | `crisis_anchors_preview` | Photos d'ancrage + phrase + message praticien | FileSystem + SQLite + Supabase |
-| `CrisisEmergencyCalls` (shared) | `exercise_safety` | Rangée de boutons d'appel `tel:` colorés (numéro + intitulé). Réutilisé par `SafetyPlanLayout` (tête) et `EditableStepsLayout` (barre) | — (appel) |
+| `CrisisEmergencyCalls` (shared) | `exercise_safety` | Ressources d'urgence, deux densités (voir ci-dessous). Réutilisé par `SafetySequenceLayout`, `SafetyPlanLayout` (tête) et `EditableStepsLayout` (barre) | — (appel / SMS) |
+
+#### CrisisEmergencyCalls : deux densités, un composant
+
+`src/components/features/ModuleRenderer/layouts/shared/CrisisEmergencyCalls.tsx`
+
+```tsx
+<CrisisEmergencyCalls fields={uiFields} />                  // bandeau permanent
+<CrisisEmergencyCalls fields={uiFields} density="full" />   // écran des ressources
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `fields` | `ContentField[]` | Fields du module ; les `exercise_safety` en sont extraits et triés par `sort_order` |
+| `density` | `'compact' \| 'full'` | `compact` (défaut) : pastilles côte à côte, numéro + sous-libellé court. `full` : cartes empilées, verbe d'action + sous-libellé long |
+
+Le **nombre d'entrées est libre** (deux, trois, quatre) : les coordonnées viendront
+d'une configuration serveur, rien n'est figé dans le rendu. Chaque entrée se configure
+par `field_props` :
+
+| Prop de field | Rôle |
+|---|---|
+| `phone` | Numéro composé |
+| `action` | `tel` (défaut) ou `sms`. Le 114 est en `sms` : un `tel:114` appellerait vocalement le service destiné aux personnes sourdes ou malentendantes |
+| `tone` | `primary` (défaut) ou `danger`. **Sémantique, jamais une couleur** : le composant la traduit en variante (`secondary`/`danger` en compact, `primary`/`dangerSolid` en full). Elle code la gravité de la situation, pas le public : le 114 est rouge comme le 15, parce que c'est le même secours |
+| `label_code` | Clé i18n du sous-libellé compact (« Parler, 24h/24 ») |
+| `action_label_code` | Clé i18n du verbe (« Appeler le 15 », « Écrire au 114 »). Sert de libellé d'accessibilité **dans les deux densités** : « 114 » seul ne dit pas ce qu'un appui déclenche |
+| `detail_label_code` | Clé i18n du sous-libellé long, densité `full` |
 
 ---
 
@@ -981,8 +1016,35 @@ n'en crée un nouveau qu'en dernier recours.
 | `EditableItemsList` | Liste d'items CRUD inline (avec poids optionnel) | `editable_steps`, `decision_grid` |
 | `WeightPicker` | Sélecteur de poids 1–5 étoiles | `EditableItemsList` |
 | `ExerciseSafetySection` | Encart rouge de numéros d'urgence cliquables (`tel:`) | `guided_exercise`, `patient_scenario` |
-| `CallableContact` | Rangée de contact en lecture seule : nom + numéro + bouton d'appel `tel:` (`@ui/Button`). Sans numéro → simple ligne | `safety_plan` (étapes contactables) |
+| `CallableContact` | Contact ou lieu du plan, en lecture seule (voir ci-dessous) | `safety_plan` (étapes contactables), Séquence |
 | `EditableContactsList` | Liste CRUD de contacts (nom + numéro) + « Importer depuis mes contacts » (`contactsService`). Construite avec `@ui/Button` + `@ui/InputField` | `editable_steps` (étapes contactables) |
+
+#### CallableContact : un contact ou un lieu, jamais un numéro
+
+`src/components/features/ModuleRenderer/layouts/shared/CallableContact.tsx`
+
+```tsx
+<CallableContact name={item.text} phone={item.phone} role={item.role} note={item.note}
+  professional={isProfessional} accentColor={iconColor}
+  callLabel={lbl('call_contact')} messageLabel={lbl('message_contact')} testID={`contact-${item.id}`} />
+```
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `name` | `string` | Nom du contact ou du lieu, tel que le patient l'a écrit |
+| `phone` | `string \| null` | Numéro. **Jamais affiché** : il ne sert qu'à composer le lien |
+| `kind` | `'person' \| 'place'` | Défaut `person`. Un lieu ne se joint pas : aucun bouton, même s'il porte un numéro |
+| `role` | `string \| null` | Lien au patient ou fonction (« ma sœur », « CMP »), dans ses mots |
+| `note` | `string \| null` | « Ce que je peux lui dire », ou ce qui rend un lieu praticable. Facultatif : son absence ne laisse aucun trou |
+| `professional` | `boolean` | Retire le bouton de message : un CMP ne se joint pas par SMS |
+| `accentColor` | `string` | Couleur d'accent de l'étape (puce et boutons) |
+| `callLabel` / `messageLabel` | `string` | **Verbes** i18n fournis par le parent. Sans `messageLabel`, aucun bouton de message |
+
+**Le numéro n'est jamais rendu à l'écran** : un plan de sécurité s'ouvre dans un train
+ou une salle d'attente, et un numéro en clair l'expose à qui regarde par-dessus l'épaule.
+Le bouton porte le verbe. **Règle constante** : un numéro existe, les boutons existent ;
+pas de numéro, ni numéro ni bouton, et surtout aucun bouton grisé ni texte de
+remplacement — un item sans action ne doit jamais se lire comme un défaut.
 
 ### Sous-composants de layout
 

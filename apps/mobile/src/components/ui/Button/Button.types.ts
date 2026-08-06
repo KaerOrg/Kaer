@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import type { StyleProp, ViewStyle } from 'react-native'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'ghostDanger'
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'ghostDanger' | 'dangerSolid'
 
 export type ButtonSize = 'sm' | 'md'
 

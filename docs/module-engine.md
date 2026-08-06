@@ -59,7 +59,7 @@ Valeurs de `preview_kind` et leur layout :
 | `crisis_companion` | Compagnon de crise « urge surfing » : machine à états accueil+catégories (un écran) → activité + délai → minuteur décompté → fin neutre. Aucune persistance. Nommé par motif, `moduleId` dérivé pour le chrome. Aperçu web = storyboard lecture seule | `distress_tolerance` (onglet « Agir en crise ») |
 | `patient_scenario` | Scénario RIM patient (lecture scénario + sons + urgence) | `rim` |
 | `safety_plan` | Vue de consultation « Je suis en crise » (entrée par défaut du Plan de crise **une fois le plan renseigné**) : numéros d'urgence en tête, 6 étapes remplies en lecture seule, « Mes raisons de tenir » ; roue crantée → mode édition. Web : aperçu reflétant la vue mobile, réponses patient privées → placeholder | `crisis_plan` |
-| `safety_sequence` | Traversée guidée du plan de sécurité en crise : machine à états `home` → `step[n]` → `resources` → `closing`, une chose à la fois, un seul bouton d'avancement. **Zéro persistance** : aucune écriture, aucun compteur, rien côté praticien (verrouillé par un test statique sur les imports du layout). Une étape sans item est **sautée** et ne compte pas dans la progression — routage structurel sur la seule *présence* d'items, jamais sur leur contenu. Logique pure partagée par les deux apps dans `@kaer/shared/services/safetySequence`. Web : storyboard des écrans dans l'ordre, contenu d'exemple, jamais le plan réel | `crisis_plan` |
+| `safety_sequence` | Traversée guidée du plan de sécurité en crise : machine à états `home` → `step[n]` → `resources` → `closing`, une chose à la fois, un seul bouton d'avancement. **Zéro persistance** : aucune écriture, aucun compteur, rien côté praticien (verrouillé par un test statique sur les imports du layout). Une étape sans item est **sautée** et ne compte pas dans la progression — routage structurel sur la seule *présence* d'items, jamais sur leur contenu. Logique pure partagée par les deux apps dans `@kaer/shared/services/safetySequence`. Écran d'étape : « ÉTAPE n », titre serif, sous-titre facultatif (`field_props.subtitle_code` sur le `step_title`, une clé i18n), items du patient séparés par un filet, sans icône ni couleur d'étape ; retour et progression en rangée de tête, deux boutons ancrés hors du flux défilant (d'où l'appartenance à `SELF_MANAGED_LAYOUTS`). Web : storyboard des écrans dans l'ordre, contenu d'exemple, jamais le plan réel | `crisis_plan` |
 | `editable_steps` | Étapes éditables par le patient (Plan de crise, mode édition atteint via la roue crantée de `safety_plan`). **Setup-fallback** : à l'ouverture nue du module (depuis l'accueil, sans override), tant que le plan est vide (aucun `plan_item`), c'est ce layout de paramétrage qui s'ouvre en premier — la config initiale se fait ainsi en consultation avec le praticien ; dès qu'un élément est saisi, l'ouverture nominale revient à `safety_plan`. Un `previewKindOverride` explicite (roue crantée, retour consultation) prime toujours sur cette bascule. Règle portée par `screens/modules/ModuleContentScreen/initialPreviewKind.ts` (déclaratif, jamais de `module_id` en dur) | `crisis_plan` |
 | `stage_wheel` | Sélecteur de stade en sélection exclusive (modèle transthéorique de Prochaska, 6 stades par défaut) + historique. Mobile : éditeur SQLite (`em_rulers.stage`, via `motivationalBalanceService`). Web : aperçu structurel statique. Nommé par motif, `moduleId` dérivé (`modules.<id>.stage_*`), `stageCount` configurable. MDR : auto-positionnement déclaratif, aucune progression imposée | `motivational_balance` (onglet « Stade ») |
 | `dual_ruler` | Deux échelles 0-10 (importance / confiance via `RatingSelector`) + justifications + engagement + historique. Mobile : éditeur SQLite (`em_rulers`). Web : aperçu structurel statique. Nommé par motif, `moduleId` dérivé (`modules.<id>.rulers_*`). MDR : valeurs brutes, aucun seuil | `motivational_balance` (onglet « Thermomètres ») |
@@ -129,7 +129,7 @@ create table public.module_content_fields (
 >
 > **Correspondances fréquentes à vérifier en priorité :**
 > - Bannière / alerte / disclaimer → `disclaimer_banner` (props : `color`, `icon`, `text_code`, `tone`)
-> - Bouton action / urgence / téléphone → `exercise_safety` (props : `phone`, `bgColor`, `label_code`)
+> - Bouton action / urgence / téléphone → `exercise_safety` (props : `phone`, `action`, `tone`, `label_code`, `action_label_code`, `detail_label_code`)
 > - Note de bas d'écran → `footer_note`
 > - Onglet → `tab` (layout `tabbed`)
 
@@ -172,7 +172,7 @@ create table public.module_content_fields (
 | `field_type` | Rendu | Props clés | Contexte |
 |---|---|---|---|
 | `footer_note` | Note texte bas de panel | — | Note légale ou précaution post-étapes |
-| `exercise_safety` | Bouton d'appel urgence | `phone`, `bgColor`, `label_code` | Rangée de boutons d'appel colorés (`CrisisEmergencyCalls`, partagé) en tête de `safety_plan` et en barre de `editable_steps` ; sur web, chip d'aperçu |
+| `exercise_safety` | Ressource d'urgence (appel ou SMS) | `phone`, `action`, `tone`, `label_code`, `action_label_code`, `detail_label_code` | `CrisisEmergencyCalls` (partagé), deux densités : `compact` (bandeau permanent de `safety_sequence`, tête de `safety_plan`, barre de `editable_steps`) et `full` (écran des ressources). Nombre d'entrées libre. `action='sms'` pour le 114. La couleur vient de `tone` (sémantique), **jamais d'un `bgColor` en dur** ; sur web, chip d'aperçu |
 | `crisis_anchors_preview` | Widget "Mes raisons de tenir" | — | **Mobile** : interactif (photos FileSystem via `expo-image`, tap → diaporama plein écran `@ui/PhotoCarousel` ; phrase SQLite ; message praticien). **Web** : aperçu statique. Message praticien depuis Supabase `crisis_plan_configs` |
 
 **Layout `cards`**
@@ -216,7 +216,7 @@ create table public.module_content_fields (
 | `exercise_stop_btn` | Label bouton Annuler | — |
 | `exercise_done_text` | Texte écran fin | — |
 | `exercise_safety_title` | Titre section urgence | — |
-| `exercise_safety` | **Bouton d'appel urgence** | `phone`, `bgColor`, `label_code` — utilisable dans tout layout nécessitant un bouton d'action coloré |
+| `exercise_safety` | **Ressource d'urgence** | `phone`, `action`, `tone`, `label_code`, `action_label_code`, `detail_label_code` — utilisable dans tout layout nécessitant un raccourci de secours |
 
 **Layout `crisis_companion` (compagnon de crise — urge surfing)**
 
@@ -391,8 +391,11 @@ create table public.field_props (
 | `subscale_key` | `"mood"` | `scale_slider_question`, `scale_number_input`, `scale_text_input` — clé dans `subscale_scores` JSON |
 | `placeholder_code` | `"modules.mood.notes_placeholder"` | `scale_text_input`, `scale_number_input` |
 | `phone` | `"3114"` | `exercise_safety` — numéro composé au tap |
+| `action` | `"sms"` | `exercise_safety` — canal : `tel` (défaut) ou `sms`. Le 114 est en `sms` : un `tel:` appellerait vocalement un service destiné aux personnes sourdes ou malentendantes |
+| `action_label_code` | `"modules.crisis_plan.emergency_114_action"` | `exercise_safety` — verbe de l'action, et libellé d'accessibilité dans les deux densités |
+| `detail_label_code` | `"modules.crisis_plan.emergency_114_detail"` | `exercise_safety` — sous-libellé long, densité `full` |
 | `text_code` | `"modules.crisis_plan.urgency_title"` | `disclaimer_banner` — clé i18n alternative (override la clé `modules.<module_key>.disclaimer` par défaut) |
-| `tone` | `"danger"` | `disclaimer_banner` — `"info"` (bleu, défaut) ou `"danger"` (rouge) |
+| `tone` | `"danger"` | `disclaimer_banner` — `"info"` (bleu, défaut) ou `"danger"` (rouge). `exercise_safety` — `"primary"` (défaut) ou `"danger"` : teinte **sémantique**, traduite en variante par le composant, jamais une couleur en dur |
 | `key` | `"pluie"` | `ambient_sound` — identifiant du fichier audio |
 | `available` | `"false"` | `ambient_sound` — `"false"` → badge "Bientôt" |
 

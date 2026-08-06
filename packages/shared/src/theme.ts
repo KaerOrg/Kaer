@@ -20,9 +20,11 @@ export const colors = {
   warning: '#F59E0B',
   warningLight: '#FFFBEB',
   danger: '#EF4444',
-  // Rouge foncé réservé au TEXTE de crise (titre du bandeau) : contraste AA sur blanc
-  // (≈ 4.9:1), là où `danger` (#EF4444) reste l'accent/icône. Jamais une couleur de
-  // gravité clinique conditionnée par la donnée (MDR 2017/745) — élément fixe.
+  // Rouge foncé de crise, dans les deux sens : TEXTE sur blanc (≈ 4.9:1) et FOND
+  // portant un libellé blanc (≈ 4.8:1, variante `dangerSolid` de `ui/Button` et
+  // ressources d'urgence vitales). `danger` (#EF4444) ne tient AA dans aucun des deux
+  // sens et reste l'accent/icône. Jamais une couleur de gravité clinique conditionnée
+  // par la donnée (MDR 2017/745) — élément fixe.
   dangerText: '#DC2626',
   dangerLight: '#FEE2E2',
   neutral: '#F3F4F6',

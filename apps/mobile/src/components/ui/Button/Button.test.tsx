@@ -50,6 +50,16 @@ describe('Button', () => {
     expect(labelStyle).toContainEqual({ color: colors.danger })
   })
 
+  // Fond `dangerText` (#DC2626) et non `danger` (#EF4444) : c'est le seul des deux
+  // rouges qui porte un libellé blanc à un contraste AA.
+  it('variant="dangerSolid" : fond rouge plein et libellé blanc', () => {
+    render(<Button label="Appeler le 15" onPress={() => {}} variant="dangerSolid" testID="btn" />)
+    const containerStyle = screen.getByTestId('btn').props.style.flat()
+    expect(containerStyle).toContainEqual({ backgroundColor: colors.dangerText })
+    const labelStyle = screen.getByText('Appeler le 15').props.style.flat()
+    expect(labelStyle).toContainEqual({ color: colors.white })
+  })
+
   it('size par défaut (md) : label en taille standard (16)', () => {
     render(<Button label="Standard" onPress={() => {}} />)
     const styleArray = screen.getByText('Standard').props.style.flat()

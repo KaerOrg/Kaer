@@ -26,6 +26,10 @@ const SELF_MANAGED_LAYOUTS = new Set([
   'guided_exercise',
   'editable_steps',
   'safety_plan',
+  // safety_sequence ancre ses deux boutons hors du flux défilant : enveloppé dans le
+  // ScrollView de l'écran, son `flex: 1` s'effondrerait et l'action partirait sous le
+  // pli dès que les items s'allongent (P-7, tenue à Dynamic Type 200 %).
+  'safety_sequence',
   'daily_checkin',
   'column_form',
   'tree_selector',

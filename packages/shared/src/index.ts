@@ -17,9 +17,10 @@ export { shiftDate, mondayOf, weekDays, todayIso, dateToIso } from './services/w
 // Séquence du plan de sécurité : logique pure partagée par le layout mobile (parcours
 // patient) et le layout web (aperçu praticien) — une seule source, zéro duplication.
 export {
-  buildDisplayableSteps, isLastStep, advance, goBack, formatProgress, INITIAL_STATE,
+  buildDisplayableSteps, isLastStep, advance, formatProgress, INITIAL_STATE,
+  INITIAL_PATH, currentState, goTo, advancePath, backPath,
 } from './services/safetySequence'
-export type { SequenceStep, SequenceState } from './services/safetySequence'
+export type { SequenceStep, SequenceState, SequencePath } from './services/safetySequence'
 export { collectRenderMismatches, RENDERABLE_WIDGET_TYPES } from './services/renderDiagnostics'
 export type { RenderMismatchDescriptor } from './services/renderDiagnostics'
 

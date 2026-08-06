@@ -23,23 +23,47 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { View, Text, ScrollView, ActivityIndicator } from 'react-native'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { useKeepAwake } from 'expo-keep-awake'
 import { colors } from '@theme'
 import { Button } from '@ui/Button'
+import { Card } from '@ui/Card'
 import type { ContentField } from '@services/moduleService'
 import { getPlanItems, type PlanItem } from '@services/planItemService'
+import { getAnchors, getAnchorPhrase } from '@services/crisisPlanService'
+import { isModuleUnlocked } from '@services/moduleService'
 import { reportFailedOperation } from '@services/errorReportingService'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import {
   buildDisplayableSteps,
-  advance,
-  goBack,
+  advancePath,
+  backPath,
+  goTo,
+  currentState,
   isLastStep,
   formatProgress,
-  INITIAL_STATE,
+  INITIAL_PATH,
+  type SequencePath,
   type SequenceState,
 } from '@kaer/shared'
-import { CrisisEmergencyCalls } from '../shared'
+import { useAuthStore } from '../../../../../store/authStore'
+import { CrisisEmergencyCalls, CallableContact } from '../shared'
+import { SequenceEntryCard } from './SequenceEntryCard'
+import { DistressToleranceLink } from './DistressToleranceLink'
+import { ClosingAnchors } from './ClosingAnchors'
 import { styles } from './styles'
+
+// Retour discret, dessiné comme un chevron et non comme un bouton libellé : il doit
+// être atteignable sans jamais concurrencer l'action du bas (P-7, maquette rail 4a).
+const BACK_ICON = <MaterialCommunityIcons name="chevron-left" size={26} color={colors.textMuted} />
+
+// Destinations fixes des entrées de l'accueil, hors du rendu : elles ne dépendent
+// d'aucune donnée et doivent rester stables pour la mémoïsation des cartes.
+const FIRST_STEP: SequenceState = { kind: 'step', index: 0 }
+const CLOSING: SequenceState = { kind: 'closing' }
+
+/** État initial des ancres : aucune photo, aucune phrase. Constante, jamais recréée. */
+const EMPTY_ANCHORS: { photos: string[]; phrase: string } = { photos: [], phrase: '' }
 
 export interface SafetySequenceLayoutProps {
   /** Étapes du plan regroupées par `section_id`, dans l'ordre de la config. */
@@ -53,6 +77,11 @@ export interface SafetySequenceLayoutProps {
 }
 
 export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: SafetySequenceLayoutProps) {
+  // L'écran ne se met pas en veille pendant la traversée : un plan de sécurité que
+  // l'on relit lentement ne doit pas s'éteindre au milieu d'une étape. Le verrou est
+  // relâché au démontage, y compris sur une sortie par le bouton système (P-12).
+  useKeepAwake()
+
   const t = useModuleTranslation()
   // Clés dérivées du module porté par les fields : `safety_sequence` nomme un motif
   // d'écran réutilisable, jamais un module (config-first).
@@ -60,7 +89,41 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
 
   const [items, setItems] = useState<PlanItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [state, setState] = useState<SequenceState>(INITIAL_STATE)
+  // Le chemin, pas l'état seul : depuis P-6 l'accueil ouvre des raccourcis, et le
+  // retour doit ramener là d'où l'on vient, pas à l'écran précédent d'une ligne
+  // théorique que le patient n'a pas suivie.
+  const [path, setPath] = useState<SequencePath>(INITIAL_PATH)
+  const state = currentState(path)
+
+  // « Traverser la vague » n'apparaît que si le clinicien a déverrouillé le module
+  // pour ce patient. Sinon le lien DISPARAÎT : un lien grisé annoncerait un outil
+  // qu'on lui refuse. Le déverrouillage est une décision de clinicien, jamais un
+  // calcul sur une donnée. Hors ligne, la lecture échoue et le lien reste absent.
+  const patientId = useAuthStore(s => s.patient?.id)
+  const [crisisLinkVisible, setCrisisLinkVisible] = useState(false)
+
+  // Ancres de la clôture, en LECTURE SEULE : l'édition appartient à la vue Édition.
+  // Chargées ici plutôt que par l'écran, pour que la clôture reste présentationnelle.
+  const [anchors, setAnchors] = useState<{ photos: string[]; phrase: string }>(EMPTY_ANCHORS)
+
+  useEffect(() => {
+    let active = true
+    Promise.all([getAnchors(), getAnchorPhrase()])
+      .then(([photos, phrase]) => {
+        if (active) setAnchors({ photos: photos.map(a => a.uri), phrase })
+      })
+      .catch(() => { /* section vide : l'écran devient un simple retour, sans texte de manque */ })
+    return () => { active = false }
+  }, [])
+
+  useEffect(() => {
+    if (patientId == null) return
+    let active = true
+    isModuleUnlocked(patientId, 'distress_tolerance')
+      .then(unlocked => { if (active) setCrisisLinkVisible(unlocked) })
+      .catch(() => { /* absence de lien : la dégradation voulue, rien à signaler */ })
+    return () => { active = false }
+  }, [patientId])
 
   useEffect(() => {
     let active = true
@@ -100,15 +163,37 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
     [sections, sectionsWithItems],
   )
 
-  const handleAdvance = useCallback(() => setState(prev => advance(prev, steps.length)), [steps.length])
+  // Raccourcis de l'accueil : les étapes que la CONFIG déclare atteignables en un
+  // geste (`direct_access_label_code` sur leur `step_title`). Rien n'est codé en dur
+  // ici — le layout ne connaît aucun numéro d'étape, et une étape sans item n'y
+  // figure pas puisqu'elle ne fait pas partie des étapes affichables.
+  const directEntries = useMemo(
+    () => steps.flatMap((step, index) => {
+      const title = sections.get(step.sectionId)?.find(f => f.field_type === 'step_title')
+      const labelCode = title?.props['direct_access_label_code']
+      if (labelCode == null) return []
+      // La cible est construite ICI, dans le mémo : passée en prop, elle doit rester
+      // stable d'un rendu à l'autre, sinon la mémoïsation de la carte ne sert à rien.
+      const target: SequenceState = { kind: 'step', index }
+      return [{ sectionId: step.sectionId, target, labelCode, hintCode: title?.props['direct_access_hint_code'] }]
+    }),
+    [steps, sections],
+  )
+
+  const handleAdvance = useCallback(() => setPath(prev => advancePath(prev, steps.length)), [steps.length])
 
   // Retour arrière discret : un appui accidentel ne doit jamais coûter une étape
-  // définitivement (P-7). Depuis l'accueil, il n'y a plus de retour : on sort.
+  // définitivement (P-7). Depuis l'accueil, il n'y a plus de retour.
   const handleBack = useCallback(() => {
-    setState(prev => goBack(prev, steps.length) ?? prev)
-  }, [steps.length])
+    setPath(prev => backPath(prev) ?? prev)
+  }, [])
 
-  const canGoBack = goBack(state, steps.length) != null
+  // Raccourci de l'accueil (P-6) : un seul callback, la destination vient de la carte.
+  const handleGoTo = useCallback((target: SequenceState) => {
+    setPath(prev => goTo(prev, target))
+  }, [])
+
+  const canGoBack = backPath(path) != null
 
   // « Je m'arrête là » SORT du parcours, sans confirmation, depuis n'importe quel
   // écran. À ne pas confondre avec le retour arrière ci-dessus.
@@ -121,8 +206,21 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
   const currentStep = state.kind === 'step' ? steps[state.index] : undefined
   const stepFields = currentStep != null ? sections.get(currentStep.sectionId) ?? [] : []
   const stepTitle = stepFields.find(f => f.field_type === 'step_title')
+  // Sous-titre d'une ligne, porté par la config (`subtitle_code`) et présent sur les
+  // seules étapes que rien d'autre ne distingue : « sans contacter personne » sépare
+  // l'étape 2 de l'étape 3. Absent partout ailleurs, sans trou dans la mise en page.
+  const stepSubtitleCode = stepTitle?.props['subtitle_code']
   const stepItems = currentStep != null ? itemsBySection.get(currentStep.sectionId) ?? [] : []
+  // Étape « contactable » : ses items sont des personnes ou des lieux, rendus avec
+  // leurs gestes (P-8) plutôt qu'en simple ligne de texte.
+  const stepContactable = stepTitle?.props['contactable'] === 'true'
+  const stepProfessional = stepTitle?.props['professional'] === 'true'
+  // L'étape déclare en config qu'elle porte le lien « Traverser la vague » (l'étape 6).
+  const stepShowsCrisisLink = stepTitle?.props['crisis_link'] === 'true'
   const onLastStep = state.kind === 'step' && isLastStep(state.index, steps.length)
+  // Progression affichée sur les seuls écrans d'étape : l'accueil, les ressources et
+  // la clôture ne sont pas numérotés.
+  const progress = state.kind === 'step' ? formatProgress(state.index, steps.length) : ''
 
   return (
     <View style={styles.container}>
@@ -131,53 +229,144 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
         <CrisisEmergencyCalls fields={uiFields} />
       </View>
 
-      {canGoBack ? (
-        <View style={styles.backRow}>
-          <Button
-            variant="ghost"
-            size="sm"
-            label={t('common.back')}
-            onPress={handleBack}
-            testID="safety-sequence-back"
-          />
+      {/* Rangée de tête : retour à gauche, progression à droite. Les deux sont
+          discrets et hors de la carte de contenu (maquette P-7). */}
+      {canGoBack || progress !== '' ? (
+        <View style={styles.topRow}>
+          {canGoBack ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              iconLeft={BACK_ICON}
+              onPress={handleBack}
+              accessibilityLabel={t('common.back')}
+              testID="safety-sequence-back"
+            />
+          ) : null}
+          {progress !== '' ? <Text style={styles.progress}>{progress}</Text> : null}
         </View>
       ) : null}
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        {state.kind === 'home' ? (
-          <Text style={styles.screenTitle}>{lbl('sequence_home_title')}</Text>
+        {/* Écran d'arrivée : l'action dominante est le plan, puis des entrées plus
+            calmes, une par geste. L'ordre est FIXE : jamais reclassé, jamais dérivé
+            d'une saisie. Plan jamais rempli : on affiche ce qui est disponible tout
+            de suite, sans jamais qualifier le plan ni parler de ce qui manque. */}
+        {state.kind === 'home' && steps.length === 0 ? (
+          <>
+            <Text style={styles.screenTitle}>{lbl('sequence_resources_title')}</Text>
+            <CrisisEmergencyCalls fields={uiFields} density="full" />
+          </>
+        ) : null}
+
+        {state.kind === 'home' && steps.length > 0 ? (
+          <>
+            <SequenceEntryCard
+              lead
+              target={FIRST_STEP}
+              label={lbl('sequence_home_follow')}
+              hint={lbl('sequence_home_follow_hint')}
+              onPress={handleGoTo}
+              testID="safety-sequence-home-follow"
+            />
+            {directEntries.map(entry => (
+              <SequenceEntryCard
+                key={entry.sectionId}
+                target={entry.target}
+                label={t(entry.labelCode)}
+                hint={entry.hintCode != null ? t(entry.hintCode) : undefined}
+                onPress={handleGoTo}
+                testID={`safety-sequence-home-${entry.sectionId}`}
+              />
+            ))}
+            <SequenceEntryCard
+              target={CLOSING}
+              label={lbl('sequence_home_anchors')}
+              hint={lbl('sequence_home_anchors_hint')}
+              onPress={handleGoTo}
+              testID="safety-sequence-home-anchors"
+            />
+          </>
         ) : null}
 
         {state.kind === 'step' && currentStep != null ? (
-          <>
+          <Card>
             <Text style={styles.stepLabel}>
               {lbl('step_label').replace('{{number}}', String(currentStep.position))}
             </Text>
             <Text style={styles.stepTitle}>{t(stepTitle?.text_code ?? '')}</Text>
-            {stepItems.map(item => (
-              <View key={item.id} style={styles.item}>
-                <Text style={styles.itemText}>{item.text}</Text>
+            {stepSubtitleCode != null ? (
+              <Text style={styles.stepSubtitle}>{t(stepSubtitleCode)}</Text>
+            ) : null}
+            {stepItems.map((item, index) => (
+              // Filet de séparation ENTRE les items seulement : un filet sous le
+              // dernier doublerait la bordure de la carte.
+              <View key={item.id} style={index < stepItems.length - 1 ? styles.item : styles.itemLast}>
+                {stepContactable ? (
+                  <CallableContact
+                    name={item.text}
+                    phone={item.phone}
+                    professional={stepProfessional}
+                    accentColor={colors.primary}
+                    callLabel={lbl('call_contact')}
+                    messageLabel={lbl('message_contact')}
+                    testID={`sequence-contact-${item.id}`}
+                  />
+                ) : (
+                  <Text style={styles.itemText}>{item.text}</Text>
+                )}
               </View>
             ))}
+          </Card>
+        ) : null}
+
+        {/* « Traverser la vague », sur l'étape qui le déclare (l'étape 6). */}
+        {state.kind === 'step' && stepShowsCrisisLink && crisisLinkVisible ? (
+          <DistressToleranceLink testID="safety-sequence-crisis-link" />
+        ) : null}
+
+        {/* Ce qui est disponible tout de suite. Le piège absolu ici est le cul-de-sac :
+            aucun commentaire sur ce qui a été tenté, aucun décompte, aucun « vous avez
+            tout essayé ». Le titre est le MÊME que celui du plan vide — il décrit ce
+            qui reste ouvert, il ne conclut pas sur ce qui a échoué.
+            Les issues ont le même poids : reléguer « ce qui me donne envie de tenir »
+            en lien discret le ferait passer pour secondaire, alors que c'est la section
+            qui demande le moins d'effort, donc celle qui reste accessible en dernier. */}
+        {state.kind === 'resources' ? (
+          <>
+            <Text style={styles.screenTitle}>{lbl('sequence_resources_title')}</Text>
+            <CrisisEmergencyCalls fields={uiFields} density="full" />
+            <View style={styles.resourcesRule} />
+            {crisisLinkVisible ? (
+              <DistressToleranceLink testID="safety-sequence-crisis-link" />
+            ) : null}
+            <SequenceEntryCard
+              target={CLOSING}
+              label={lbl('sequence_home_anchors')}
+              hint={lbl('sequence_home_anchors_hint')}
+              onPress={handleGoTo}
+              testID="safety-sequence-resources-anchors"
+            />
           </>
         ) : null}
 
-        {state.kind === 'resources' ? (
-          <Text style={styles.screenTitle}>{lbl('sequence_resources_title')}</Text>
-        ) : null}
-
+        {/* Clôture. Si la section est vide, elle n'existe pas : l'écran devient un
+            simple retour, sans le moindre texte de manque. */}
         {state.kind === 'closing' ? (
-          <Text style={styles.screenTitle}>{lbl('sequence_closing_title')}</Text>
+          <>
+            <Text style={styles.screenTitle}>{lbl('sequence_closing_title')}</Text>
+            <ClosingAnchors photos={anchors.photos} phrase={anchors.phrase} />
+          </>
         ) : null}
       </ScrollView>
 
       {/* Actions ANCRÉES hors du flux défilant : les items peuvent défiler à taille de
           police maximale, l'action jamais (P-7). */}
       <View style={styles.actions}>
+        {/* L'accueil porte ses propres entrées : y ajouter « Autre chose que j'ai
+            prévu » ferait deux fois la même promesse, et concurrencerait l'action
+            dominante. La clôture, elle, n'a plus d'écran suivant. */}
         {state.kind === 'step' ? (
-          <Text style={styles.progress}>{formatProgress(state.index, steps.length)}</Text>
-        ) : null}
-        {state.kind !== 'closing' ? (
           <Button
             variant="primary"
             label={onLastStep ? lbl('sequence_advance_last') : lbl('sequence_advance')}
@@ -187,7 +376,7 @@ export function SafetySequenceLayout({ sections, uiFields, moduleId, onExit }: S
         ) : null}
         <Button
           variant="ghost"
-          label={lbl('sequence_stop')}
+          label={state.kind === 'home' ? lbl('sequence_home_close') : lbl('sequence_stop')}
           onPress={handleStop}
           testID="safety-sequence-stop"
         />

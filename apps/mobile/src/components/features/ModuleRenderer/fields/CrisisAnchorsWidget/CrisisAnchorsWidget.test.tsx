@@ -110,3 +110,48 @@ describe('CrisisAnchorsWidget', () => {
     await waitFor(() => expect(mockShowToast).toHaveBeenCalledWith('modules.crisis_plan.photo_error', 'error'))
   })
 })
+
+// La vue de Consultation donne à RELIRE, pas à modifier. Monter le composant d'édition
+// à sa place rendait la « lecture seule » fausse — et proposait de supprimer une photo
+// d'ancrage d'un appui long, dans un écran qu'on ouvre quand ça ne va pas (P-4).
+describe('CrisisAnchorsWidget — mode lecture seule (P-4)', () => {
+  it('n\'offre aucune affordance d\'édition : ni ajout, ni suppression, ni crayon', async () => {
+    svc.getAnchors.mockResolvedValue([{ id: 'a1', uri: 'file://a1.jpg', sort_order: 0, created_at: '' }])
+    svc.getAnchorPhrase.mockResolvedValue('Ma fille m\'attend')
+    render(<CrisisAnchorsWidget readOnly />)
+    await waitFor(() => expect(svc.getAnchors).toHaveBeenCalled())
+
+    expect(screen.queryByLabelText('modules.crisis_plan.add_photo')).toBeNull()
+    expect(screen.queryByLabelText('modules.crisis_plan.delete_photo_title')).toBeNull()
+    // La phrase est du contenu, pas un champ : aucune zone tappable pour l'éditer.
+    expect(screen.queryByLabelText('modules.crisis_plan.anchor_phrase_label')).toBeNull()
+  })
+
+  it('affiche la phrase du patient comme du contenu', async () => {
+    svc.getAnchors.mockResolvedValue([])
+    svc.getAnchorPhrase.mockResolvedValue('Ma fille m\'attend')
+    render(<CrisisAnchorsWidget readOnly />)
+    await waitFor(() => expect(screen.getByTestId('anchor-phrase-read')).toBeTruthy())
+    expect(screen.getByText('Ma fille m\'attend')).toBeTruthy()
+  })
+
+  // Un placeholder « Une phrase qui vous ancre… » dans une vue de relecture se lit
+  // comme un reproche.
+  it('ne rend rien quand la phrase est vide, pas de placeholder', async () => {
+    svc.getAnchors.mockResolvedValue([])
+    svc.getAnchorPhrase.mockResolvedValue('')
+    render(<CrisisAnchorsWidget readOnly />)
+    await waitFor(() => expect(svc.getAnchorPhrase).toHaveBeenCalled())
+    expect(screen.queryByTestId('anchor-phrase-read')).toBeNull()
+    expect(screen.queryByText('modules.crisis_plan.anchor_phrase_placeholder')).toBeNull()
+  })
+
+  // Les photos restent consultables en plein écran : regarder n'est pas modifier.
+  it('laisse ouvrir le diaporama', async () => {
+    svc.getAnchors.mockResolvedValue([{ id: 'a1', uri: 'file://a1.jpg', sort_order: 0, created_at: '' }])
+    render(<CrisisAnchorsWidget readOnly />)
+    await waitFor(() => expect(screen.getAllByLabelText('modules.crisis_plan.anchors_title').length).toBeGreaterThan(0))
+    fireEvent.press(screen.getAllByLabelText('modules.crisis_plan.anchors_title')[0])
+    expect(screen.getByTestId('anchors-carousel-photo-0')).toBeTruthy()
+  })
+})
