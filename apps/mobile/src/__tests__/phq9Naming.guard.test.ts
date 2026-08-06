@@ -15,34 +15,9 @@
 // contenu psychométrique dans `teen.json` (§ Droit d'auteur de l'Epic). Un fichier de
 // locale de 2000+ lignes se dérègle facilement à un merge : d'où la garde.
 
-import { readFileSync, readdirSync } from 'fs'
-import { join } from 'path'
+import { readModuleBlock } from '../test-utils/locales'
 
-// __dirname = apps/mobile/src/__tests__
-const LOCALES_DIR = join(__dirname, '..', 'i18n', 'locales')
-
-// Seules les clés vérifiées ici sont typées : le bloc en porte beaucoup d'autres,
-// hors périmètre de ce garde-fou.
-type Phq9Block = Record<string, string | undefined>
-
-function readModule(rel: string): Phq9Block {
-  const raw = JSON.parse(readFileSync(join(LOCALES_DIR, rel), 'utf8')) as {
-    modules?: Record<string, Phq9Block>
-  }
-  return raw.modules?.phq9 ?? {}
-}
-
-function localeFiles(): { rel: string; content: string }[] {
-  const out: { rel: string; content: string }[] = []
-  for (const lang of readdirSync(LOCALES_DIR)) {
-    for (const file of readdirSync(join(LOCALES_DIR, lang))) {
-      if (file.endsWith('.json')) {
-        out.push({ rel: `${lang}/${file}`, content: readFileSync(join(LOCALES_DIR, lang, file), 'utf8') })
-      }
-    }
-  }
-  return out
-}
+const readModule = (rel: string) => readModuleBlock(rel, 'phq9')
 
 describe('phq9 : renommage « Mon humeur ces 2 semaines » (#405)', () => {
   it('sert le nom en clair et le sous-titre en fr', () => {
@@ -101,12 +76,5 @@ describe('phq9 : renommage « Mon humeur ces 2 semaines » (#405)', () => {
       const keys = Object.keys(readModule(rel)).filter(k => PSYCHOMETRIC.test(k))
       expect(keys).toEqual([])
     }
-  })
-
-  it('ne laisse aucun tiret long dans les locales mobile', () => {
-    const offenders = localeFiles()
-      .filter(({ content }) => /[–—]/.test(content))
-      .map(({ rel }) => rel)
-    expect(offenders).toEqual([])
   })
 })

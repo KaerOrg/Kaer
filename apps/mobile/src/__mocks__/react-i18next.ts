@@ -1,21 +1,21 @@
 import frCommon from '../i18n/locales/fr/common.json'
 
-type NestedObject = { [key: string]: NestedObject | string }
+type Translatable = string | { [key: string]: Translatable }
 
-function flatten(obj: NestedObject, prefix = ''): Record<string, string> {
+function flatten(obj: { [key: string]: Translatable }, prefix = ''): Record<string, string> {
   const result: Record<string, string> = {}
   for (const [k, v] of Object.entries(obj)) {
     const key = prefix ? `${prefix}.${k}` : k
     if (typeof v === 'string') {
       result[key] = v
     } else {
-      Object.assign(result, flatten(v as NestedObject, key))
+      Object.assign(result, flatten(v, key))
     }
   }
   return result
 }
 
-const TRANSLATIONS = flatten(frCommon as unknown as NestedObject)
+const TRANSLATIONS = flatten(frCommon)
 
 // Suffixes candidats pour un `count` donné, dans l'ordre de préférence. i18next v21+
 // résout les pluriels via `_one` / `_other` (Intl.PluralRules) ; `_plural` est la forme
