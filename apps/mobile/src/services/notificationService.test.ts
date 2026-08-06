@@ -43,6 +43,26 @@ function makeChain(result: { data: unknown; error?: unknown }) {
   return proxy
 }
 
+/**
+ * Chaîne Supabase qui CAPTURE les objets passés à `.update()`. `makeChain` recrée son
+ * mock à chaque accès, donc il ne permet pas de relire les arguments après coup.
+ */
+function makeUpdateSpy(result: { data: unknown; error?: unknown }) {
+  const updates: Record<string, unknown>[] = []
+  const proxy: unknown = new Proxy({}, {
+    get(_target, prop: string) {
+      if (prop === 'then') {
+        return (resolve: (v: unknown) => unknown) => Promise.resolve(result).then(resolve)
+      }
+      if (prop === 'update') {
+        return (payload: Record<string, unknown>) => { updates.push(payload); return proxy }
+      }
+      return () => proxy
+    },
+  })
+  return { proxy, updates }
+}
+
 const ROUTINE = {
   id: 'r-1',
   patient_module_id: 'pm-1',
@@ -243,6 +263,20 @@ describe('pauseRoutine', () => {
     const result = await pauseRoutine('r-1', 'pat-1', 'phq9')
     expect(result).toBe(false)
   })
+
+  // #268 : le praticien lit « en pause depuis le 12 juil. ». Sans la date, il voit que
+  // c'est en pause, mais pas depuis quand — et un rappel éteint depuis un mois explique
+  // une absence de saisies mieux que n'importe quel graphique.
+  it('horodate la pause', async () => {
+    const { proxy, updates } = makeUpdateSpy({ data: null, error: null })
+    jest.mocked(supabase.from).mockImplementation((table: string) => {
+      if (table === 'notification_routines') return proxy as never
+      return { insert: jest.fn().mockResolvedValue({ error: null }) } as never
+    })
+    await pauseRoutine('r-1', 'pat-1', 'phq9')
+    expect(updates[0]).toMatchObject({ patient_paused: true })
+    expect(typeof updates[0]?.patient_paused_at).toBe('string')
+  })
 })
 
 // ── resumeRoutine ───────────────────────────────────────────────────────────
@@ -252,6 +286,15 @@ describe('resumeRoutine', () => {
     jest.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: null }) as never)
     const result = await resumeRoutine('r-1', 'pat-1')
     expect(result).toBe(true)
+  })
+
+  // Sans remise à null, la date d'une pause levée traînerait et le praticien lirait
+  // une pause qui n'existe plus.
+  it('efface la date de pause à la reprise', async () => {
+    const { proxy, updates } = makeUpdateSpy({ data: null, error: null })
+    jest.mocked(supabase.from).mockReturnValue(proxy as never)
+    await resumeRoutine('r-1', 'pat-1')
+    expect(updates[0]).toMatchObject({ patient_paused: false, patient_paused_at: null })
   })
 
   it('retourne false si erreur', async () => {
