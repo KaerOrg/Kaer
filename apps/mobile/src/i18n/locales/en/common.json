@@ -62,6 +62,8 @@
     "modify": "Edit",
     "saving": "Saving…",
     "reuse_last_values": "Reuse values from {{date}}",
+    "unanswered_count_one": "{{count}} unanswered question.",
+    "unanswered_count_other": "{{count}} unanswered questions.",
     "save_changes": "Save changes",
     "delete_record_title": "Delete this record?",
     "notes_placeholder": "Context, remarks...",
@@ -1410,8 +1412,8 @@
       "values_growth": "Personal growth"
     },
     "phq9": {
-      "label": "PHQ-9",
-      "description": "",
+      "label": "My mood over the past 2 weeks",
+      "description": "PHQ-9 questionnaire · 10 questions, 4 min",
       "new_btn": "New questionnaire",
       "empty_title": "No questionnaire filled in yet",
       "empty_text": "Use the button above to complete your first PHQ-9.",

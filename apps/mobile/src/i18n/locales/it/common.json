@@ -398,6 +398,10 @@
       "add_trigger": "Aggiungi",
       "saved_message": "Il tuo bilancio è stato salvato.",
       "save": "Salva"
+    },
+    "phq9": {
+      "label": "Il mio umore nelle ultime 2 settimane",
+      "description": "Questionario PHQ-9 · 10 domande, 4 min"
     }
   }
 }
