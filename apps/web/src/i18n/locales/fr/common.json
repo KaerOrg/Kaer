@@ -472,7 +472,7 @@
     "defusion_reveal_word": "••• Afficher",
     "defusion_load_older": "Afficher les séances antérieures ({{count}} en {{month}})",
     "dpv_filter_all": "Tout le parcours",
-    "bpv_banner": "Aperçu lecture seule, identique sur l'app mobile et l'app web patient.",
+    "bpv_banner": "Aperçu lecture seule, identique à ce que voit le patient dans son app.",
     "bpv_filter_all": "Tout le parcours",
     "bpv_footer": "{{count}} écrans · données d'exemple, lecture seule",
     "bpv_cap_hub": "Accueil",

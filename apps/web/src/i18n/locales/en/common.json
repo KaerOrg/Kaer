@@ -486,7 +486,7 @@
     "defusion_reveal_word": "••• Show",
     "defusion_load_older": "Show earlier sessions ({{count}} in {{month}})",
     "dpv_filter_all": "Full journey",
-    "bpv_banner": "Read-only preview, identical on the mobile app and the patient web app.",
+    "bpv_banner": "Read-only preview, identical to what the patient sees in their app.",
     "bpv_filter_all": "Full journey",
     "bpv_footer": "{{count}} screens · example data, read-only",
     "bpv_cap_hub": "Home",
