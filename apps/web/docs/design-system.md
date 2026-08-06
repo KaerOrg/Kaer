@@ -1378,6 +1378,40 @@ const dayLabels = DAY_KEYS.map(k => t(`notifications.day_${k}`)) // ['L','M','Me
 | `dayAriaLabel` | `(iso, active) => string` | libellé court | Libellé accessible enrichi (sinon `aria-checked` porte l'état) |
 | `accentColor` | `string` | `var(--color-primary)` | Couleur des arrêts actifs et du fil |
 
+### `MonthGrid`
+
+`components/ui/MonthGrid/`. Grille calendaire d'un mois, du lundi au dimanche : un carré
+par jour, un point facultatif sous le carré.
+
+Primitive pur : **aucun métier, aucune i18n**. La grille ne sait pas ce qu'une couleur
+signifie, elle place les teintes qu'on lui donne ; les libellés arrivent déjà traduits.
+Les initiales de jours viennent d'`Intl` et suivent donc la locale.
+
+Elle remplace les grilles mensuelles recopiées à la main dans les layouts d'aperçu
+(`ChronoMonthLayout`, `PreviewCalendarPanel`) : ne pas en réécrire une troisième.
+
+```tsx
+import { MonthGrid, type MonthGridCell } from '@ui/MonthGrid'
+
+const cells: MonthGridCell[] = days.map(day => ({
+  day: day.day, background: colorOf(day.techniqueKey), dotColor: FEELING_COLORS[day.feeling],
+  label: t('evolution.breathing_day_label', { count: day.sessions }),
+}))
+<MonthGrid year={2026} month={3} locale={i18n.language} cells={cells} dimAfter={todayIso()} />
+```
+
+| Prop | Type | Défaut | Rôle |
+|---|---|---|---|
+| `year` | `number` | — | Année affichée |
+| `month` | `number` | — | Mois **de 1 à 12** (pas l'index JavaScript) |
+| `locale` | `string` | — | Locale des initiales de jours |
+| `cells` | `readonly MonthGridCell[]` | — | Jours remplis, dans n'importe quel ordre ; les autres restent vides |
+| `dimAfter` | `string` | — | Jours postérieurs à cette date `YYYY-MM-DD` rendus estompés |
+| `data-testid` | `string` | — | Posé sur la racine |
+
+`MonthGridCell` : `{ day, background, dotColor?, label? }`. `label` sert de `title` et
+d'`aria-label` du carré.
+
 ---
 
 ## Composant `ScaleEvalBadge`

@@ -21,6 +21,16 @@ export const FEELING_COLORS: Record<BreathingFeelingValue, string> = {
 /** Teinte des sessions sans ressenti : neutre, ce n'est pas une quatrième réponse. */
 export const FEELING_UNANSWERED_COLOR = '#F3F4F6'
 
+/**
+ * Segments d'une barre de ressenti, dans un ordre **fixe**, jamais trié par effectif :
+ * un ordre qui bougerait avec les données installerait une lecture de classement.
+ */
+export const FEELING_SEGMENTS = [
+  { key: 'calmer', color: FEELING_COLORS.calmer },
+  { key: 'same', color: FEELING_COLORS.same },
+  { key: 'tenser', color: FEELING_COLORS.tenser },
+] as const
+
 /** Nom de fichier de l'export, horodaté pour ne pas écraser un export précédent. */
 export function csvFileName(patientRef: string, isoDate: string): string {
   return `respiration_${patientRef}_${isoDate}.csv`

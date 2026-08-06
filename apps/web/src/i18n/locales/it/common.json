@@ -4,7 +4,9 @@
     "cancel": "Annulla",
     "save": "Salva",
     "back": "Indietro",
-    "error_generic": "Si è verificato un errore."
+    "error_generic": "Si è verificato un errore.",
+    "previous": "Precedente",
+    "next": "Successivo"
   },
   "nav": {
     "profile_menu": "Menu profilo",
@@ -106,7 +108,8 @@
     "wardrobe_desc": "I moduli attualmente attivati per questo paziente.",
     "wardrobe_empty": "Nessun modulo attivato per questo paziente. Clicca su «Aggiungi un modulo» per iniziare.",
     "add_module_button": "Aggiungi un modulo",
-    "add_module_title": "Aggiungi un modulo",    "unlock_button": "Sblocca",
+    "add_module_title": "Aggiungi un modulo",
+    "unlock_button": "Sblocca",
     "revoke_button": "Revoca",
     "preview_button": "Anteprima",
     "patient_view": "Cosa vedrà il tuo paziente",

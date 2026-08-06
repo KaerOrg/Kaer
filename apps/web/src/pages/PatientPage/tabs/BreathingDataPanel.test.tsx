@@ -101,7 +101,7 @@ describe('BreathingDataPanel : W1', () => {
     renderPanel(many)
     await screen.findByTestId('breathing-tile-sessions')
     expect(screen.getAllByTestId('breathing-journal-row')).toHaveLength(5)
-    fireEvent.click(screen.getByText('common.next'))
+    fireEvent.click(screen.getByText('Suivant'))
     expect(screen.getAllByTestId('breathing-journal-row')).toHaveLength(2)
   })
 

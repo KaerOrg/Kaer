@@ -4,7 +4,9 @@
     "cancel": "Cancelar",
     "save": "Guardar",
     "back": "Voltar",
-    "error_generic": "Ocorreu um erro."
+    "error_generic": "Ocorreu um erro.",
+    "previous": "Anterior",
+    "next": "Seguinte"
   },
   "nav": {
     "profile_menu": "Menu de perfil",
@@ -106,7 +108,8 @@
     "wardrobe_desc": "Os módulos atualmente ativados para este paciente.",
     "wardrobe_empty": "Nenhum módulo ativado para este paciente. Clique em «Adicionar um módulo» para começar.",
     "add_module_button": "Adicionar um módulo",
-    "add_module_title": "Adicionar um módulo",    "unlock_button": "Desbloquear",
+    "add_module_title": "Adicionar um módulo",
+    "unlock_button": "Desbloquear",
     "revoke_button": "Revogar",
     "preview_button": "Pré-visualizar",
     "patient_view": "O que o seu paciente irá ver",

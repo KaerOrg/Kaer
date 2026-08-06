@@ -1,0 +1,85 @@
+/* Section respiration de la page Évolution clinique (W2). */
+
+.breathing-evolution__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 260px);
+  gap: var(--spacing-lg);
+  align-items: start;
+}
+
+@media (max-width: 780px) {
+  .breathing-evolution__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.breathing-evolution__nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.breathing-evolution__month {
+  min-width: 7.5rem;
+  text-align: center;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.breathing-evolution__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm) var(--spacing-md);
+  margin-top: var(--spacing-sm);
+}
+
+.breathing-evolution__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-xxs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.breathing-evolution__legend-square {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-sm);
+}
+
+.breathing-evolution__legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+}
+
+.breathing-evolution__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.breathing-evolution__value {
+  margin: 0;
+  font-size: var(--font-size-h2);
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.breathing-evolution__label {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* Le compte du mois précédent est posé à côté, jamais présenté comme une évolution. */
+.breathing-evolution__note {
+  margin: 4px 0 0;
+  font-size: var(--font-size-xxs);
+  color: var(--color-text-muted);
+}

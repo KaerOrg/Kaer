@@ -64,7 +64,7 @@ export const engagementQueries = {
       queryKey: ['engagement', 'evolution', patientId],
       queryFn: async () => {
         const available = await fetchAvailableScales(patientId)
-        const [scaleResults, mood, fear, defusion, med, sleep, chronoEntries, beckEntries, activityEntries, namingEntries] = await Promise.all([
+        const [scaleResults, mood, fear, defusion, med, sleep, chronoEntries, beckEntries, activityEntries, namingEntries, breathingSessions] = await Promise.all([
           Promise.all(available.map(mt => fetchScaleEvolution(patientId, mt))),
           fetchMoodEvolution(patientId),
           fetchFearEvolution(patientId),
@@ -79,6 +79,9 @@ export const engagementQueries = {
           // « Nommer ce que je ressens » : saisies brutes. La section Évolution en
           // tire des comptages descriptifs, jamais une série ni une tendance.
           fetchEmotionNamingEntries(patientId),
+          // Respiration : sessions brutes. La section Évolution en tire un calendrier
+          // et des comptes, jamais une série ni une tendance.
+          fetchBreathingSessions(patientId),
         ])
         const scaleData: Record<string, Awaited<ReturnType<typeof fetchScaleEvolution>>> = {}
         available.forEach((mt, i) => { scaleData[mt] = scaleResults[i] })
@@ -95,6 +98,7 @@ export const engagementQueries = {
           beckEntries,
           activityEntries,
           namingEntries,
+          breathingSessions,
         }
       },
     }),
