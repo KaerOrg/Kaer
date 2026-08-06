@@ -1864,6 +1864,107 @@ create policy "patient_entries_practitioner_select"
 --   - ajout à la publication supabase_realtime, gardé idempotent (ré-exécutable).
 alter table public.patient_entries replica identity full;
 
+
+-- ============================================================
+-- TABLE : safety_plan_items (Plan de sécurité — document co-édité)
+-- ============================================================
+-- Les items du plan de sécurité vivaient dans `patient_entries`. C'était une erreur
+-- de nature : `patient_entries` est un JOURNAL DE SAISIES produites par l'appareil,
+-- drainé par une outbox strictement MONTANTE (`RemoteSyncService` ne contient aucun
+-- `pull`, aucun `select`). Or un plan de sécurité n'est pas une saisie : c'est un
+-- DOCUMENT CO-ÉDITÉ par deux acteurs, écrit d'un côté et lu de l'autre. Un item
+-- ajouté par le praticien depuis le web n'atteignait donc jamais le téléphone.
+--
+-- Accès :
+--   • Patient   → lecture et écriture de ses propres lignes
+--   • Praticien → lecture et écriture sur ses patients liés
+--
+-- ⚠️ PAS de garde `share_consent`, CONTRAIREMENT à `patient_entries`, et c'est
+-- délibéré. Le plan est construit EN CONSULTATION, à deux : le praticien en est
+-- co-auteur, et le lui masquer derrière le consentement de partage lui retirerait
+-- l'accès à ce qu'il a écrit lui-même. La ligne de confidentialité de l'Epic #315
+-- passe ailleurs, et elle est nette : les ANCRES (photos, phrase personnelle)
+-- restent dans `patient_entries` sous la garde du consentement, parce que ce sont
+-- des contenus intimes que le praticien n'a pas à lire. Le plan, lui, est commun.
+-- Même motif que `crisis_plan_configs`, dont la RLS est calquée ici.
+--
+-- MDR 2017/745 : `authored_by` est DESCRIPTIF, jamais interprété. Il sert à
+-- l'affichage (« ajouté par le patient le 11 juin ») et au diff de PW-8. Aucune
+-- règle de priorité, aucun verrou d'édition : chacun peut modifier ce que l'autre a
+-- écrit. Ne jamais en dériver un droit ni une conclusion clinique.
+
+create table if not exists public.safety_plan_items (
+  id          uuid        primary key default gen_random_uuid(),
+  patient_id  uuid        not null references public.patients(id) on delete cascade,
+  section_id  text        not null,                     -- step_1 … step_6
+  text        text        not null,                     -- dans les mots de son auteur
+  kind        text,                                     -- 'person' | 'place'  (P-14)
+  role        text,                                     -- lien ou fonction     (P-14)
+  note        text,                                     -- une ligne libre      (P-14)
+  phone       text,
+  sort_order  int         not null default 0,
+  authored_by text        not null default 'patient' check (authored_by in ('patient', 'practitioner')),
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+-- Lecture nominale : tous les items d'un patient, dans l'ordre d'affichage.
+create index if not exists idx_safety_plan_items_patient
+  on public.safety_plan_items(patient_id, section_id, sort_order);
+
+alter table public.safety_plan_items enable row level security;
+
+-- Patient : lecture et écriture de son propre plan.
+drop policy if exists "safety_plan_items_patient_rw" on public.safety_plan_items;
+create policy "safety_plan_items_patient_rw"
+  on public.safety_plan_items for all
+  using (auth.uid() = patient_id)
+  with check (auth.uid() = patient_id);
+
+-- Praticien : lecture et écriture sur les plans de ses patients liés. Même jointure
+-- que `patient_entries_practitioner_select`, sans la garde de consentement (voir
+-- l'argumentaire en tête de table).
+drop policy if exists "safety_plan_items_practitioner_rw" on public.safety_plan_items;
+create policy "safety_plan_items_practitioner_rw"
+  on public.safety_plan_items for all
+  using (
+    exists (
+      select 1 from public.practitioner_patients pp
+      where pp.practitioner_id = auth.uid()
+        and pp.patient_id = public.safety_plan_items.patient_id
+    )
+  )
+  with check (
+    exists (
+      select 1 from public.practitioner_patients pp
+      where pp.practitioner_id = auth.uid()
+        and pp.patient_id = public.safety_plan_items.patient_id
+    )
+  );
+
+-- Reprise des items déjà synchronisés dans `patient_entries` (PW-1, #320).
+-- Idempotente : `where not exists` sur le couple (patient, section, texte), donc
+-- ré-exécutable sans créer de doublon. L'historique `patient_entries` n'est PAS
+-- supprimé : on ne détruit pas la source dans la migration qui la recopie.
+insert into public.safety_plan_items (patient_id, section_id, text, phone, sort_order, authored_by, created_at)
+select
+  pe.patient_id,
+  coalesce(pe.payload ->> 'section_id', 'step_1'),
+  pe.payload ->> 'text',
+  pe.payload ->> 'phone',
+  coalesce((pe.payload ->> 'sort_order')::int, 0),
+  'patient',
+  pe.client_created_at
+from public.patient_entries pe
+where pe.entry_kind = 'plan_item'
+  and pe.payload ->> 'text' is not null
+  and not exists (
+    select 1 from public.safety_plan_items spi
+    where spi.patient_id = pe.patient_id
+      and spi.section_id = coalesce(pe.payload ->> 'section_id', 'step_1')
+      and spi.text = pe.payload ->> 'text'
+  );
+
 do $$
 begin
   if exists (select 1 from pg_publication where pubname = 'supabase_realtime')

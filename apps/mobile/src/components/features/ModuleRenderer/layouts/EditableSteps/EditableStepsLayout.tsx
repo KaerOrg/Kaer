@@ -12,8 +12,19 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { colors } from '@theme'
 import type { ContentField } from '@services/moduleService'
 import { generateId } from '../../../../../lib/database'
-import { getPlanItems, savePlanItem, deletePlanItem, type PlanItem } from '@services/planItemService'
+import { getPlanItems, type PlanItem } from '@services/planItemService'
+// Le plan de sécurité est un DOCUMENT PARTAGÉ : il s'écrit dans `safety_plan_items`,
+// pas dans l'outbox montante, sinon ce que le praticien ajoute depuis le web ne
+// descend jamais (PW-1). `editable_steps` n'est utilisé que par `crisis_plan` — voir
+// le commentaire de `SECTION_WIDGETS` — donc ce service est le bon pour ce layout.
+// La Balance décisionnelle, elle, garde `planItemService`.
+import {
+  refreshSafetyPlan,
+  saveSafetyPlanItem,
+  deleteSafetyPlanItem,
+} from '@services/safetyPlanService'
 import { pickContact } from '@services/contactsService'
+import { useAuthStore } from '../../../../../store/authStore'
 import { useModuleTranslation } from '../../../../../hooks/useModuleT'
 import { useConfirmDialog } from '../../../../../contexts/ConfirmDialogContext'
 import { EditableItemsList, EditableContactsList, CrisisEmergencyCalls, type EditableContact } from '../shared'
@@ -44,15 +55,24 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
   const [items, setItems] = useState<PlanItem[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedSections, setExpandedSections] = useState<ReadonlySet<string>>(new Set())
+  const patientId = useAuthStore(s => s.patient?.id)
 
+  // Rafraîchissement à l'OUVERTURE du module, jamais dans le parcours de crise : le
+  // praticien a pu compléter le plan depuis la consultation. La lecture affichée reste
+  // celle du cache local, donc un échec réseau ne vide rien — il laisse le plan connu.
   useEffect(() => {
-    getPlanItems(moduleId)
-      .then(data => {
+    let active = true
+    const load = async () => {
+      if (patientId != null) await refreshSafetyPlan(patientId)
+      const data = await getPlanItems(moduleId)
+      if (active) {
         setItems(data)
         setLoading(false)
-      })
-      .catch(() => setLoading(false))
-  }, [moduleId])
+      }
+    }
+    load().catch(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [moduleId, patientId])
 
   const itemsBySection = useMemo(() => {
     const map = new Map<string, PlanItem[]>()
@@ -86,14 +106,16 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
       contact_source: null,
       created_at: new Date().toISOString(),
     }
-    await savePlanItem(newItem)
+    if (patientId == null) return
+    await saveSafetyPlanItem(patientId, newItem)
     setItems(prev => [...prev, newItem])
-  }, [itemsBySection, moduleId])
+  }, [itemsBySection, moduleId, patientId])
 
   const handleEdit = useCallback(async (item: PlanItem, text: string) => {
-    await savePlanItem({ id: item.id, module_id: item.module_id, section_id: item.section_id, text, sort_order: item.sort_order, weight: item.weight, phone: item.phone, contact_source: item.contact_source })
+    if (patientId == null) return
+    await saveSafetyPlanItem(patientId, { id: item.id, section_id: item.section_id, text, sort_order: item.sort_order, phone: item.phone })
     setItems(prev => prev.map(i => (i.id === item.id ? { ...i, text } : i)))
-  }, [])
+  }, [patientId])
 
   // ── Contacts (étapes « contactables » : proches/pros, avec numéro appelable) ──
 
@@ -110,17 +132,18 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
       contact_source: source,
       created_at: new Date().toISOString(),
     }
-    await savePlanItem(newItem)
+    if (patientId == null) return
+    await saveSafetyPlanItem(patientId, newItem)
     setItems(prev => [...prev, newItem])
-  }, [itemsBySection, moduleId])
+  }, [itemsBySection, moduleId, patientId])
 
   const handleEditContact = useCallback(async (id: string, name: string, phone: string) => {
     const item = items.find(i => i.id === id)
-    if (item == null) return
+    if (item == null || patientId == null) return
     const nextPhone = phone !== '' ? phone : null
-    await savePlanItem({ id: item.id, module_id: item.module_id, section_id: item.section_id, text: name, sort_order: item.sort_order, weight: item.weight, phone: nextPhone, contact_source: item.contact_source })
+    await saveSafetyPlanItem(patientId, { id: item.id, section_id: item.section_id, text: name, sort_order: item.sort_order, phone: nextPhone })
     setItems(prev => prev.map(i => (i.id === id ? { ...i, text: name, phone: nextPhone } : i)))
-  }, [items])
+  }, [items, patientId])
 
   const handleDelete = useCallback((item: PlanItem) => {
     showConfirm({
@@ -129,11 +152,12 @@ export function EditableStepsLayout({ sections, uiFields, moduleId }: EditableSt
       confirmLabel: t('common.delete'),
       destructive: true,
       onConfirm: async () => {
-        await deletePlanItem(item.id)
+        if (patientId == null) return
+        await deleteSafetyPlanItem(patientId, item.id)
         setItems(prev => prev.filter(i => i.id !== item.id))
       },
     })
-  }, [t, showConfirm])
+  }, [t, showConfirm, patientId])
 
   const handleDeleteContact = useCallback((contact: EditableContact) => {
     const item = items.find(i => i.id === contact.id)

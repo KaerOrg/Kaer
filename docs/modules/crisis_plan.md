@@ -128,12 +128,41 @@ nécessaire coïncident avec ceux où le réseau est le plus défaillant.
 `plan_items` (SQLite mobile) — `id`, `module_id`, `section_id`, `text`, `sort_order`,
 `weight`, `phone`, `contact_source`, `created_at`.
 
-> ⚠️ **Il n'existe pas de table `plan_items` côté Supabase.** Elle est locale au
-> téléphone ; le serveur reçoit les items dans `patient_entries.payload` (jsonb opaque),
-> poussés par `syncUpsert` avec `entry_kind: 'plan_item'`. Ce modèle est appelé à
-> changer : `PW-1` sort le plan de `patient_entries` pour lui donner une table dédiée
-> avec RLS dans les deux sens, parce que `RemoteSyncService` est strictement montant et
-> qu'un item écrit depuis le web n'atteindrait jamais le téléphone.
+`safety_plan_items` (Supabase) — la table dédiée du plan, écrite **des deux côtés**.
+Schéma, RLS et argumentaire : [`docs/database.md`](../database.md).
+
+> **Deux tables, deux natures.** `plan_items` (SQLite) reste le **cache local** qui sert
+> la Séquence hors ligne ; `safety_plan_items` (Supabase) est le **document partagé**.
+> `patient_entries` n'est plus la source du plan : c'est un journal de saisies drainé
+> par une outbox strictement montante, donc un item écrit par le praticien depuis le web
+> n'y atteignait jamais le téléphone.
+>
+> ⚠️ **`entry_kind: 'plan_item'` n'est pas supprimé pour autant**, contrairement à ce
+> qu'annonçait #320 : la table SQLite `plan_items` sert aussi le module **Balance
+> décisionnelle** (`decisional_balance`), qui y stocke ses arguments et les synchronise
+> par ce même `entry_kind`. Seul `crisis_plan` migre.
+
+### Qui écrit quoi, et où
+
+| Surface | Service | Écrit dans |
+|---|---|---|
+| Édition patient (`editable_steps`) | `safetyPlanService` (mobile) | `safety_plan_items`, puis le cache SQLite |
+| Éditeur praticien (PW-2) | `safetyPlanItemsService` (web) | `safety_plan_items` |
+| Séquence (`safety_sequence`) | `planItemService.getPlanItems` | **rien** : lecture SQLite seule |
+| Balance décisionnelle | `planItemService` | `patient_entries`, inchangé |
+
+**Le réseau est hors du chemin de la Séquence, et c'est structurel.** `planItemService`
+reste strictement SQLite, verrouillé par un test statique ; le service qui parle au
+serveur est un **autre fichier**. La Séquence ne peut donc pas se mettre à dépendre du
+réseau par accident.
+
+Le **rafraîchissement** se fait à l'ouverture du module d'édition, jamais pendant le
+parcours de crise. Un échec de lecture (hors ligne, RLS) laisse le cache **intact** :
+perdre le réseau ne doit jamais vider un plan de sécurité.
+
+À l'**écriture**, le serveur passe en premier. S'il refuse, rien n'est écrit localement :
+mieux vaut que le patient voie que sa saisie n'a pas été prise que de lui montrer un item
+qui n'existe que sur son téléphone et disparaîtra au prochain rafraîchissement.
 
 ## Fichiers
 
