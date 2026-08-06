@@ -31,6 +31,7 @@ Index général de la documentation du monorepo. Pour le contexte projet, voir [
 | [`render-diagnostics.md`](render-diagnostics.md) | Observabilité du moteur de rendu — non-match (preview_kind/field_type/widget_type/text_code) → `render_mismatch_log` + email Resend + garde CI |
 | [`app-error-alerting.md`](app-error-alerting.md) | Alerte email sur erreur applicative — crash (ErrorBoundary + handler global) et opération réseau/serveur échouée (chokepoint fetch) → `app_error_log` + email Resend |
 | [`modules.md`](modules.md) | Liste et statut de tous les modules thérapeutiques |
+| [`instruments/phq9.md`](instruments/phq9.md) | PHQ-9 : source anglaise, traduction Kær, régime de droits et limites. Référence du garde-fou de conformité |
 | [`terminologie-praticiens.md`](terminologie-praticiens.md) | Glossaire métier (IDE, IPA, etc.) |
 | [`migration-engine-roadmap.md`](migration-engine-roadmap.md) | Roadmap moteur de migrations |
 | [`dependency-pitfalls.md`](dependency-pitfalls.md) | Pièges connus de dépendances |
