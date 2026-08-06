@@ -151,6 +151,35 @@ carte « Moment de pratique » de l'onglet Données : une seule clé de cache, u
 Le changement est propre à `breathing_techniques` : les autres modules gardent leur
 éditeur de routine (`NotificationRoutinePanel`).
 
+### L'onglet « Vue patient » (W5, web)
+
+Les quatre écrans du parcours mobile (hub, préparation, séance, clôture) miniaturisés
+dans un rail, numérotés et légendés. Même coquille que les autres parcours multi-écrans
+(`PatientScreenRail`, partagée avec la défusion et « Nommer ce que je ressens ») : le
+filtre par étape réduit le rail **sans renuméroter**, pour que le repère « écran 4 »
+reste celui que le praticien partage avec le patient.
+
+L'aperçu reflète la **configuration réelle du patient** : ses techniques activées, sa
+technique principale (mise en avant avec son rythme et sa teinte), son objectif
+hebdomadaire. Un praticien qui montre l'écran en séance doit montrer celui que le
+patient a, pas une capture générique. Il se met à jour dès qu'un enregistrement de
+l'onglet Configuration invalide `moduleQueries.breathingConfig`.
+
+Lecture seule et sans interaction : rien ne se lance, rien ne s'enregistre, et les
+miniatures ne contiennent aucun bouton (un test l'assure). Les saisies affichées sont
+des **exemples déclarés dans `breathingScreens.tsx`**, jamais de vraies sessions : les
+données du patient ont leur propre onglet.
+
+Sans configuration lue, l'aperçu montre le catalogue complet plutôt qu'un écran vide, et
+se resserre dès que la config arrive. Aucune technique activée affiche un message
+explicite, jamais un hub muet.
+
+> **MDR 2017/745.** Les trois choix de ressenti de l'écran de clôture portent une teinte
+> **unique** : proposer un « bon » et un « mauvais » bouton au moment de répondre
+> orienterait la réponse du patient. C'est la même règle que côté mobile (M4), et elle
+> se distingue de l'onglet Données, où les trois ressentis déjà saisis portent chacun
+> leur teinte d'identité.
+
 ### La section « Évolution clinique » (W2, web)
 
 La page Évolution clinique porte une section respiration dès que le patient a au moins
