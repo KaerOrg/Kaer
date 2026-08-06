@@ -27,8 +27,10 @@ import {
   saveBreathingSettings,
   techniquesFromFields,
   getCycleDuration,
+  breathingConfigFromFields,
+  resolveActivation,
 } from './breathingService'
-import type { BreathingSettings } from './breathingService'
+import type { BreathingSettings, BreathingTechnique } from './breathingService'
 import type { ContentField } from '@kaer/shared'
 
 beforeEach(() => jest.clearAllMocks())
@@ -243,6 +245,107 @@ describe('breathingService — techniquesFromFields', () => {
 
   it('retourne [] sans field de technique', () => {
     expect(techniquesFromFields([makeField({ field_type: 'field_row' })])).toEqual([])
+  })
+})
+
+describe('breathingService : breathingConfigFromFields', () => {
+  it('lit la technique par défaut depuis le field exercise_config', () => {
+    const config = breathingConfigFromFields([
+      makeField({ id: 'bt.label', field_type: 'module_label' }),
+      makeField({
+        id: 'bt.config',
+        field_type: 'exercise_config',
+        props: { default_technique_key: 'coherence_cardiaque' },
+      }),
+    ])
+    expect(config).toEqual({ defaultTechniqueKey: 'coherence_cardiaque' })
+  })
+
+  it('rend null sans field de config (aucun repli codé en dur)', () => {
+    expect(breathingConfigFromFields([makeField({ field_type: 'module_label' })]))
+      .toEqual({ defaultTechniqueKey: null })
+  })
+
+  it('rend null quand le field de config existe sans la clé', () => {
+    expect(breathingConfigFromFields([makeField({ id: 'bt.config', field_type: 'exercise_config' })]))
+      .toEqual({ defaultTechniqueKey: null })
+  })
+})
+
+describe('breathingService : resolveActivation', () => {
+  const tech = (key: string): BreathingTechnique => ({
+    key, color: '#4A9EA3', recommended_duration_min: 5,
+    phases: [{ type: 'inhale', seconds: 5 }, { type: 'exhale', seconds: 5 }],
+  })
+  const TECHNIQUES = [tech('coherence_cardiaque'), tech('diaphragmatique'), tech('carree')]
+  const CONFIG = { defaultTechniqueKey: 'coherence_cardiaque' }
+
+  const settings = (over: Partial<BreathingSettings> = {}): BreathingSettings => ({
+    enabled_techniques: [], primary_technique: null, weekly_goal_sessions: 5,
+    reminder_enabled: false, reminder_time: null, reminder_days: [],
+    haptics: true, ambient_sound: false, ambient_sound_key: 'river',
+    breath_sound: false, preferred_duration_min: 5,
+    ...over,
+  })
+
+  it('ne rend que les techniques activées par le praticien', () => {
+    const { primary, others } = resolveActivation(
+      TECHNIQUES,
+      settings({ enabled_techniques: ['coherence_cardiaque', 'carree'], primary_technique: 'coherence_cardiaque' }),
+      CONFIG,
+    )
+    expect(primary?.key).toBe('coherence_cardiaque')
+    expect(others.map(t => t.key)).toEqual(['carree'])
+  })
+
+  it('n’expose jamais une technique non activée, même en second rang', () => {
+    const { primary, others } = resolveActivation(
+      TECHNIQUES,
+      settings({ enabled_techniques: ['carree'], primary_technique: 'carree' }),
+      CONFIG,
+    )
+    expect(primary?.key).toBe('carree')
+    expect(others).toEqual([])
+  })
+
+  it('retombe sur la technique par défaut de la config quand rien n’est activé', () => {
+    const { primary, others } = resolveActivation(TECHNIQUES, settings(), CONFIG)
+    expect(primary?.key).toBe('coherence_cardiaque')
+    expect(others).toEqual([])
+  })
+
+  it('conserve l’ordre de la config, pas celui des clés activées', () => {
+    const { others } = resolveActivation(
+      TECHNIQUES,
+      settings({ enabled_techniques: ['carree', 'diaphragmatique', 'coherence_cardiaque'], primary_technique: 'coherence_cardiaque' }),
+      CONFIG,
+    )
+    expect(others.map(t => t.key)).toEqual(['diaphragmatique', 'carree'])
+  })
+
+  it('prend la première technique activée quand la principale n’est pas activée', () => {
+    const { primary, others } = resolveActivation(
+      TECHNIQUES,
+      settings({ enabled_techniques: ['diaphragmatique', 'carree'], primary_technique: 'coherence_cardiaque' }),
+      CONFIG,
+    )
+    expect(primary?.key).toBe('diaphragmatique')
+    expect(others.map(t => t.key)).toEqual(['carree'])
+  })
+
+  it('ignore une clé activée qui n’existe plus en base', () => {
+    const { primary, others } = resolveActivation(
+      TECHNIQUES,
+      settings({ enabled_techniques: ['coherence_cardiaque', 'technique_supprimee'] }),
+      CONFIG,
+    )
+    expect(primary?.key).toBe('coherence_cardiaque')
+    expect(others).toEqual([])
+  })
+
+  it('rend primary null quand ni activation ni repli ne donnent de technique', () => {
+    expect(resolveActivation(TECHNIQUES, settings(), { defaultTechniqueKey: null }))
+      .toEqual({ primary: null, others: [] })
   })
 })
 

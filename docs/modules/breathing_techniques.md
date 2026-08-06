@@ -37,26 +37,77 @@ Le module n'a plus d'écran custom : il passe par le moteur générique via
 `preview_kind = 'breathing_pacer'` (`ModuleContentScreen` → `FieldRenderer` →
 `BreathingPacerLayout`).
 
+Depuis la refonte (epic #195, M1), le layout est un **hub** en trois blocs, et non
+plus une liste académique des cinq techniques.
+
 | Composant | Rôle |
 |---|---|
-| `layouts/BreathingPacer/BreathingPacerLayout` | Liste des 5 techniques (config lue des fields) + historique de sessions ; ouvre le lecteur en modale |
+| `layouts/BreathingPacer/BreathingPacerLayout` | Hub : orchestration, chargement des sessions et de la config, feuilles |
+| `.../PrimaryTechniqueCard` + `BreathingPulse` | Carte « Travaillée en séance » et sa pastille animée en boucle |
+| `.../WeekCard` + `WeekDots` + `ReminderRow` | Carte « Cette semaine » : pastilles, série, objectif, ligne de rappel |
+| `.../TechniqueRow` | Une ligne de la liste « Vos techniques » |
+| `.../{GoalSheet,ReminderSheet,TechniqueInfoSheet}` + `DayChip` | Feuilles objectif, rappel, « En savoir plus » |
+| `.../{rhythmLabels,weekDayOrder,formatDuration}` | Helpers purs du dossier (rythmes, ordre de semaine, durées) |
 | `layouts/BreathingPacer/BreathingExercisePlayer` | Lecteur animé (modale) : cercle respiratoire, barre de phases, compteurs cycles/durée |
-| `layouts/BreathingPacer/{TechniqueCard,BreathCircle,PhaseBar}` | Primitives présentationnelles du layout |
+| `layouts/BreathingPacer/{BreathCircle,PhaseBar}` | Primitives présentationnelles du lecteur |
 
 Côté web praticien, `breathing_pacer` rend l'aperçu descriptif (`field_row`) via
 `FieldsLayout` : le praticien n'exécute pas l'exercice.
 
+### Le hub (M1)
+
+Trois blocs, dans cet ordre :
+
+1. **« Travaillée en séance »**, la `primary_technique` : pastille animée, bénéfice en
+   une ligne **orienté patient** (jamais une citation), puces de rythme, CTA
+   « Démarrer · N min » (`preferred_duration_min`), dernière session en sous-texte.
+2. **« Cette semaine »** : sept pastilles L à D, série en cours, `n / objectif`
+   sessions, barre de progression, puis la **ligne de rappel** (opt-in).
+3. **« Vos techniques »** : les autres techniques **activées par le praticien**.
+
+**Invariant d'activation.** Le patient ne voit que ce que son praticien a activé :
+`breathing_settings.enabled_techniques`. Aucune technique verrouillée, aucun teaser.
+Tant que l'écran praticien web (W0) n'existe pas, `enabled_techniques` est vide et le
+hub retombe sur la technique déclarée en base (`bt.config.default_technique_key` =
+`coherence_cardiaque`) : le repli est **en config**, pas dans une constante TypeScript.
+
+**Objectif en sessions par semaine, jamais en minutes** (`weekly_goal_sessions`, 1 à 14,
+borné par un `check` en base). Proposé en séance, librement ajustable par le patient.
+
+**Preuves scientifiques** : retirées des cartes, elles vivent derrière « En savoir plus »
+(`TechniqueInfoSheet`), repliées par défaut. M6 (#371) enrichira cette feuille.
+
 ### Stockage
 
-**Table SQLite :** `breathing_sessions`
+**Table SQLite :** `breathing_sessions` (enrichie par T0, epic #195)
 
 | Colonne | Type | Description |
 |---|---|---|
 | `id` | TEXT PK | Identifiant unique |
-| `date` | TEXT | YYYY-MM-DD |
+| `date` | TEXT | YYYY-MM-DD, dérivé de `started_at` (local, non synchronisé) |
+| `started_at` | TEXT | Horodatage ISO du début de session (date métier) |
 | `technique_key` | TEXT | Clé de la technique (ex: `coherence_cardiaque`) |
-| `duration_seconds` | INTEGER | Durée effective de la session |
+| `duration_seconds` | INTEGER | Durée réellement pratiquée |
+| `planned_duration_seconds` | INTEGER | Durée choisie avant la session |
+| `cycles_completed` | INTEGER | Cycles menés au bout |
+| `completed` | INTEGER | 1 = menée au bout, 0 = interrompue |
+| `feeling` | TEXT | `calmer` / `same` / `tenser`, ou NULL (facultatif) |
 | `created_at` | TEXT | Horodatage ISO 8601 |
+
+**Table SQLite :** `breathing_settings` (une ligne par patient) : techniques activées,
+technique de séance, objectif hebdomadaire, rappel (`reminder_enabled` / `_time` /
+`_days`), accompagnements de session (`haptics`, `breath_sound`, `ambient_sound`,
+`ambient_sound_key`) et `preferred_duration_min`. Détail : [`docs/database.md`](../database.md).
+
+### Statistiques de la semaine (partagées web ≡ mobile)
+
+Les comptes affichés par le hub viennent de `packages/shared/src/services/breathingStats.ts` :
+`buildWeekPractice`, `sessionsInWeek`, `currentStreak`, `lastSession`. Purs, sans I/O,
+sur un contrat structurel minimal (`{ date }`, plus `started_at` pour la dernière
+session). La vue praticien web (W1/W2) lira les mêmes fonctions, donc les mêmes chiffres.
+
+**Restitution brute.** La série est un nombre de jours consécutifs, rien d'autre : pas de
+félicitation, pas de jugement calculé, pas de couleur qui varierait selon la valeur.
 
 ### Configuration des techniques (config-first, issue #69)
 
@@ -69,15 +120,19 @@ La définition des 5 techniques (couleur, durée recommandée, séquence de phas
 - **`field_props`** (atomiques) :
   - technique → `technique_key`, `color` (hex), `recommended_duration_min`
   - phase → `phase_type` (`inhale`|`hold_in`|`exhale`|`hold_out`), `phase_seconds`
+- **`bt.config`** (field `exercise_config`) → `default_technique_key` : la technique
+  activée par défaut tant que le praticien n'a rien activé (repli avant W0). Lu par
+  `breathingService.breathingConfigFromFields()`.
 - **Lecture mobile** : le layout `breathing_pacer` reçoit déjà les fields et les
   convertit via `breathingService.techniquesFromFields()` (helper pur) ;
   `breathingService.fetchBreathingTechniques()` réutilise ce même helper après
   `fetchModuleFields('breathing_techniques')` (cache mémoire).
 
-Les libellés (nom, sous-titre, description, niveau de preuve, label de phase) restent
-en i18n bundlé : `modules.breathing_techniques.<key>_name` / `_subtitle` /
-`_description` / `_evidence` et `modules.breathing_techniques.phase_<type>`, déclinés
-`fr`/`en` en `common` et `teen`. Les sources cliniques et la note MDR sont conservées
+Les libellés (nom, sous-titre, bénéfice, description, niveau de preuve, label de phase)
+restent en i18n bundlé : `modules.breathing_techniques.<key>_name` / `_subtitle` /
+`_benefit` / `_description` / `_evidence` et `modules.breathing_techniques.phase_<type>`,
+déclinés `fr`/`en` en `common` et `teen`. Le hub ajoute les clés `hub_*`, `goal_*`,
+`reminder_*` et `info_*`. Les sources cliniques et la note MDR sont conservées
 en commentaire d'en-tête du bloc seed.
 
 ### Signal d'observance Supabase
@@ -91,10 +146,11 @@ en commentaire d'en-tête du bloc seed.
 
 | Fichier | Rôle |
 |---|---|
-| `supabase/seed.sql` | Config des techniques (`breathing_technique`/`breathing_phase` + `field_props`) |
-| `apps/mobile/src/services/breathingService.ts` | Lecture config (`techniquesFromFields` / `fetchBreathingTechniques`) + sessions + sync |
-| `apps/mobile/src/lib/database.ts` | Table + CRUD `breathing_sessions` |
-| `apps/mobile/src/components/features/ModuleRenderer/layouts/BreathingPacer/` | Layout `breathing_pacer` : liste + lecteur animé + primitives + tests |
+| `supabase/seed.sql` | Config des techniques + `bt.config` (`default_technique_key`) |
+| `apps/mobile/src/services/breathingService.ts` | Config (`techniquesFromFields`, `breathingConfigFromFields`, `resolveActivation`) + sessions + réglages + sync |
+| `packages/shared/src/services/breathingStats.ts` | Semaine, série, compteurs (purs, partagés web ≡ mobile) |
+| `apps/mobile/src/lib/database.ts` | Tables + CRUD `breathing_sessions` / `breathing_settings` |
+| `apps/mobile/src/components/features/ModuleRenderer/layouts/BreathingPacer/` | Layout `breathing_pacer` : hub + feuilles + lecteur animé + tests |
 | `apps/mobile/src/services/breathingService.test.ts` | Tests service (save, fetch, parsing) |
 | `apps/web/src/components/features/ModuleRenderer/FieldRenderer/LayoutDispatcher.tsx` | Aperçu praticien web (`breathing_pacer` → `FieldsLayout`) |
 
@@ -114,7 +170,9 @@ npx jest BreathingPacer
 - [x] Web : aperçu praticien via `breathing_pacer` → `FieldsLayout` (`field_row`)
 - [x] Config-first : 5 techniques en base (`module_content_fields` / `field_props`)
 - [x] Mobile : `techniquesFromFields()` convertit les fields en techniques
-- [x] Mobile : `BreathingPacerLayout` : liste + historique
+- [x] Mobile : `BreathingPacerLayout` : hub en trois blocs (M1, #366)
+- [x] Mobile : activation praticien + repli `bt.config` (aucune technique non activée affichée)
+- [x] Mobile : objectif en sessions/semaine et ligne de rappel opt-in, écrits dans `breathing_settings`
 - [x] Mobile : `BreathingExercisePlayer` : guide animé (modale) avec cercle, phases, compteurs
 - [x] Mobile : table SQLite `breathing_sessions` + `initDatabase`
 - [x] Mobile : rendu via le moteur générique (`preview_kind = 'breathing_pacer'`), aucun écran custom

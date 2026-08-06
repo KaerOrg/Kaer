@@ -1843,7 +1843,11 @@ insert into public.module_content_fields (id, module_id, section_id, parent_fiel
   ('bt.field_4', 'breathing_techniques', NULL, NULL, 'field_row', 'module.breathing_techniques.field_4.label', 40),
   ('bt.field_5', 'breathing_techniques', NULL, NULL, 'field_row', 'module.breathing_techniques.field_5.label', 50),
   ('bt.field_6', 'breathing_techniques', NULL, NULL, 'field_row', 'module.breathing_techniques.field_6.label', 60),
-  ('bt.footer', 'breathing_techniques', NULL, NULL, 'footer_note', 'module.breathing_techniques.footer', 99)
+  ('bt.footer', 'breathing_techniques', NULL, NULL, 'footer_note', 'module.breathing_techniques.footer', 99),
+  -- config du hub patient (epic #195, M1) : valeurs de repli tant que le praticien
+  -- n'a pas activé de techniques depuis le web (W0). Hors aperçu praticien : le
+  -- dispatcher web ne rend que les `field_row`.
+  ('bt.config', 'breathing_techniques', NULL, NULL, 'exercise_config', NULL, 5)
 on conflict (id) do update set module_id = excluded.module_id, section_id = excluded.section_id, parent_field_id = excluded.parent_field_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
 -- ── module_content_fields : breathing_techniques (config des 5 techniques) ────
@@ -2094,15 +2098,23 @@ on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 -- technique : technique_key + color (hex) + recommended_duration_min
 -- phase     : phase_type (inhale|hold_in|exhale|hold_out) + phase_seconds
 insert into public.field_props (field_id, prop_key, prop_value) values
+  -- Repli d'activation (epic #195) : tant que l'écran praticien web (W0) n'existe
+  -- pas, aucune ligne `breathing_settings.enabled_techniques` n'est posée. Le hub
+  -- patient lit alors cette clé plutôt qu'une constante figée en TypeScript.
+  -- (L'objectif hebdomadaire par défaut, lui, est déjà porté par la colonne :
+  --  `breathing_settings.weekly_goal_sessions integer not null default 5`.)
+  ('bt.config',                           'default_technique_key',        'coherence_cardiaque'),
+  -- Palette de la refonte (epic #195) : teal Kær, en remplacement des teintes
+  -- indigo / émeraude d'origine.
   ('bt.tech.coherence_cardiaque',         'technique_key',            'coherence_cardiaque'),
-  ('bt.tech.coherence_cardiaque',         'color',                    '#4F46E5'),
+  ('bt.tech.coherence_cardiaque',         'color',                    '#4A9EA3'),
   ('bt.tech.coherence_cardiaque',         'recommended_duration_min', '5'),
   ('bt.tech.coherence_cardiaque.phase_1', 'phase_type',               'inhale'),
   ('bt.tech.coherence_cardiaque.phase_1', 'phase_seconds',            '5'),
   ('bt.tech.coherence_cardiaque.phase_2', 'phase_type',               'exhale'),
   ('bt.tech.coherence_cardiaque.phase_2', 'phase_seconds',            '5'),
   ('bt.tech.diaphragmatique',             'technique_key',            'diaphragmatique'),
-  ('bt.tech.diaphragmatique',             'color',                    '#059669'),
+  ('bt.tech.diaphragmatique',             'color',                    '#5FAE9B'),
   ('bt.tech.diaphragmatique',             'recommended_duration_min', '5'),
   ('bt.tech.diaphragmatique.phase_1',     'phase_type',               'inhale'),
   ('bt.tech.diaphragmatique.phase_1',     'phase_seconds',            '4'),

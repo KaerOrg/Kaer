@@ -14,6 +14,16 @@ export { buildColumnSpecs, readSliderParams, CHILD_FIELD_TYPES } from './service
 export type { ColumnSpec, SliderParams } from './services/columnForm'
 export { shiftDate, mondayOf, weekDays, todayIso, dateToIso } from './services/weekDates'
 
+// Statistiques descriptives des sessions de respiration (comptes bruts, zéro
+// interprétation) : le hub patient mobile et la vue praticien web lisent les mêmes
+// fonctions, donc les mêmes chiffres.
+export {
+  buildWeekPractice, sessionsInWeek, currentStreak, lastSession,
+} from './services/breathingStats'
+export type {
+  BreathingSessionLike, BreathingSessionTimed, WeekPracticeDay,
+} from './services/breathingStats'
+
 // Séquence du plan de sécurité : logique pure partagée par le layout mobile (parcours
 // patient) et le layout web (aperçu praticien) — une seule source, zéro duplication.
 export {

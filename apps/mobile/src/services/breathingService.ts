@@ -101,6 +101,66 @@ export async function fetchBreathingTechniques(): Promise<BreathingTechnique[]> 
   return techniquesFromFields(fields)
 }
 
+// ─── Activation praticien (epic #195) ────────────────────────────────────────
+
+/** Config du module lue en base (field `bt.config`), et non figée en TypeScript. */
+export interface BreathingModuleConfig {
+  /** Technique activée par défaut tant que le praticien n'en a activé aucune. */
+  defaultTechniqueKey: string | null
+}
+
+/**
+ * Lit la config du module depuis ses fields. Pure : partagée par le hub (qui reçoit
+ * déjà les fields) et tout appelant qui les a chargés.
+ */
+export function breathingConfigFromFields(fields: ContentField[]): BreathingModuleConfig {
+  const config = fields.find((f) => f.field_type === 'exercise_config')
+  return { defaultTechniqueKey: config?.props.default_technique_key ?? null }
+}
+
+/** Ce que le patient voit : sa technique de séance, et les autres techniques activées. */
+export interface BreathingActivation {
+  /** Technique « travaillée en séance ». `null` si aucune technique n'est disponible. */
+  primary: BreathingTechnique | null
+  /** Les autres techniques activées, hors `primary`, dans l'ordre de la config. */
+  others: BreathingTechnique[]
+}
+
+/**
+ * Résout ce que le patient a le droit de voir : **uniquement** les techniques
+ * activées par son praticien. Aucune technique non activée n'est jamais renvoyée,
+ * sous aucune forme (ni verrouillée, ni en teaser).
+ *
+ * Repli tant que l'écran praticien web (W0) n'existe pas : quand
+ * `enabled_techniques` est vide (le praticien n'a rien activé ; le patient, lui,
+ * ne peut pas y toucher depuis l'app), on retombe sur la technique par défaut
+ * déclarée en base (`bt.config.default_technique_key`).
+ *
+ * Pure : aucun I/O, testable directement.
+ */
+export function resolveActivation(
+  techniques: BreathingTechnique[],
+  settings: BreathingSettings,
+  config: BreathingModuleConfig,
+): BreathingActivation {
+  const enabledKeys = settings.enabled_techniques.length > 0
+    ? settings.enabled_techniques
+    : config.defaultTechniqueKey != null ? [config.defaultTechniqueKey] : []
+
+  const allowed = new Set(enabledKeys)
+  // On filtre `techniques` (et non `enabledKeys`) pour conserver l'ordre de la
+  // config et écarter une clé activée qui n'existerait plus en base.
+  const enabled = techniques.filter((tech) => allowed.has(tech.key))
+
+  const primaryKey = settings.primary_technique ?? config.defaultTechniqueKey
+  const primary = enabled.find((tech) => tech.key === primaryKey) ?? enabled[0] ?? null
+
+  return {
+    primary,
+    others: enabled.filter((tech) => tech !== primary),
+  }
+}
+
 /** Historique local des sessions de respiration, les plus récentes d'abord. */
 export async function fetchBreathingSessions(limit = 200): Promise<BreathingSession[]> {
   return dbGetAll(limit)

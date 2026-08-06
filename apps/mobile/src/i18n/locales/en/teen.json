@@ -607,7 +607,9 @@
       "recommended_hint": "Suggested duration: {{min}} min · {{evidence}}",
       "technique_not_found": "Technique not found.",
       "session_count": "{{count}} session",
-      "session_count_plural": "{{count}} sessions"
+      "session_count_plural": "{{count}} sessions",
+      "coherence_cardiaque_benefit": "Ease stress, calm your heart rhythm",
+      "hub_your_techniques": "Your techniques"
     },
     "rim": {
       "title": "Rewriting the nightmare",
