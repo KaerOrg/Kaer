@@ -24,6 +24,7 @@ const ROW = {
   time_of_day: '19:00',
   ends_on: null,
   patient_reminder: true,
+  created_at: '2026-07-01T09:00:00.000Z',
 }
 
 /** Chaîne `.select().eq().eq().maybeSingle()` du cas « une échelle ». */
@@ -51,6 +52,7 @@ describe('scaleScheduleService.fetchScaleSchedule', () => {
     await expect(fetchScaleSchedule('pat-1', 'phq9')).resolves.toEqual({
       moduleId: 'phq9', mode: 'home', frequency: 'biweekly',
       dayOfWeek: 3, timeOfDay: '19:00', endsOn: null, patientReminder: true,
+      createdAtIso: '2026-07-01T09:00:00.000Z',
     })
     expect(mockFrom).toHaveBeenCalledWith('scale_schedules')
   })

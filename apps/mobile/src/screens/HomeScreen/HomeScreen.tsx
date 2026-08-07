@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import {
   View,
   Text,
@@ -12,18 +12,19 @@ import { useNavigation, type CompositeNavigationProp } from '@react-navigation/n
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import { useTranslation } from 'react-i18next'
-import { AppStackParamList, TabParamList } from '../navigation/AppStack'
+import { AppStackParamList, TabParamList } from '../../navigation/AppStack'
 import { useQuery } from '@tanstack/react-query'
-import { useAuthStore } from '../store/authStore'
+import { useAuthStore } from '../../store/authStore'
 import type { UnlockedModule, TodayRoutine } from '@services/homeService'
-import { homeQueries } from '../hooks/queries'
-import { useRefreshOnFocus } from '../hooks/useRefreshOnFocus'
-import { TodaySchedule } from '../components/features/TodaySchedule'
-import { CrisisBanner } from '../components/features/CrisisBanner'
-import { ModuleSections } from '../components/features/ModuleSections'
+import { homeQueries } from '../../hooks/queries'
+import { useRefreshOnFocus } from '../../hooks/useRefreshOnFocus'
+import { TodaySchedule } from '../../components/features/TodaySchedule'
+import { CrisisBanner } from '../../components/features/CrisisBanner'
+import { ModuleSections } from '../../components/features/ModuleSections'
 import { colors, spacing, fonts } from '@theme'
-import { useTeen } from '../hooks/useTeen'
+import { useTeen } from '../../hooks/useTeen'
 import { EmptyState } from '@ui/EmptyState'
+import { buildDueLabels } from './buildDueLabels'
 
 // Modules avec un écran dédié (interaction custom non couverte par le moteur générique).
 // Tout module absent de cette map ET avec preview_kind = 'questionnaire' → ScaleHistory.
@@ -49,11 +50,12 @@ function isModuleAvailable(mod: UnlockedModule): boolean {
 export default function HomeScreen() {
   const navigation = useNavigation<HomeNavigation>()
   const patient = useAuthStore((s) => s.patient)
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { isTeenMode, tg, teenColor } = useTeen()
 
   const modulesQuery = useQuery(homeQueries.unlockedModules(patient?.id))
   const routinesQuery = useQuery(homeQueries.todayRoutines(patient?.id))
+  const dueQuery = useQuery(homeQueries.scaleDueContext(patient?.id))
   const modules: UnlockedModule[] = modulesQuery.data ?? []
   const todayRoutines: TodayRoutine[] = routinesQuery.data ?? []
   const loading = modulesQuery.isLoading || routinesQuery.isLoading
@@ -70,6 +72,18 @@ export default function HomeScreen() {
 
   // Rafraîchit au retour sur l'écran (déblocage de module ailleurs, etc.).
   useRefreshOnFocus(handleRefresh)
+
+  // Échéances des cartes (#414). La map est vide tant qu'aucune programmation
+  // n'existe, et les cartes ne portent alors aucune pastille.
+  const dueByModule = useMemo(
+    () => buildDueLabels({
+      schedules: dueQuery.data?.schedules ?? new Map(),
+      lastActivityByModule: dueQuery.data?.lastActivityByModule ?? new Map(),
+      t,
+      locale: i18n.language,
+    }),
+    [dueQuery.data, t, i18n.language],
+  )
 
   const handleCrisisPress = useCallback(() => {
     navigation.navigate('ModuleContent', { moduleType: 'crisis_plan' })
@@ -150,6 +164,7 @@ export default function HomeScreen() {
             teenColor={teenColor}
             isAvailable={isModuleAvailable}
             onModulePress={handleModulePress}
+            dueByModule={dueByModule}
           />
         )}
       </ScrollView>

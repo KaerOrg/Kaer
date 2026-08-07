@@ -121,7 +121,8 @@
     "section_tools": "Therapeutic tools",
     "section_scales": "Scales & questionnaires",
     "today_section": "Planned for today",
-    "crisis_subtitle": "Immediate help, any time"
+    "crisis_subtitle": "Immediate help, any time",
+    "due_before": "To complete before {{date}}"
   },
   "wip": {
     "title": "Under construction",

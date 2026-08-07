@@ -8,6 +8,8 @@ export { fetchModuleFields } from './services/moduleFields'
 
 export { collectIndexed } from './services/fieldProps'
 export { readScaleSource } from './services/scaleSource'
+export { computeScheduleStatus } from './services/scaleScheduleStatus'
+export type { ScheduleStatus, SchedulePeriod, ScheduleFrequency, ScheduleMode, RecurringFrequency } from './services/scaleScheduleStatus'
 export type { ScaleSource } from './services/scaleSource'
 
 export { readEnabledGroups } from './services/patientModuleConfig'
