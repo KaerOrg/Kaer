@@ -7,14 +7,19 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react-nativ
 import ScaleEntryScreen from './ScaleEntryScreen'
 import * as database from '../../../lib/database'
 import * as moduleService from '@services/moduleService'
+import * as scaleScoring from '../../../lib/scaleScoring'
 
 jest.setTimeout(15000)
 
 const mockGoBack = jest.fn()
 
+// Paramètre de route mutable : certains tests ouvrent une saisie EXISTANTE (édition),
+// ce qu'un `params` figé au niveau module ne permet pas d'exprimer.
+let mockEntryId: string | undefined
+
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ goBack: mockGoBack, setOptions: jest.fn() }),
-  useRoute: () => ({ params: { scale_id: 'phq9' } }),
+  useRoute: () => ({ params: { scale_id: 'phq9', entry_id: mockEntryId } }),
 }))
 
 jest.mock('react-native-safe-area-context', () => ({
@@ -123,9 +128,20 @@ const MOCK_FIELDS: moduleService.ContentField[] = [
   },
 ]
 
+/** Remet les mocks partagés dans leur état par défaut : nouvelle saisie, deux items. */
+function resetScaleMocks(): void {
+  jest.clearAllMocks()
+  mockEntryId = undefined
+  ;(database.getScaleEntryById as jest.Mock).mockResolvedValue(null)
+  ;(scaleScoring.SCALE_SCORING as Record<string, unknown>).phq9 = {
+    score_decimals: 0, items_count: 2,
+    computeScore: jest.fn().mockReturnValue(2), computeSubscaleScores: undefined,
+  }
+}
+
 describe('ScaleEntryScreen', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    resetScaleMocks()
     ;(moduleService.fetchModuleFields as jest.Mock).mockResolvedValue({
       preview_kind: 'questionnaire',
       fields: MOCK_FIELDS,
@@ -202,7 +218,7 @@ const META = (entryMode: string): moduleService.ContentField => ({
 })
 
 describe('ScaleEntryScreen : mode de saisie configuré', () => {
-  beforeEach(() => jest.clearAllMocks())
+  beforeEach(resetScaleMocks)
 
   it('rend la liste défilante quand entry_mode vaut scrolling_list', async () => {
     ;(moduleService.fetchModuleFields as jest.Mock).mockResolvedValue({
@@ -226,5 +242,104 @@ describe('ScaleEntryScreen : mode de saisie configuré', () => {
     await waitFor(() => expect(screen.getByText('q1')).toBeTruthy())
     expect(screen.queryByText('q2')).toBeNull()
     expect(screen.getByTestId('stepper-progress')).toBeTruthy()
+  })
+})
+
+// ── Items POSÉS et items COTÉS sont deux notions distinctes (#410) ──────────
+//
+// Le PHQ-9 pose dix questions et n'en additionne que neuf : l'item 10 mesure le
+// retentissement fonctionnel, il est stocké mais pas compté. La maquette de test
+// reproduit ce rapport en petit : TROIS questions posées, DEUX cotées.
+
+const THIRD_QUESTION: moduleService.ContentField = {
+  id: 'phq9.q3', module_id: 'phq9', section_id: null, parent_field_id: null,
+  field_type: 'scale_question', text_code: 'modules.phq9.q3', sort_order: 12,
+  props: {}, children: [],
+}
+
+describe('ScaleEntryScreen : item posé mais non coté', () => {
+  beforeEach(() => {
+    resetScaleMocks()
+    ;(moduleService.fetchModuleFields as jest.Mock).mockResolvedValue({
+      preview_kind: 'questionnaire',
+      fields: [...MOCK_FIELDS, THIRD_QUESTION],
+    })
+  })
+
+  it('ne se croit pas complète quand seuls les items cotés sont remplis', async () => {
+    // Deux réponses sur trois : c'est le nombre d'items COTÉS, mais la saisie n'est
+    // pas finie pour autant. C'est exactement le bug silencieux que le ticket vise.
+    render(<ScaleEntryScreen />)
+    await waitFor(() => expect(screen.getByTestId('answer_0')).toBeTruthy())
+    fireEvent.press(screen.getByTestId('answer_0'))
+    fireEvent.press(screen.getByTestId('answer_1'))
+    fireEvent.press(screen.getByText('submit'))
+    expect(database.saveScaleEntry).not.toHaveBeenCalled()
+  })
+
+  it('n\'additionne que les items cotés, et stocke la réponse de l\'item non coté', async () => {
+    const computeScore = jest.fn().mockReturnValue(2)
+    ;(scaleScoring.SCALE_SCORING as Record<string, unknown>).phq9 = {
+      score_decimals: 0, items_count: 2, computeScore, computeSubscaleScores: undefined,
+    }
+
+    render(<ScaleEntryScreen />)
+    await waitFor(() => expect(screen.getByTestId('answer_0')).toBeTruthy())
+    fireEvent.press(screen.getByTestId('answer_0'))
+    fireEvent.press(screen.getByTestId('answer_1'))
+    fireEvent.press(screen.getByTestId('answer_2'))
+    fireEvent.press(screen.getByText('submit'))
+
+    await waitFor(() => expect(database.saveScaleEntry).toHaveBeenCalled())
+    // Le calcul ne voit que les deux premières réponses…
+    expect(computeScore).toHaveBeenCalledWith([1, 1])
+    // …mais les trois sont persistées : l'item non coté remonte au praticien.
+    expect(database.saveScaleEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ answers: [1, 1, 1], total_score: 2 })
+    )
+  })
+})
+
+// ── Rétrocompatibilité : une passation antérieure à l'item 10 (#410) ────────
+
+describe('ScaleEntryScreen : passation enregistrée avant l\'ajout d\'un item', () => {
+  beforeEach(() => {
+    resetScaleMocks()
+    // On ouvre une saisie EXISTANTE : c'est le cas d'une passation enregistrée quand
+    // le questionnaire n'avait encore que deux items sur les trois d'aujourd'hui.
+    mockEntryId = 'old-1'
+    ;(moduleService.fetchModuleFields as jest.Mock).mockResolvedValue({
+      preview_kind: 'questionnaire',
+      fields: [...MOCK_FIELDS, THIRD_QUESTION],
+    })
+    ;(database.getScaleEntryById as jest.Mock).mockResolvedValue({
+      id: 'old-1', scale_id: 'phq9', answers: [2, 1], total_score: 3,
+      subscale_scores: null, created_at: '2026-01-15T10:00:00.000Z',
+    })
+    ;(scaleScoring.SCALE_SCORING as Record<string, unknown>).phq9 = {
+      score_decimals: 0, items_count: 2,
+      computeScore: jest.fn().mockReturnValue(3), computeSubscaleScores: undefined,
+    }
+  })
+
+  it('ne se croit pas complète alors qu\'il manque le dernier item', async () => {
+    // La saisie porte deux réponses pour trois items posés : les cases manquantes
+    // restent nulles, elles ne décalent rien et n'autorisent pas l'envoi.
+    render(<ScaleEntryScreen />)
+    await waitFor(() => expect(screen.getByText('save_changes')).toBeTruthy())
+    fireEvent.press(screen.getByText('save_changes'))
+    expect(database.saveScaleEntry).not.toHaveBeenCalled()
+  })
+
+  it('conserve l\'horodatage d\'origine quand on complète une ancienne passation', async () => {
+    render(<ScaleEntryScreen />)
+    await waitFor(() => expect(screen.getByTestId('answer_2')).toBeTruthy())
+    fireEvent.press(screen.getByTestId('answer_2'))
+    fireEvent.press(screen.getByText('save_changes'))
+
+    await waitFor(() => expect(database.saveScaleEntry).toHaveBeenCalled())
+    expect(database.saveScaleEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'old-1', created_at: '2026-01-15T10:00:00.000Z' })
+    )
   })
 })

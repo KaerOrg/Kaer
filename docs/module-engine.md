@@ -774,6 +774,36 @@ Toute valeur absente ou inconnue retombe sur `scrolling_list` : une configuratio
 erronée dégrade vers le comportement historique, elle ne casse pas la saisie. La
 lecture est isolée dans `readEntryMode` (`ScaleEntryScreen/entryConfig.ts`), testée à part.
 
+### Items POSÉS et items COTÉS : deux notions distinctes (#410)
+
+Un questionnaire peut **poser** plus d'items qu'il n'en **cote**. Le PHQ-9 pose dix
+questions et n'additionne que les neuf premières : l'item 10 mesure le retentissement
+fonctionnel, il fait partie du formulaire officiel, il est stocké, et il n'entre pas
+dans le total sur 27.
+
+| Notion | Source de vérité | Ce qu'elle pilote |
+|---|---|---|
+| Items **posés** | Les fields `scale_question` / `scale_slider_question` en base | Le nombre d'écrans, la progression, la complétion de la saisie |
+| Items **cotés** | `SCALE_SCORING.<id>.items_count` (code) | Le total enregistré dans `scale_entries.total_score` |
+
+Confondre les deux est un **bug silencieux** : juger la complétion sur les items cotés
+ferait croire la saisie finie à neuf réponses sur dix ; sommer le tableau entier
+gonflerait le total et casserait la comparabilité avec toutes les passations
+antérieures. `ScaleEntryScreen` tranche une fois pour toutes en ne transmettant au
+calcul que les `items_count` premières réponses, ce qui protège aussi toute échelle
+future.
+
+Un item posé hors score porte le `field_props` `scored = 'false'`. C'est aujourd'hui une
+**marque documentaire** : le nombre d'items cotés vient de `SCALE_SCORING`, pas de cette
+prop. Elle existe pour qu'on lise en base pourquoi un item ne compte pas, et pour servir
+de point d'accroche si le scoring devient un jour lui aussi piloté par la config.
+
+**Rétrocompatibilité.** Le tableau de réponses est toujours dimensionné sur les items
+posés. Une passation enregistrée avant l'arrivée d'un item en porte moins : les cases
+manquantes restent nulles, elles ne décalent aucune réponse, et la saisie ne se croit pas
+complète. Le score déjà enregistré, lui, ne bouge jamais : `readTotalScore` (web) lit
+`payload.total_score` et ne recalcule rien.
+
 La clé i18n `modules.<id>.full_title` porte le titre complet de l'échelle (ex. `"Patient Health Questionnaire-9"`). La clé `modules.<id>.label` (déjà utilisée par le moteur générique) porte le nom court.
 
 ### Comportement `no_toggle`

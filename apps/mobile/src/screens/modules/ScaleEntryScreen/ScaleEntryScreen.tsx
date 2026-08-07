@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { fetchModuleFields, type ContentField } from '@services/moduleService'
-import { getScaleEntryById, generateId, type ScaleEntry } from '../../../lib/database'
+import { getScaleEntryById, generateId } from '../../../lib/database'
 import { saveScaleEntry } from '@services/scaleEntryService'
 import { FieldRenderer } from '../../../components/features/ModuleRenderer/FieldRenderer'
 import { AppStackParamList } from '../../../navigation/AppStack'
@@ -50,30 +50,37 @@ export default function ScaleEntryScreen() {
   const loadFields = useCallback(async () => {
     setLoadState({ status: 'loading' })
     try {
-      const result = await fetchModuleFields(scale_id)
+      // Les deux chargements partent ensemble et sont appliqués d'un bloc. Les séparer
+      // en deux effets laissait une course : la saisie existante pouvait remplacer le
+      // tableau dimensionné sur les items posés, ou être écrasée par lui selon l'ordre
+      // d'arrivée. La saisie ne serait alors ni de la bonne taille ni pré-remplie.
+      const [result, existing] = await Promise.all([
+        fetchModuleFields(scale_id),
+        // Une saisie absente n'est pas une erreur : on ouvre alors un formulaire vide.
+        entry_id != null ? getScaleEntryById(entry_id).catch(() => null) : Promise.resolve(null),
+      ])
       if (!isMounted.current) return
       const questions = result.fields
         .filter(f => f.field_type === 'scale_question' || f.field_type === 'scale_slider_question')
         .sort((a, b) => a.sort_order - b.sort_order)
-      setAnswers(Array(questions.length).fill(null))
+      // Le tableau est TOUJOURS dimensionné sur les items posés en base. Une passation
+      // enregistrée avant l'arrivée d'un item en porte moins : les cases manquantes
+      // restent nulles, elles ne décalent aucune réponse et la saisie ne se croit pas
+      // complète (#410, rétrocompatibilité).
+      const next: (number | null)[] = Array(questions.length).fill(null)
+      existing?.answers.forEach((value: number | null, index: number) => {
+        if (index < next.length) next[index] = value ?? null
+      })
+      if (existing) editedCreatedAt.current = existing.created_at
+      setAnswers(next)
       setLoadState({ status: 'ready', fields: result.fields })
     } catch {
       if (!isMounted.current) return
       setLoadState({ status: 'error', message: t('common.error') })
     }
-  }, [scale_id, t])
+  }, [scale_id, entry_id, t])
 
-  // Load fields first, then pre-fill from existing entry if editing
   useEffect(() => { void loadFields() }, [loadFields])
-
-  useEffect(() => {
-    if (!isEditing || !entry_id) return
-    getScaleEntryById(entry_id).then((existing: ScaleEntry | null) => {
-      if (!existing || !isMounted.current) return
-      setAnswers(existing.answers.map(v => v ?? null))
-      editedCreatedAt.current = existing.created_at
-    }).catch(() => {/* silent — entry not found, keep empty form */})
-  }, [entry_id, isEditing])
 
   const handleAnswer = useCallback((index: number, value: number) => {
     setAnswers(prev => {
@@ -87,20 +94,33 @@ export default function ScaleEntryScreen() {
     setTextInputValues(prev => ({ ...prev, [fieldId]: value }))
   }, [])
 
+  // Deux notions distinctes, et les confondre est exactement le bug silencieux que
+  // #410 signale. Un questionnaire peut POSER plus d'items qu'il n'en COTE : le PHQ-9
+  // pose dix questions et n'additionne que les neuf premières, l'item 10 mesurant le
+  // retentissement fonctionnel hors score.
+  //   - `posedItems`  vient des fields en base, c'est ce que le patient doit remplir ;
+  //   - `scoredItems` vient de `SCALE_SCORING`, c'est ce qui entre dans le total.
+  // La complétion se juge sur les items POSÉS, sinon la saisie se croirait finie à
+  // neuf réponses sur dix.
   const answeredCount = answers.filter(a => a !== null).length
-  const totalItems = config?.items_count ?? answers.length
-  const allAnswered = answeredCount === totalItems
+  const posedItems = answers.length
+  const scoredItems = config?.items_count ?? answers.length
+  const allAnswered = answeredCount === posedItems && posedItems > 0
 
   const handleSubmit = useCallback(async () => {
     if (!allAnswered) {
       // Pluriel délégué à i18next (clés `_one` / `_other`) : la règle d'accord
       // n'est pas la même d'une langue à l'autre, elle n'a rien à faire ici.
-      showToast(t('common.unanswered_count', { count: totalItems - answeredCount }), 'info')
+      showToast(t('common.unanswered_count', { count: posedItems - answeredCount }), 'info')
       return
     }
     if (config == null) return
     setSaving(true)
-    const totalScore = config.computeScore(answers)
+    // Le calcul ne voit QUE les items cotés : un item posé au-delà gonflerait le total
+    // et casserait la comparabilité avec les passations antérieures. La troncature est
+    // faite ici, une fois, plutôt que dans chaque `computeScore`, pour qu'aucune
+    // échelle future ne puisse rater la distinction.
+    const totalScore = config.computeScore(answers.slice(0, scoredItems))
     let subscaleScores: Record<string, number | string> | null =
       config.computeSubscaleScores?.(answers) ?? null
 
@@ -139,7 +159,7 @@ export default function ScaleEntryScreen() {
     })
     if (isMounted.current) setSaving(false)
     navigation.goBack()
-  }, [allAnswered, answers, config, entry_id, navigation, scale_id, totalItems, answeredCount, loadState, textInputValues, showToast, t])
+  }, [allAnswered, answers, config, entry_id, navigation, scale_id, posedItems, scoredItems, answeredCount, loadState, textInputValues, showToast, t])
 
   const handleExit = useCallback(() => navigation.goBack(), [navigation])
 
@@ -200,7 +220,7 @@ export default function ScaleEntryScreen() {
       {/* Progression — sticky en haut, toujours visible pendant la saisie */}
       <View style={styles.progressBar}>
         <Text style={styles.progress}>
-          {t(`modules.${scale_id}.progress`, { answered: answeredCount, total: totalItems })}
+          {t(`modules.${scale_id}.progress`, { answered: answeredCount, total: posedItems })}
         </Text>
       </View>
 

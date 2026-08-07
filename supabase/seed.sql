@@ -172,12 +172,34 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   ('phq9.q7',     'phq9', 'scale_question',     'modules.phq9.q7',             106),
   ('phq9.q8',     'phq9', 'scale_question',     'modules.phq9.q8',             107),
   ('phq9.q9',     'phq9', 'scale_question',     'modules.phq9.q9',             108),
+  -- Item 10 : retentissement fonctionnel (#410). Il fait partie du formulaire
+  -- officiel, il est POSÉ comme les autres, et il n'entre PAS dans le score sur 27.
+  -- Il distingue quelqu'un à 14 qui fonctionne de quelqu'un à 14 qui ne sort plus,
+  -- et c'est la seule question qui parle du vécu plutôt que d'un symptôme coché.
+  ('phq9.q10',    'phq9', 'scale_question',     'modules.phq9.q10',            109),
   ('phq9.footer', 'phq9', 'footer_note',         'modules.phq9.footer',         999)
 on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 
+-- Les modalités de l'item 10 lui sont PROPRES (degrés de difficulté), et non les
+-- modalités de fréquence communes aux items 1 à 9. Elles sont donc portées en
+-- enfants du field : le moteur préfère les options d'un item à celles du
+-- questionnaire quand il en trouve.
+insert into public.module_content_fields (id, module_id, field_type, text_code, parent_field_id, sort_order) values
+  ('phq9.q10.opt0', 'phq9', 'scale_option', 'modules.phq9.q10_opt_0', 'phq9.q10', 1),
+  ('phq9.q10.opt1', 'phq9', 'scale_option', 'modules.phq9.q10_opt_1', 'phq9.q10', 2),
+  ('phq9.q10.opt2', 'phq9', 'scale_option', 'modules.phq9.q10_opt_2', 'phq9.q10', 3),
+  ('phq9.q10.opt3', 'phq9', 'scale_option', 'modules.phq9.q10_opt_3', 'phq9.q10', 4)
+on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, parent_field_id = excluded.parent_field_id, sort_order = excluded.sort_order;
+
 insert into public.field_props (field_id, prop_key, prop_value) values
   ('phq9.opt0', 'value', '0'), ('phq9.opt1', 'value', '1'),
-  ('phq9.opt2', 'value', '2'), ('phq9.opt3', 'value', '3')
+  ('phq9.opt2', 'value', '2'), ('phq9.opt3', 'value', '3'),
+  ('phq9.q10.opt0', 'value', '0'), ('phq9.q10.opt1', 'value', '1'),
+  ('phq9.q10.opt2', 'value', '2'), ('phq9.q10.opt3', 'value', '3'),
+  -- Marque l'item comme posé mais non coté. Le total du PHQ-9 reste la somme des
+  -- items 1 à 9, sur 0 à 27 : c'est ce qui garde comparables les passations
+  -- antérieures à l'arrivée de l'item 10.
+  ('phq9.q10', 'scored', 'false')
 on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- ── GAD-7 ─────────────────────────────────────────────────────────────────────
