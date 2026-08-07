@@ -69,7 +69,8 @@
     "notes_placeholder": "Context, remarks...",
     "step": "Step",
     "read_sheet": "Read the sheet",
-    "close": "Close"
+    "close": "Close",
+    "your_clinician": "your clinician"
   },
   "global": {
     "greeting": "Welcome",
@@ -193,7 +194,15 @@
   "modules": {
     "scale_history": {
       "evolution_label": "Score evolution",
-      "avg": "Avg: {{value}}"
+      "avg": "Avg: {{value}}",
+      "last_sent_label": "Last sent",
+      "entries_section": "My questionnaires",
+      "sent_status": "sent",
+      "score_details": "See the figures",
+      "score_note": "These totals do not make a diagnosis and are not read on their own. They are there to discuss with {{name}}.",
+      "start_btn": "Start",
+      "fill_now_btn": "Fill in now",
+      "start_hint": "You can stop and pick up where you left off."
     },
     "scale_entry": {
       "progress": "{{current}} / {{total}}",
@@ -1451,7 +1460,10 @@
       "score_max": "/ 27",
       "footer": "The score is shared with your clinician. Interpretation is their responsibility.",
       "progress": "{{answered}} / {{total}} answers",
-      "submit": "Send my answers"
+      "submit": "Send my answers",
+      "intro_length": "10 questions, about 4 minutes.",
+      "intro_window": "They cover the past 2 weeks.",
+      "intro_recipient": "Your answers go to {{name}}."
     },
     "bsl23": {
       "label": "BSL-23",

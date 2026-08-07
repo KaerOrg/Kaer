@@ -51,6 +51,13 @@ values
   -- items, punitif au-delà d'une vingtaine, d'où une config par échelle et non une
   -- règle globale. Absent = 'scrolling_list', le comportement historique.
   ('phq9.scale_meta', 'entry_mode',        'one_per_screen'),
+  -- Posture vis-à-vis du score (#408). `collapsed` : la liste ne montre que des dates,
+  -- les totaux vivent sous un dépli replié et la courbe disparaît. Le score reste
+  -- accessible, il n'est plus imposé. PROMDEP (Kendrick, HTA 2024, ECR en grappes,
+  -- 141 cabinets) ne trouve aucun bénéfice symptomatique au retour du score au patient,
+  -- et « 4 points de plus » tombe sur quelqu'un dont le biais interprétatif négatif
+  -- fait partie du tableau clinique. Absent = 'inline', le comportement historique.
+  ('phq9.scale_meta', 'score_display',     'collapsed'),
   ('phq9.scale_meta', 'reference_label',   'NICE NG222 — Dépression adulte : PHQ-9 recommandé pour le suivi régulier (2022). Également recommandé par l''APA Clinical Practice Guidelines.'),
   ('phq9.scale_meta', 'reference_url',     'https://www.nice.org.uk/guidance/ng222'),
 

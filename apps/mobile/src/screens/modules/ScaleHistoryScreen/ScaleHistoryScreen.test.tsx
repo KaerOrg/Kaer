@@ -7,6 +7,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react-nativ
 import ScaleHistoryScreen from './ScaleHistoryScreen'
 import * as database from '../../../lib/database'
 import * as draftService from '@services/scaleDraftService'
+import * as moduleService from '@services/moduleService'
 import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
 
 jest.setTimeout(15000)
@@ -54,6 +55,10 @@ jest.mock('@services/scaleDraftService', () => ({
   discardDraft: jest.fn().mockResolvedValue(undefined),
 }))
 
+jest.mock('@services/moduleService', () => ({
+  fetchModuleFields: jest.fn().mockResolvedValue({ preview_kind: 'questionnaire', fields: [] }),
+}))
+
 jest.mock('../../../lib/scaleScoring', () => ({
   SCALE_SCORING: {
     phq9: { score_decimals: 0, items_count: 9 },
@@ -75,6 +80,15 @@ const PHQ9_ENTRY: database.ScaleEntry = {
   created_at: '2026-04-20T10:00:00.000Z',
 }
 
+const PHQ9_ENTRY_2: database.ScaleEntry = {
+  id: 'phq9-2',
+  scale_id: 'phq9',
+  answers: Array(9).fill(2),
+  total_score: 18,
+  subscale_scores: null,
+  created_at: '2026-04-06T10:00:00.000Z',
+}
+
 const SNAPIV_ENTRY: database.ScaleEntry = {
   id: 'snap-1',
   scale_id: 'snap_iv',
@@ -90,6 +104,9 @@ describe('ScaleHistoryScreen', () => {
     mockScaleId = 'phq9'
     ;(database.getAllScaleEntries as jest.Mock).mockResolvedValue([])
     ;(draftService.loadDraft as jest.Mock).mockResolvedValue(null)
+    ;(moduleService.fetchModuleFields as jest.Mock).mockResolvedValue({
+      preview_kind: 'questionnaire', fields: [],
+    })
   })
 
   it('navigue vers ScaleEntry au clic sur le bouton nouveau', async () => {
@@ -188,5 +205,95 @@ describe('ScaleHistoryScreen : brouillon en cours', () => {
     render(<ScaleHistoryScreen />)
     await waitFor(() => expect(screen.getByText('new_btn')).toBeTruthy())
     expect(screen.queryByTestId('draft-resume-card')).toBeNull()
+  })
+})
+
+// ── Posture `collapsed` : le score n'est plus imposé (#408) ─────────────────
+//
+// Le comportement vient d'une CLÉ DE CONFIGURATION, jamais d'un test sur le module :
+// les deux describes ci-dessous ne diffèrent que par la valeur de `score_display`.
+
+const META = (scoreDisplay: string) => ({
+  id: 'phq9.scale_meta', module_id: 'phq9', section_id: null, parent_field_id: null,
+  field_type: 'scale_meta', text_code: null, sort_order: 0,
+  props: { score_display: scoreDisplay }, children: [],
+})
+
+describe('ScaleHistoryScreen : posture inline (défaut)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockScaleId = 'phq9'
+    ;(draftService.loadDraft as jest.Mock).mockResolvedValue(null)
+    ;(database.getAllScaleEntries as jest.Mock).mockResolvedValue([PHQ9_ENTRY, PHQ9_ENTRY_2])
+    ;(moduleService.fetchModuleFields as jest.Mock).mockResolvedValue({
+      preview_kind: 'questionnaire', fields: [META('inline')],
+    })
+  })
+
+  it('montre le total de chaque passation et la courbe', async () => {
+    render(<ScaleHistoryScreen />)
+    await waitFor(() => expect(screen.getAllByText(/score_max/).length).toBeGreaterThan(0))
+    expect(screen.getByText('evolution_label')).toBeTruthy()
+    expect(screen.queryByTestId('score-disclosure')).toBeNull()
+  })
+})
+
+describe('ScaleHistoryScreen : posture collapsed', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockScaleId = 'phq9'
+    ;(draftService.loadDraft as jest.Mock).mockResolvedValue(null)
+    ;(database.getAllScaleEntries as jest.Mock).mockResolvedValue([PHQ9_ENTRY, PHQ9_ENTRY_2])
+    ;(moduleService.fetchModuleFields as jest.Mock).mockResolvedValue({
+      preview_kind: 'questionnaire', fields: [META('collapsed')],
+    })
+  })
+
+  it('retire la courbe d\'évolution', async () => {
+    // Trois points ne font pas une tendance, et une courbe sans axe est un jugement.
+    render(<ScaleHistoryScreen />)
+    await waitFor(() => expect(screen.getByTestId('last-submission-banner')).toBeTruthy())
+    expect(screen.queryByText('evolution_label')).toBeNull()
+  })
+
+  it('n\'affiche aucun score tant que le patient ne le demande pas', async () => {
+    render(<ScaleHistoryScreen />)
+    await waitFor(() => expect(screen.getByTestId('score-disclosure')).toBeTruthy())
+    // Le dépli est fermé : ni total, ni borne haute à l'écran.
+    expect(screen.queryByText('score_max')).toBeNull()
+    expect(screen.queryByText('9')).toBeNull()
+  })
+
+  it('révèle les totaux sur action explicite, avec leur note de lecture', async () => {
+    render(<ScaleHistoryScreen />)
+    await waitFor(() => expect(screen.getByText('score_details')).toBeTruthy())
+    fireEvent.press(screen.getByText('score_details'))
+    expect(screen.getAllByText('score_max').length).toBe(2)
+    expect(screen.getByText('score_note')).toBeTruthy()
+  })
+
+  it('liste les passations par date, avec la mention d\'envoi', async () => {
+    render(<ScaleHistoryScreen />)
+    await waitFor(() => expect(screen.getByText('entries_section')).toBeTruthy())
+    expect(screen.getAllByText('sent_status').length).toBe(2)
+  })
+
+  it('se rend sans accusé de lecture tant que QW-2 n\'est pas livré', async () => {
+    // Pas de placeholder, pas de ligne fantôme : l'information absente ne s'affiche pas.
+    render(<ScaleHistoryScreen />)
+    const banner = await waitFor(() => screen.getByTestId('last-submission-banner'))
+    expect(banner).toBeTruthy()
+    expect(screen.getByText('last_sent_label')).toBeTruthy()
+  })
+
+  it('présente le module et propose de commencer quand rien n\'a été rempli', async () => {
+    ;(database.getAllScaleEntries as jest.Mock).mockResolvedValue([])
+    render(<ScaleHistoryScreen />)
+    await waitFor(() => expect(screen.getByTestId('module-intro-card')).toBeTruthy())
+    expect(screen.getByText('start_btn')).toBeTruthy()
+    expect(screen.getByText('start_hint')).toBeTruthy()
+    // Aucun bloc de comparaison sur une première passation.
+    expect(screen.queryByTestId('last-submission-banner')).toBeNull()
+    expect(screen.queryByTestId('score-disclosure')).toBeNull()
   })
 })
