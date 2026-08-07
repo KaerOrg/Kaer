@@ -34,4 +34,21 @@ describe('summaryReaders.readTotalScore', () => {
     expect(readTotalScore({})).toBeNull()
     expect(readTotalScore({ total_score: 'abc' })).toBeNull()
   })
+
+  it('ne ramasse pas un item posé hors score (#410)', () => {
+    // Le PHQ-9 pose dix questions et n'en additionne que neuf : l'item 10 mesure le
+    // retentissement fonctionnel et n'entre pas dans le total sur 27. Le lecteur ne
+    // recalcule rien à partir de `answers`, il lit le total tel qu'il a été enregistré
+    // par le mobile. Cette lecture ne peut donc pas gonfler avec un item posé de plus.
+    const payload = { total_score: 14, answers: [2, 2, 2, 2, 2, 2, 1, 1, 0, 3] }
+    expect(readTotalScore(payload)).toBe(14)
+  })
+
+  it('rend le même total pour une passation à 9 réponses et une à 10 (#410)', () => {
+    // Rétrocompatibilité : les passations enregistrées avant l'arrivée de l'item 10
+    // gardent exactement leur score, la série reste comparable.
+    const before = { total_score: 14, answers: [2, 2, 2, 2, 2, 2, 1, 1, 0] }
+    const after = { total_score: 14, answers: [2, 2, 2, 2, 2, 2, 1, 1, 0, 3] }
+    expect(readTotalScore(after)).toBe(readTotalScore(before))
+  })
 })
