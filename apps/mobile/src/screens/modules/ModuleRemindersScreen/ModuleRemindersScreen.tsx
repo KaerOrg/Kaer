@@ -16,7 +16,10 @@ import {
   type NotificationRoutine,
 } from '@services/notificationService'
 import { colors, spacing, fontSize } from '@theme'
+import { fetchScaleSchedule, type ScaleSchedule } from '@services/scaleScheduleService'
 import { ReminderCard } from './ReminderCard'
+import { ProposedCadenceCard } from './ProposedCadenceCard'
+import { formatCadence } from './formatCadence'
 import { toDraft, newDraft, toggleDay, type ReminderDraft } from './reminderDraft'
 import { buildSavePlan, isEmptyPlan } from './savePlan'
 
@@ -58,6 +61,9 @@ export default function ModuleRemindersScreen({ route, navigation }: Props) {
   const [loaded, setLoaded] = useState<NotificationRoutine[]>([])
   const [drafts, setDrafts] = useState<ReminderDraft[]>([])
   const [moduleRef, setModuleRef] = useState<{ id: string; practitioner_id: string } | null>(null)
+  // Cadence PROPOSÉE par le praticien (#413). `null` = aucune programmation, ce qui est
+  // un cas nominal : l'écran se rend alors sans le bloc, sans ligne fantôme.
+  const [schedule, setSchedule] = useState<ScaleSchedule | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [expandedKey, setExpandedKey] = useState<string | null>(null)
@@ -72,9 +78,15 @@ export default function ModuleRemindersScreen({ route, navigation }: Props) {
     async function load() {
       if (!patient) return
       const ref = await getPatientModuleRef(patient.id, moduleType)
-      const routines = ref ? await getRoutinesForModule(ref.id) : []
+      const [routines, proposed] = await Promise.all([
+        ref ? getRoutinesForModule(ref.id) : Promise.resolve([]),
+        // Lecture seule : la RLS n'accorde au patient qu'un `select` sur sa
+        // programmation. Ses ajustements vivent dans ses routines, juste en dessous.
+        fetchScaleSchedule(patient.id, moduleType).catch(() => null),
+      ])
       if (cancelled) return
       setModuleRef(ref)
+      setSchedule(proposed)
       setLoaded(routines)
       setDrafts(routines.map(toDraft))
       setExpandedKey(routines.length > 0 ? routines[0].id : null)
@@ -184,6 +196,16 @@ export default function ModuleRemindersScreen({ route, navigation }: Props) {
   return (
     <SafeAreaView style={styles.screen} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.content}>
+        {/* Ce que le praticien PROPOSE, au-dessus des réglages du patient. Absent
+            quand aucune programmation n'existe : pas de bloc vide (#413). */}
+        {schedule != null ? (
+          <ProposedCadenceCard
+            label={t('modules.scale_reminder.proposed_label')}
+            cadence={formatCadence(schedule, t)}
+            reassurance={t('modules.scale_reminder.proposed_reassurance')}
+          />
+        ) : null}
+
         <Text style={styles.title}>{t('notifications.reminders_question')}</Text>
 
         {drafts.length === 0 ? (

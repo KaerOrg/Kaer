@@ -1838,6 +1838,25 @@
       "plan_lead": "If things are not going well right now, this is not the right place.",
       "plan_action": "Open my safety plan",
       "open": "About this questionnaire"
+    },
+    "scale_reminder": {
+      "proposed_label": "Suggested rhythm",
+      "proposed_reassurance": "You can change this. Nobody will hold it against you.",
+      "frequency_weekly": "Every week",
+      "frequency_biweekly": "Every 2 weeks",
+      "frequency_monthly": "Every month",
+      "frequency_quarterly": "Every 3 months",
+      "frequency_on_demand": "Whenever you want",
+      "cadence_day_time": "{{frequency}}, on {{day}} at {{time}}",
+      "cadence_day": "{{frequency}}, on {{day}}",
+      "cadence_time": "{{frequency}}, at {{time}}",
+      "day_mon": "Monday",
+      "day_tue": "Tuesday",
+      "day_wed": "Wednesday",
+      "day_thu": "Thursday",
+      "day_fri": "Friday",
+      "day_sat": "Saturday",
+      "day_sun": "Sunday"
     }
   },
   "agenda": {
