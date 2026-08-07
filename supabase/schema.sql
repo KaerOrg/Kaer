@@ -1942,16 +1942,24 @@ create policy "patient_entries_practitioner_select"
 -- ── Accusé de lecture d'une passation (#419, QW-2) ───────────────────────────
 --
 -- Une date, et une seule : celle de la PREMIÈRE ouverture de la passation par un
--- praticien rattaché. Elle alimente la ligne « Vu par … le … » côté patient, qui est
--- le levier de rétention que la littérature soutient : le retour humain, pas la donnée.
+-- praticien rattaché. Elle est affichée AU PRATICIEN, dans le détail d'une passation.
+--
+-- ⚠️ **Elle n'est PAS montrée au patient**, et ne doit pas le redevenir. Le champ avait
+-- d'abord été conçu pour lui afficher « Vu par votre soignant le … » ; la décision a été
+-- renversée. Trois raisons, dans l'ordre de poids :
+--   1. Une ligne présente une fois puis absente ensuite fait lire quelque chose dans son
+--      ABSENCE. Le biais d'interprétation négatif fait partie du tableau clinique qu'on
+--      suit ici : c'est le mauvais matériau.
+--   2. Un horodatage automatique n'est pas un retour humain, c'en est l'apparence. Le
+--      retour qui compte est la consigne écrite par le soignant (`instruction`, #421).
+--   3. Le patient remplit le questionnaire parce qu'il lui a été prescrit, et l'échange
+--      a lieu en séance : la date ne lui apprend rien.
 --
 -- Trois décisions portées ici, et pas ailleurs :
---   • UN SEUL horodatage. Il n'est jamais réécrit aux consultations suivantes : le
---     patient n'a pas à savoir combien de fois son praticien a rouvert sa passation.
+--   • UN SEUL horodatage. Il n'est jamais réécrit aux consultations suivantes.
 --   • AUCUN état intermédiaire. Si la passation n'a pas été ouverte, la colonne est
---     nulle et le patient ne voit rien. Un « transmis » ou un « en attente de lecture »
---     laisserait entendre un engagement que personne n'a pris ; mieux vaut un silence
---     qu'une fausse promesse.
+--     nulle. Un « transmis » ou un « en attente de lecture » laisserait entendre un
+--     engagement que personne n'a pris.
 --   • Ce n'est PAS un accusé de réception automatique : il atteste d'une ouverture par
 --     un humain, jamais d'une réception par un serveur.
 --

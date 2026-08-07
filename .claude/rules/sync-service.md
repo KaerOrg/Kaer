@@ -126,7 +126,7 @@ Cette règle s'applique à **tous les services mobiles** qui gèrent des entrée
 
 ## Exceptions légitimes
 
-- Services qui **ne stockent pas de données patient** (ex. `psyeduService` — lecture Supabase uniquement, zéro écriture locale patient ; `scaleReceiptService` : accusés de lecture posés par le praticien, que la base interdit au patient d'écrire).
+- Services qui **ne stockent pas de données patient** (ex. `psyeduService` — lecture Supabase uniquement, zéro écriture locale patient).
 - Services d'infrastructure (`authService`, `appointmentService`) — leurs données passent directement par Supabase, sans SQLite local.
 - Modules sans stockage local du tout (ex. `grounding` — exercice sans persistance).
 
