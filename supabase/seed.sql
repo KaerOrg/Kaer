@@ -2212,6 +2212,10 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   ('crisis_plan.step_2.title', 'color', '#059669'),
   ('crisis_plan.step_2.title', 'icon', 'heart-pulse'),
   ('crisis_plan.step_2.title', 'step_number', '2'),
+  -- Sous-titres de la Séquence (P-7) : une ligne, uniquement là où deux étapes
+  -- voisines se confondent. L'étape 2 se fait seul, l'étape 3 sans se confier.
+  ('crisis_plan.step_2.title', 'subtitle_code', 'modules.crisis_plan.step_2_subtitle'),
+  ('crisis_plan.step_3.title', 'subtitle_code', 'modules.crisis_plan.step_3_subtitle'),
   ('crisis_plan.step_3.hint', 'color', '#4F46E5'),
   ('crisis_plan.step_3.hint', 'step_number', '3'),
   ('crisis_plan.step_3.title', 'bgColor', '#EEF2FF'),

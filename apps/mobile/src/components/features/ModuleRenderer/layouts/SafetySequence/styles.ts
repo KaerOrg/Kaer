@@ -12,7 +12,10 @@ export const styles = StyleSheet.create({
   // barre qui rognait le contenu en vue Consultation, cf. P-17).
   emergencyBar:  { paddingHorizontal: spacing.md, paddingTop: spacing.sm },
 
-  backRow:       { flexDirection: 'row', paddingHorizontal: spacing.sm, paddingTop: spacing.xs },
+  // Rangée de tête : retour à gauche, progression poussée à droite par sa marge auto.
+  // `space-between` ne conviendrait pas — sans retour, la progression se recalerait
+  // à gauche.
+  topRow:        { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.sm, paddingTop: spacing.xs },
 
   scroll:        { flex: 1 },
   scrollContent: { padding: spacing.md, paddingBottom: spacing.lg, gap: spacing.md },
@@ -21,13 +24,16 @@ export const styles = StyleSheet.create({
 
   stepLabel:     { fontSize: fontSize.xs, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 1 },
   stepTitle:     { fontFamily: fonts.serif, fontSize: fontSize.display, lineHeight: 38, color: colors.text, flexShrink: 1 },
+  // Sous-titre d'une ligne : il distingue deux étapes voisines, il ne les commente pas.
+  stepSubtitle:  { fontSize: fontSize.label, color: colors.textMuted, flexShrink: 1 },
 
   // Items du patient, tels qu'il les a écrits. Séparés par un filet, sans puce ni
   // pastille colorée : une seule couleur d'action sur tout le parcours (P-7).
   item:          { paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },
+  itemLast:      { paddingVertical: spacing.sm },
   itemText:      { fontSize: fontSize.h2, lineHeight: 30, color: colors.text, flexShrink: 1 },
 
   // Actions ancrées HORS du flux défilant.
   actions:       { paddingHorizontal: spacing.md, paddingTop: spacing.sm, paddingBottom: spacing.md, gap: spacing.xs, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.background, borderTopLeftRadius: radius.md, borderTopRightRadius: radius.md },
-  progress:      { fontSize: fontSize.sm, color: colors.textMuted, textAlign: 'center' },
+  progress:      { fontSize: fontSize.sm, color: colors.textMuted, marginLeft: 'auto' },
 })

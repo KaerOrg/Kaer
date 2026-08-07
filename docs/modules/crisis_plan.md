@@ -82,6 +82,29 @@ Trois contrôles distincts, à ne pas confondre :
 | Retour discret | Recule d'un écran. **Obligatoire** : un appui accidentel ne doit pas coûter une étape définitivement. C'est l'argument qui écarte le geste de balayage |
 | « Je m'arrête là » | **Sort** du parcours, sans confirmation, depuis n'importe quel écran |
 
+### Un écran d'étape, et rien d'autre
+
+Le contenu est volontairement pauvre : « ÉTAPE n » en petites capitales, le titre de
+l'étape en grand (serif, `fontSize.display`), le sous-titre s'il y en a un, puis les
+items **tels que le patient les a écrits**, séparés par un filet. Ni pastille d'icône
+colorée, ni badge de comptage, ni couleur d'étape, ni question d'élaboration : **une
+seule couleur d'action sur tout le parcours**. Les couleurs et icônes par étape
+existent bien en base (`bgColor`, `color`, `icon`), mais elles servent les vues
+Consultation et Édition, et un test statique vérifie que la Séquence ne les lit pas.
+
+Le retour et la progression « n / m » occupent une rangée discrète en tête, hors de la
+carte de contenu. Les deux boutons du bas sont **ancrés hors du flux défilant** : les
+items peuvent défiler à taille de police système maximale, l'action jamais. C'est
+pourquoi `safety_sequence` figure dans `SELF_MANAGED_LAYOUTS` de `ModuleContentScreen`
+— enveloppé dans le `ScrollView` de l'écran, son `flex: 1` s'effondrerait.
+
+**Sous-titre d'étape** (`field_props.subtitle_code` sur le field `step_title`) : une
+ligne, uniquement là où deux étapes voisines se confondent. L'étape 2 porte « sans
+contacter personne », l'étape 3 « sans avoir à dire que je vais mal ». Config-first :
+la prop porte une clé i18n, jamais le texte. Une étape sans sous-titre ne laisse aucun
+trou dans la mise en page. Le même mécanisme alimente l'aperçu web, pour que le
+praticien voie exactement l'écran de son patient.
+
 ### Logique pure partagée
 
 `packages/shared/src/services/safetySequence.ts` — consommée par le layout mobile

@@ -58,7 +58,14 @@ function planItem(id: string, sectionId: string, text: string) {
 const SECTIONS = new Map<string, ContentField[]>([
   ['step_1', [field({ id: 's1', section_id: 'step_1', text_code: 'modules.crisis_plan.step_1_title' })]],
   ['step_2', [field({ id: 's2', section_id: 'step_2', text_code: 'modules.crisis_plan.step_2_title' })]],
-  ['step_3', [field({ id: 's3', section_id: 'step_3', text_code: 'modules.crisis_plan.step_3_title' })]],
+  // Seule l'étape 3 porte un sous-titre ici : c'est ce qui permet de vérifier qu'il
+  // n'apparaît PAS sur les étapes qui n'en configurent pas.
+  ['step_3', [field({
+    id: 's3',
+    section_id: 'step_3',
+    text_code: 'modules.crisis_plan.step_3_title',
+    props: { subtitle_code: 'modules.crisis_plan.step_3_subtitle' },
+  })]],
 ])
 
 function renderLayout(onExit = jest.fn()) {
@@ -158,6 +165,42 @@ describe('SafetySequenceLayout — parcours', () => {
   })
 })
 
+describe('SafetySequenceLayout — contenu d\'un écran d\'étape (P-7)', () => {
+  it('affiche le sous-titre configuré sur l\'étape qui en porte un', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    fireEvent.press(screen.getByTestId('safety-sequence-advance'))
+    expect(screen.getByText('modules.crisis_plan.step_3_subtitle')).toBeTruthy()
+  })
+
+  it('n\'affiche aucun sous-titre sur une étape qui n\'en configure pas', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    expect(screen.getByText('modules.crisis_plan.step_1_title')).toBeTruthy()
+    expect(screen.queryByText('modules.crisis_plan.step_3_subtitle')).toBeNull()
+  })
+
+  it('ne numérote QUE les écrans d\'étape : ni l\'accueil, ni les ressources', async () => {
+    renderLayout()
+    await screen.findByTestId('safety-sequence-advance')
+    expect(screen.queryByText('1 / 2')).toBeNull()   // accueil
+    fireEvent.press(screen.getByTestId('safety-sequence-advance'))
+    expect(screen.getByText('1 / 2')).toBeTruthy()   // étape 1
+    fireEvent.press(screen.getByTestId('safety-sequence-advance'))
+    fireEvent.press(screen.getByTestId('safety-sequence-advance'))
+    expect(screen.queryByText('2 / 2')).toBeNull()   // ressources
+  })
+
+  it('rend le retour en icône seule, avec son libellé d\'accessibilité', async () => {
+    renderLayout()
+    fireEvent.press(await screen.findByTestId('safety-sequence-advance'))
+    const back = screen.getByTestId('safety-sequence-back')
+    expect(back.props.accessibilityLabel).toBe('common.back')
+    // Icône seule : aucun libellé visible ne concurrence l'action du bas.
+    expect(screen.queryByText('common.back')).toBeNull()
+  })
+})
+
 describe('SafetySequenceLayout — invariant MDR : zéro persistance', () => {
   it('ne déclenche AUCUNE écriture pendant une traversée complète', async () => {
     const onExit = renderLayout()
@@ -190,5 +233,23 @@ describe('SafetySequenceLayout — invariant MDR : zéro persistance', () => {
     const joined = imports.join('\n')
     expect(joined).not.toMatch(/savePlanItem|deletePlanItem|syncUpsert|syncDelete|RemoteSyncService/)
     expect(joined).not.toMatch(/lib\/database/)
+  })
+})
+
+describe('SafetySequenceLayout — garde-fous statiques du parcours (P-7)', () => {
+  const source = readFileSync(join(__dirname, 'SafetySequenceLayout.tsx'), 'utf-8')
+
+  // Le retour arrière est un bouton explicite, précisément PARCE QUE le balayage
+  // rendrait un appui accidentel irrattrapable. Un geste réintroduit ici casserait
+  // l'argument, sans qu'aucun test de parcours ne s'en aperçoive.
+  it('n\'utilise aucun geste de balayage', () => {
+    expect(source).not.toMatch(/PanResponder|Swipeable|react-native-gesture-handler|\bGesture\./)
+  })
+
+  // « Une seule couleur d'action sur tout le parcours » : les props de couleur et
+  // d'icône par étape existent en base (elles servent aux vues Consultation et
+  // Édition) et ne doivent jamais être lues ici.
+  it('ne lit aucune couleur ni icône d\'étape', () => {
+    expect(source).not.toMatch(/'bgColor'|'icon'|'step_number'/)
   })
 })

@@ -50,6 +50,17 @@ beforeEach(() => {
   mockGetPlanItems.mockResolvedValue([]) // plan vide par défaut
 })
 
+describe('ModuleContentScreen — layouts qui gèrent leur propre structure', () => {
+  it('rend safety_sequence hors du ScrollView de l\'écran, pour que ses actions restent ancrées', async () => {
+    mockFetchModuleFields.mockResolvedValue({ preview_kind: 'safety_sequence', fields: [] })
+    renderScreen({ moduleType: 'crisis_plan' })
+    await waitFor(() => expect(screen.getByText('renderer:safety_sequence')).toBeTruthy())
+    // La description n'est rendue que par la branche enveloppée dans un ScrollView :
+    // son absence prouve que le layout a bien été reconnu comme auto-géré.
+    expect(screen.queryByText('module.crisis_plan.description')).toBeNull()
+  })
+})
+
 describe('ModuleContentScreen — previewKindOverride', () => {
   it('force le layout de l\'override quand fourni (roue crantée → édition)', async () => {
     renderScreen({ moduleType: 'crisis_plan', previewKindOverride: 'editable_steps' })

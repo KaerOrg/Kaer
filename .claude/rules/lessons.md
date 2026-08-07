@@ -246,6 +246,36 @@ occurrence est-elle une surface/wrapper/rôle, ou un bouton d'action déguisé ?
 
 ---
 
+## Layout à actions ancrées : rejoindre `SELF_MANAGED_LAYOUTS`
+
+> Règle source : [coding-standards.md § React Native](coding-standards.md#react-native) (structure d'écran) + `docs/module-engine.md` § layouts.
+
+**refonte/safety-sequence-etapes-p7 (2026-08-03) — des boutons « ancrés » qui ne l'étaient pas.**
+Le layout `safety_sequence` construit sa structure lui-même : un `ScrollView` de contenu en
+`flex: 1`, et deux boutons **hors** de ce flux, ancrés en bas. Le socle (#301) l'avait écrit
+correctement, mais avait oublié d'ajouter `safety_sequence` à `SELF_MANAGED_LAYOUTS` de
+`ModuleContentScreen`. Le layout était donc rendu **à l'intérieur du `ScrollView` de l'écran** :
+```tsx
+// ModuleContentScreen — branche par défaut, celle qui s'appliquait par omission
+<ScrollView contentContainerStyle={styles.content}>
+  <FieldRenderer preview_kind={previewKind} … />   {/* flex: 1 dans un ScrollView = hauteur nulle */}
+</ScrollView>
+```
+Un `flex: 1` imbriqué dans un `contentContainer` ne se contraint à rien : le layout s'étire à
+la hauteur de son contenu, et les boutons « ancrés » descendent sous le pli dès que les items
+s'allongent. Le critère d'acceptation « les boutons restent visibles à Dynamic Type 200 % »
+était donc **faux**, sans que rien ne le signale : ni la compilation, ni les tests unitaires
+(qui rendent le layout isolément, hors de l'écran), ni un coup d'œil sur un plan à deux items.
+→ **Tout layout qui gère son propre défilement, ancre une barre d'action, ou occupe l'écran
+entier doit être inscrit dans `SELF_MANAGED_LAYOUTS`** au moment où il est câblé dans le
+`LayoutDispatcher`, pas plus tard. Réflexe review sur un nouveau `preview_kind` : si le layout
+contient un `ScrollView`, un `flex: 1` racine ou une barre d'action hors flux, vérifier la liste.
+Le test qui l'attrape est côté **écran**, pas côté layout : rendre l'écran et vérifier que la
+branche auto-gérée est prise (ex. absence de la description, rendue par la seule branche à
+`ScrollView` externe).
+
+---
+
 ## Design system : tokens (pas de valeur hardcodée)
 
 > Règle source : [coding-standards.md § `<button>` natif (web)](coding-standards.md#button-natif-web--quand-cest-interdit-quand-cest-légitime).
