@@ -171,7 +171,7 @@
       "mode_label": "Administration mode",
       "mode_home": "At home (auto)",
       "mode_in_session": "In session",
-      "frequency_label": "Frequency",
+      "frequency_label": "Proposed cadence",
       "freq_weekly": "Weekly",
       "freq_biweekly": "Every 2 weeks",
       "freq_monthly": "Monthly",
@@ -199,7 +199,13 @@
       "save": "Save schedule",
       "saved": "Schedule saved.",
       "save_error": "Failed to save the schedule.",
-      "action_soon": "Coming soon."
+      "action_soon": "Coming soon.",
+      "patient_can_adjust": "The patient can shift the time or pause their reminders from their phone. You will see it here.",
+      "patient_paused": "The patient has paused their reminders.",
+      "patient_time_override": "The patient moved their reminder to {{time}}.",
+      "instruction_label": "Note shown to the patient",
+      "instruction_placeholder": "Fill it in the day before each session. We will look at the change together.",
+      "instruction_hint": "Two sentences at most. It appears as written on their phone, signed with your name."
     },
     "programmed": {
       "col": "Scheduled",
@@ -292,6 +298,11 @@
       "asrs6": "6-item ADHD screening (Part A, ASRS v1.1). Total score 0 à 24. WHO-validated for rapid detection.",
       "snap_iv": "26-item behavioural ADHD screening (18 DSM-IV + 8 ODD criteria). Clinician-rated by parent or teacher.",
       "cssrs": "Structured assessment of suicidal ideation and behaviour. Columbia University / NIMH, 'Since last visit' version."
+    },
+    "dormant": {
+      "title": "Dormant, not assignable",
+      "reason_rights": "Usage rights being verified. They will reappear here once settled.",
+      "reason_beta_scope": "Outside the beta scope. Their rights are secured, they will come back."
     }
   },
   "patient_rights": {

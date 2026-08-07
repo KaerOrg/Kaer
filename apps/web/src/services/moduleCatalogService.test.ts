@@ -7,6 +7,7 @@ vi.mock('../lib/supabase', () => ({
 import { supabase } from '../lib/supabase'
 import {
   fetchComingSoonModuleIds,
+  fetchDormantModules,
   fetchHiddenModuleIds,
   fetchInviteCategories,
   fetchModuleCategories,
@@ -93,6 +94,45 @@ describe('moduleCatalogService : filtrage des modules masqués (#247)', () => {
     await fetchComingSoonModuleIds()
 
     expect(chain.eq).toHaveBeenCalledWith('is_hidden', false)
+  })
+})
+
+describe('moduleCatalogService.fetchDormantModules', () => {
+  it('renvoie les modules en veille AVEC leur motif (#421)', async () => {
+    const chain = makeChain({
+      data: [
+        { id: 'bsl23', hidden_reason: 'rights' },
+        { id: 'gad7', hidden_reason: 'beta_scope' },
+      ],
+      error: null,
+    })
+    vi.mocked(supabase.from).mockReturnValue(chain as never)
+
+    const result = await fetchDormantModules()
+
+    // La SEULE lecture qui les récupère volontairement. Partout ailleurs, le filtre
+    // `is_hidden = false` les écarte, et il ne doit pas être relâché.
+    expect(chain.eq).toHaveBeenCalledWith('is_hidden', true)
+    expect(result).toEqual([
+      { id: 'bsl23', reason: 'rights' },
+      { id: 'gad7', reason: 'beta_scope' },
+    ])
+  })
+
+  it('ignore une ligne masquée sans motif plutôt que d\'en inventer un', async () => {
+    // `modules_hidden_reason_ck` l'interdit déjà en base ; si une ligne y échappait,
+    // annoncer un motif au hasard au praticien serait pire que de ne rien dire.
+    vi.mocked(supabase.from).mockReturnValue(makeChain({
+      data: [{ id: 'bsl23', hidden_reason: null }, { id: 'nsi', hidden_reason: 'rights' }],
+      error: null,
+    }) as never)
+
+    expect(await fetchDormantModules()).toEqual([{ id: 'nsi', reason: 'rights' }])
+  })
+
+  it('renvoie une liste vide si data null', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: null }) as never)
+    expect(await fetchDormantModules()).toEqual([])
   })
 })
 

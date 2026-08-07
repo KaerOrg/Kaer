@@ -53,6 +53,25 @@
   color: var(--color-text-secondary);
 }
 
+/* Précisions sous un champ (#421) : ce que le patient peut ajuster, la borne de la
+   consigne. Discret, jamais une alerte. */
+.scale-prog__hint {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* Réglage que le patient a changé de son côté. Même habillage que les autres
+   précisions : c'est un constat, pas un reproche. */
+.scale-prog__adjustment {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
 .scale-prog__actions {
   display: flex;
   justify-content: space-between;

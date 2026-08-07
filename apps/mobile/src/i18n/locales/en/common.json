@@ -204,7 +204,8 @@
       "score_note": "These totals do not make a diagnosis and are not read on their own. They are there to discuss with {{name}}.",
       "start_btn": "Start",
       "fill_now_btn": "Fill in now",
-      "start_hint": "You can stop and pick up where you left off."
+      "start_hint": "You can stop and pick up where you left off.",
+      "practitioner_instruction": "{{name}}: “{{instruction}}”"
     },
     "scale_entry": {
       "progress": "{{current}} / {{total}}",

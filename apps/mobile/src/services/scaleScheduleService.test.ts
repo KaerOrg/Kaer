@@ -24,6 +24,7 @@ const ROW = {
   time_of_day: '19:00',
   ends_on: null,
   patient_reminder: true,
+  instruction: null,
   created_at: '2026-07-01T09:00:00.000Z',
 }
 
@@ -52,9 +53,22 @@ describe('scaleScheduleService.fetchScaleSchedule', () => {
     await expect(fetchScaleSchedule('pat-1', 'phq9')).resolves.toEqual({
       moduleId: 'phq9', mode: 'home', frequency: 'biweekly',
       dayOfWeek: 3, timeOfDay: '19:00', endsOn: null, patientReminder: true,
+      instruction: null,
       createdAtIso: '2026-07-01T09:00:00.000Z',
     })
     expect(mockFrom).toHaveBeenCalledWith('scale_schedules')
+  })
+
+  it('rend la consigne du praticien telle quelle (#421)', async () => {
+    chainSingle({ data: { ...ROW, instruction: 'Remplissez-le la veille de chaque séance.' }, error: null })
+    const schedule = await fetchScaleSchedule('pat-1', 'phq9')
+    expect(schedule?.instruction).toBe('Remplissez-le la veille de chaque séance.')
+  })
+
+  it('traite une consigne vide comme une absence de consigne', async () => {
+    // Sinon la carte de présentation afficherait une ligne vide, signée du soignant.
+    chainSingle({ data: { ...ROW, instruction: '   ' }, error: null })
+    expect((await fetchScaleSchedule('pat-1', 'phq9'))?.instruction).toBeNull()
   })
 
   it('rend null quand aucune cadence n\'est programmée', async () => {

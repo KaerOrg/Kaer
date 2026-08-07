@@ -575,6 +575,12 @@ export interface Database {
           time_of_day: string | null
           ends_on: string | null
           patient_reminder: boolean
+          /**
+           * Consigne affichée au patient (#421), 280 caractères au plus. `null` =
+           * aucune consigne, l'état nominal. Texte libre du praticien, restitué tel
+           * quel : l'app ne le compose jamais.
+           */
+          instruction: string | null
           created_at: string
           updated_at: string
         }
@@ -588,6 +594,7 @@ export interface Database {
           time_of_day?: string | null
           ends_on?: string | null
           patient_reminder?: boolean
+          instruction?: string | null
           updated_at?: string
         }
         Update: {
@@ -597,6 +604,7 @@ export interface Database {
           time_of_day?: string | null
           ends_on?: string | null
           patient_reminder?: boolean
+          instruction?: string | null
           updated_at?: string
         }
         Relationships: []

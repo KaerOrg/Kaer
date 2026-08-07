@@ -16,6 +16,7 @@ import { ScaleMetaBadges } from '../../../components/features/ScaleMetaBadges/Sc
 import { ScaleEvalBadge } from '../../../components/features/ScaleEvalBadge'
 import { ScheduleCell } from '../../../components/features/ScheduleCell'
 import { OverdueScalesReminder, type OverdueScaleItem } from '../../../components/features/OverdueScalesReminder'
+import { DormantScalesCard } from '../../../components/features/DormantScalesCard'
 import { CSSRSScreenPanel } from '../../../components/features/CSSRSScreenPanel'
 import { computeScheduleStatus } from '../../../lib/scaleScheduleStatus'
 import { moduleMatchesTagFilters } from '../../../lib/moduleFilter'
@@ -35,7 +36,7 @@ import {
   unlockModule as unlockStandardModule,
   revokeModule as revokeModuleService,
 } from '@services/moduleAssignmentService'
-import { scaleQueries, engagementQueries, scaleScheduleQueries } from '../../../hooks/queries'
+import { scaleQueries, engagementQueries, scaleScheduleQueries, catalogQueries } from '../../../hooks/queries'
 import { PatientViewProvider } from '../../../contexts/PatientViewContext'
 import { todayIso } from '@kaer/shared'
 
@@ -74,6 +75,7 @@ export function PatientScalesTab({
   const { data: scaleMeta = [] } = useQuery(scaleQueries.meta())
   const { data: lastActivityByModule } = useQuery(engagementQueries.lastActivity(patientId))
   const { data: schedules = [] } = useQuery(scaleScheduleQueries.byPatient(patientId))
+  const { data: dormantModules = [] } = useQuery(catalogQueries.dormantModules())
 
   // Ancre « aujourd'hui » stable sur la durée du rendu (colonne « Programmée », K-7).
   const today = useMemo(() => todayIso(), [])
@@ -94,6 +96,13 @@ export function PatientScalesTab({
   const { taxonomy, activeFilters, toggleTag, resetFilters } = useTagFilters()
 
   const scaleById = useMemo(() => new Map(scaleMeta.map(s => [s.id, s])), [scaleMeta])
+
+  // Zone « En veille » (#421) : uniquement les ÉCHELLES, cet onglet ne parle que
+  // d'elles. Un module « outil » en veille n'a rien à faire dans cette liste.
+  const dormantScales = useMemo(
+    () => dormantModules.filter(m => scaleById.has(m.id)),
+    [dormantModules, scaleById],
+  )
 
   // Bandeau « auto en retard » (K-7) : uniquement les échelles auto dont l'échéance de
   // calendrier est dépassée (jamais les hétéro « en séance »). Trié du plus en retard au
@@ -406,6 +415,7 @@ export function PatientScalesTab({
         moduleId={activeScale.module}
         onRunNow={notYet}
         unlockedAtLabel={unlockedAtLabel}
+        patientModuleId={mod?.id}
       />
     )
   }, [activeScale, activeModalContext, modules, patientId, practitionerId, notYet, i18n.language])
@@ -506,6 +516,10 @@ export function PatientScalesTab({
                 emptyState={<p className="wardrobe__empty">{t('modules.empty_filter')}</p>}
                 onRowClick={id => openScaleSheet(id as ModuleType)}
               />
+              {/* Ce que le praticien ne trouvera pas, et pourquoi (#421). Informatif :
+                  rien de cette liste n'est assignable, et le filtre `is_hidden` des
+                  lectures de catalogue n'est pas relâché pour autant. */}
+              <DormantScalesCard items={dormantScales} />
             </div>
           )
         ) : (

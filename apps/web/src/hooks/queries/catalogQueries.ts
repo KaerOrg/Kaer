@@ -1,5 +1,7 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query'
-import { fetchModuleCategories, fetchComingSoonModuleIds, fetchModuleTaxonomy } from '@services/moduleCatalogService'
+import {
+  fetchModuleCategories, fetchComingSoonModuleIds, fetchModuleTaxonomy, fetchDormantModules,
+} from '@services/moduleCatalogService'
 import { fetchEnabledModules, saveEnabledModules } from '@services/practitionerSettingsService'
 import { fetchModulePreviewKind } from '@services/moduleService'
 import { CONFIG_QUERY_OPTIONS } from './configCache'
@@ -30,6 +32,15 @@ export const catalogQueries = {
     queryOptions({
       queryKey: ['catalog', 'comingSoonIds'],
       queryFn: fetchComingSoonModuleIds,
+      ...CONFIG_QUERY_OPTIONS,
+    }),
+
+  // Modules en veille AVEC leur motif (#421) : la seule lecture qui les récupère
+  // volontairement, pour la zone « En veille » du praticien. Référentiel de config.
+  dormantModules: () =>
+    queryOptions({
+      queryKey: ['catalog', 'dormantModules'],
+      queryFn: fetchDormantModules,
       ...CONFIG_QUERY_OPTIONS,
     }),
 

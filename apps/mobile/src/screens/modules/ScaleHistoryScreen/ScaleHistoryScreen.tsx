@@ -22,7 +22,9 @@ import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
 import { useScaleScreen } from '../../../hooks/useScaleScreen'
 import { loadDraft, discardDraft, type ScaleDraft } from '@services/scaleDraftService'
 import { fetchScaleReadReceipts, type ReadReceiptsByEntry } from '@services/scaleReceiptService'
+import { fetchScaleSchedule } from '@services/scaleScheduleService'
 import { fetchModuleFields } from '@services/moduleService'
+import { useAuthStore } from '../../../store/authStore'
 import { formatDateTime, formatDateLong } from '../../../lib/dateUtils'
 import { EntryCard } from './EntryCard'
 import { DraftResumeCard } from './DraftResumeCard'
@@ -53,6 +55,7 @@ export default function ScaleHistoryScreen() {
   const { scale_id } = params
   const { config, accentColor, activeColor, isTeenMode, t, i18n } = useScaleScreen(scale_id)
   const { showConfirm } = useConfirmDialog()
+  const patientId = useAuthStore(s => s.patient?.id)
 
   const handleOpenAbout = useCallback(
     () => navigation.navigate('ScaleAbout', { scale_id }),
@@ -87,6 +90,8 @@ export default function ScaleHistoryScreen() {
   // Accusés de lecture (#419), lus sur le serveur : une passation absente de la map
   // n'a pas été ouverte, et rien ne s'affiche pour elle.
   const [receipts, setReceipts] = useState<ReadReceiptsByEntry>(() => new Map())
+  // Consigne écrite par le praticien (#421). `null` = il n'en a pas écrit.
+  const [instruction, setInstruction] = useState<string | null>(null)
 
   const chartPoints = useMemo(() => buildTotalScoreChartData(entries, range), [entries, range])
   const xLabels = useMemo(() => buildXLabels(range, i18n.language), [range, i18n.language])
@@ -120,8 +125,15 @@ export default function ScaleHistoryScreen() {
       fetchScaleReadReceipts(scale_id)
         .then(found => { if (active) setReceipts(found) })
         .catch(() => { if (active) setReceipts(new Map()) })
+      // Consigne du praticien (#421) : lecture seule de la programmation. Absente ou
+      // illisible, l'écran se rend sans elle plutôt qu'avec un texte inventé.
+      if (patientId != null) {
+        fetchScaleSchedule(patientId, scale_id)
+          .then(schedule => { if (active) setInstruction(schedule?.instruction ?? null) })
+          .catch(() => { if (active) setInstruction(null) })
+      }
       return () => { active = false }
-    }, [scale_id])
+    }, [scale_id, patientId])
   )
 
   const handleNew = useCallback(
@@ -176,14 +188,27 @@ export default function ScaleHistoryScreen() {
   // soignant » quand il n'y a pas de nom à insérer.
   const clinician = t('common.your_clinician')
 
-  const introLines = useMemo(
-    () => [
+  /**
+   * Lignes de la carte de présentation, tant qu'aucune passation n'a été envoyée.
+   *
+   * La consigne du praticien (#421) ferme la liste : c'est la seule ligne où quelqu'un
+   * parle au patient plutôt que l'app. Elle est restituée telle quelle, signée du
+   * soignant, et absente s'il n'en a pas écrit : pas de ligne fantôme.
+   */
+  const introLines = useMemo(() => {
+    const lines = [
       t(`modules.${scale_id}.intro_length`),
       t(`modules.${scale_id}.intro_window`),
       t(`modules.${scale_id}.intro_recipient`, { name: clinician }),
-    ],
-    [t, scale_id, clinician],
-  )
+    ]
+    if (instruction != null) {
+      lines.push(t('modules.scale_history.practitioner_instruction', {
+        name: clinician,
+        instruction,
+      }))
+    }
+    return lines
+  }, [t, scale_id, clinician, instruction])
 
   /**
    * Ligne « Vu par … le … » du dernier envoi (#419), ou `null` si personne ne l'a
