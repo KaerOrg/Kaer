@@ -1818,6 +1818,14 @@
     "cssrs": {
       "label": "C-SSRS, Suicide Risk",
       "description": ""
+    },
+    "scale_submitted": {
+      "title": "It's sent.",
+      "seen_by": "It will be read by {{name}}.",
+      "resources_hint": "If things are not going well, now or later:",
+      "plan_title": "My safety plan",
+      "plan_subtitle": "What you prepared together",
+      "done": "Done"
     }
   },
   "agenda": {

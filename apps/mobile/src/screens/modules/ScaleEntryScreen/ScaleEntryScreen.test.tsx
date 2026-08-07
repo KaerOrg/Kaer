@@ -13,6 +13,7 @@ import * as draftService from '@services/scaleDraftService'
 jest.setTimeout(15000)
 
 const mockGoBack = jest.fn()
+const mockReplace = jest.fn()
 
 // Paramètre de route mutable : certains tests ouvrent une saisie EXISTANTE (édition),
 // ce qu'un `params` figé au niveau module ne permet pas d'exprimer.
@@ -20,7 +21,7 @@ let mockEntryId: string | undefined
 let mockResume: boolean | undefined
 
 jest.mock('@react-navigation/native', () => ({
-  useNavigation: () => ({ goBack: mockGoBack, setOptions: jest.fn() }),
+  useNavigation: () => ({ goBack: mockGoBack, replace: mockReplace, setOptions: jest.fn() }),
   useRoute: () => ({ params: { scale_id: 'phq9', entry_id: mockEntryId, resume: mockResume } }),
 }))
 
@@ -170,14 +171,17 @@ describe('ScaleEntryScreen', () => {
     expect(database.saveScaleEntry).not.toHaveBeenCalled()
   })
 
-  it('sauvegarde et revient en arrière après réponses complètes', async () => {
+  it('sauvegarde puis ouvre l\'écran d\'après-envoi', async () => {
+    // #411 : l'envoi ne referme plus l'écran, il débouche sur les ressources d'aide.
+    // `replace` et non `navigate` : le retour ne doit pas ramener sur un questionnaire
+    // déjà envoyé.
     render(<ScaleEntryScreen />)
     await waitFor(() => expect(screen.getByTestId('answer_0')).toBeTruthy())
     fireEvent.press(screen.getByTestId('answer_0'))
     fireEvent.press(screen.getByTestId('answer_1'))
-    // After all answers, the button is enabled — press triggers save + navigation
     fireEvent.press(screen.getByText('submit'))
-    await waitFor(() => expect(mockGoBack).toHaveBeenCalled())
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('ScaleSubmitted', { scale_id: 'phq9' }))
+    expect(mockGoBack).not.toHaveBeenCalled()
     expect(database.saveScaleEntry).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'test-id',
