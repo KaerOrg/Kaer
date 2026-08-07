@@ -102,6 +102,30 @@ bibliothèque** (i18next, navigation, date), comparer sa logique à la **version
 installée** dans `package.json`, pas à la mémoire qu'on en a. Et lui exiger un test
 direct dès qu'il contient un `if`.
 
+**Epic PHQ-9, lots Q-5 à Q-8 (2026-08-07) : le mock PARTIEL d'un module de tokens, qui
+casse à chaque token ajouté.**
+Quatre suites mockaient `@theme` en recopiant à la main un sous-ensemble des tokens :
+```ts
+jest.mock('@theme', () => ({
+  colors: { primary: '#000', /* … */ }, spacing: { xs: 4, /* … */ },
+  radius: { sm: 6, md: 8 }, typography: {},   // ← `fontSize` absent
+}))
+```
+Tant qu'aucun composant rendu par ces suites ne lisait `fontSize`, personne ne le
+voyait. Le jour où `ui/Radio` a gagné une variante qui utilise `fontSize.label`, les
+quatre suites sont tombées d'un coup sur `Cannot read properties of undefined`, dans des
+écrans **sans rapport** avec le changement (`MoodTrackerScreen`,
+`MedicationSideEffectsHistoryScreen`…). J'ai commencé par recopier le token manquant
+dans chaque mock : c'est traiter le symptôme, et la panne est revenue au ticket suivant.
+→ **Un module de tokens ne se mocke pas.** Le vrai `@theme` se résout parfaitement sous
+jest (les tests de `ui/` l'utilisent directement) : ces mocks n'apportaient rien et
+garantissaient une casse à chaque enrichissement du thème. Ils ont été **supprimés**, et
+les suites passent inchangées. Réflexe : devant un `jest.mock` qui **énumère à la main**
+le contenu d'un module de constantes (thème, tokens, catalogue d'icônes), se demander
+d'abord pourquoi il existe. S'il n'y a pas de raison (lenteur, effet de bord, accès
+réseau), le supprimer plutôt que le compléter. Un mock partiel d'un module qui grandit
+est une bombe à retardement dont la mèche est la longueur de la liste.
+
 ---
 
 ## Architecture `ui/` vs `features/`

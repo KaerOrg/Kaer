@@ -8,6 +8,7 @@ import ScaleEntryScreen from './ScaleEntryScreen'
 import * as database from '../../../lib/database'
 import * as moduleService from '@services/moduleService'
 import * as scaleScoring from '../../../lib/scaleScoring'
+import * as draftService from '@services/scaleDraftService'
 
 jest.setTimeout(15000)
 
@@ -16,10 +17,11 @@ const mockGoBack = jest.fn()
 // Paramètre de route mutable : certains tests ouvrent une saisie EXISTANTE (édition),
 // ce qu'un `params` figé au niveau module ne permet pas d'exprimer.
 let mockEntryId: string | undefined
+let mockResume: boolean | undefined
 
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ goBack: mockGoBack, setOptions: jest.fn() }),
-  useRoute: () => ({ params: { scale_id: 'phq9', entry_id: mockEntryId } }),
+  useRoute: () => ({ params: { scale_id: 'phq9', entry_id: mockEntryId, resume: mockResume } }),
 }))
 
 jest.mock('react-native-safe-area-context', () => ({
@@ -47,18 +49,6 @@ jest.mock('../../../store/authStore', () => ({
 
 jest.mock('@services/notificationService', () => ({
   logScaleSubmission: jest.fn(),
-}))
-
-jest.mock('@theme', () => ({
-  colors: {
-    primary: '#000', primaryLight: '#eef', danger: '#f00', neutral: '#f3f4f6',
-    background: '#fff', border: '#ccc', white: '#fff', text: '#111', textMuted: '#999',
-    card: '#fff',
-  },
-  spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
-  radius: { sm: 6, md: 8, lg: 16, full: 999 },
-  fontSize: { xxs: 11, xs: 12, sm: 13, caption: 14, label: 15, body: 16, h3: 18, h2: 22, h1: 28, display: 32 },
-  typography: {},
 }))
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
@@ -90,6 +80,14 @@ jest.mock('../../../components/features/ModuleRenderer/FieldRenderer', () => {
 
 jest.mock('@services/moduleService', () => ({
   fetchModuleFields: jest.fn(),
+}))
+
+// Le brouillon (#412) est mocké au niveau du SERVICE, pas de la base : l'écran dépend
+// du service, c'est cette frontière-là qu'un test d'écran doit tenir.
+jest.mock('@services/scaleDraftService', () => ({
+  loadDraft: jest.fn().mockResolvedValue(null),
+  saveDraft: jest.fn().mockResolvedValue(undefined),
+  discardDraft: jest.fn().mockResolvedValue(undefined),
 }))
 
 jest.mock('../../../lib/database', () => ({
@@ -132,7 +130,11 @@ const MOCK_FIELDS: moduleService.ContentField[] = [
 function resetScaleMocks(): void {
   jest.clearAllMocks()
   mockEntryId = undefined
+  mockResume = undefined
   ;(database.getScaleEntryById as jest.Mock).mockResolvedValue(null)
+  ;(draftService.loadDraft as jest.Mock).mockResolvedValue(null)
+  ;(draftService.saveDraft as jest.Mock).mockResolvedValue(undefined)
+  ;(draftService.discardDraft as jest.Mock).mockResolvedValue(undefined)
   ;(scaleScoring.SCALE_SCORING as Record<string, unknown>).phq9 = {
     score_decimals: 0, items_count: 2,
     computeScore: jest.fn().mockReturnValue(2), computeSubscaleScores: undefined,
@@ -242,6 +244,81 @@ describe('ScaleEntryScreen : mode de saisie configuré', () => {
     await waitFor(() => expect(screen.getByText('q1')).toBeTruthy())
     expect(screen.queryByText('q2')).toBeNull()
     expect(screen.getByTestId('stepper-progress')).toBeTruthy()
+  })
+})
+
+// ── Brouillon local d'une saisie en cours (#412) ────────────────────────────
+
+describe('ScaleEntryScreen : brouillon', () => {
+  beforeEach(() => {
+    resetScaleMocks()
+    ;(moduleService.fetchModuleFields as jest.Mock).mockResolvedValue({
+      preview_kind: 'questionnaire',
+      fields: MOCK_FIELDS,
+    })
+  })
+
+  it('enregistre la progression à chaque réponse', async () => {
+    // À chaque appui : c'est peut-être le dernier avant un appel entrant.
+    render(<ScaleEntryScreen />)
+    await waitFor(() => expect(screen.getByTestId('answer_0')).toBeTruthy())
+    fireEvent.press(screen.getByTestId('answer_0'))
+    expect(draftService.saveDraft).toHaveBeenCalledWith('phq9', [1, null], 0)
+    fireEvent.press(screen.getByTestId('answer_1'))
+    expect(draftService.saveDraft).toHaveBeenCalledWith('phq9', [1, 1], 1)
+  })
+
+  it('reprend les réponses du brouillon quand la route le demande', async () => {
+    mockResume = true
+    ;(draftService.loadDraft as jest.Mock).mockResolvedValue({
+      scaleId: 'phq9', answers: [2, null], position: 0, startedAt: '2026-08-01T21:40:00.000Z',
+    })
+    render(<ScaleEntryScreen />)
+    // Une seule réponse restaurée sur deux items : l'envoi reste fermé.
+    await waitFor(() => expect(screen.getByText('submit')).toBeTruthy())
+    fireEvent.press(screen.getByText('submit'))
+    expect(database.saveScaleEntry).not.toHaveBeenCalled()
+    fireEvent.press(screen.getByTestId('answer_1'))
+    fireEvent.press(screen.getByText('submit'))
+    await waitFor(() => expect(database.saveScaleEntry).toHaveBeenCalled())
+    expect(database.saveScaleEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ answers: [2, 1] })
+    )
+  })
+
+  it('ignore le brouillon quand la route ne demande pas de reprise', async () => {
+    // C'est ce que fait « Recommencer » : on repart d'un questionnaire vierge.
+    ;(draftService.loadDraft as jest.Mock).mockResolvedValue({
+      scaleId: 'phq9', answers: [2, 3], position: 1, startedAt: '2026-08-01T21:40:00.000Z',
+    })
+    render(<ScaleEntryScreen />)
+    await waitFor(() => expect(screen.getByText('submit')).toBeTruthy())
+    expect(draftService.loadDraft).not.toHaveBeenCalled()
+    fireEvent.press(screen.getByText('submit'))
+    expect(database.saveScaleEntry).not.toHaveBeenCalled()
+  })
+
+  it('purge le brouillon une fois la passation enregistrée', async () => {
+    render(<ScaleEntryScreen />)
+    await waitFor(() => expect(screen.getByTestId('answer_0')).toBeTruthy())
+    fireEvent.press(screen.getByTestId('answer_0'))
+    fireEvent.press(screen.getByTestId('answer_1'))
+    fireEvent.press(screen.getByText('submit'))
+    await waitFor(() => expect(draftService.discardDraft).toHaveBeenCalledWith('phq9'))
+  })
+
+  it('ne brouillonne pas la modification d\'une passation déjà envoyée', async () => {
+    // Elle est en base : il n'y a rien à garder sur le téléphone.
+    mockEntryId = 'entry-1'
+    ;(database.getScaleEntryById as jest.Mock).mockResolvedValue({
+      id: 'entry-1', scale_id: 'phq9', answers: [1, 1], total_score: 2,
+      subscale_scores: null, created_at: '2026-01-15T10:00:00.000Z',
+    })
+    render(<ScaleEntryScreen />)
+    await waitFor(() => expect(screen.getByTestId('answer_0')).toBeTruthy())
+    fireEvent.press(screen.getByTestId('answer_0'))
+    expect(draftService.saveDraft).not.toHaveBeenCalled()
+    expect(draftService.loadDraft).not.toHaveBeenCalled()
   })
 })
 

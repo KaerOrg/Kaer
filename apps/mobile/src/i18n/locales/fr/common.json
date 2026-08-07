@@ -212,7 +212,11 @@
       "progress": "{{current}} / {{total}}",
       "review_title": "Avant d'envoyer",
       "review_hint": "Touchez une ligne pour la modifier.",
-      "unanswered": "Sans réponse"
+      "unanswered": "Sans réponse",
+      "draft_title": "Vous en étiez à la question {{question}}",
+      "draft_subtitle": "Commencé le {{date}}. Vos réponses sont gardées sur ce téléphone.",
+      "draft_resume": "Reprendre",
+      "draft_restart": "Recommencer"
     },
     "crisis_plan": {
       "sequence_home_title": "Je suis là avec vous.",

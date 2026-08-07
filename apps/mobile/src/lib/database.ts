@@ -67,6 +67,7 @@ export async function initDatabase(): Promise<void> {
     () => createASRS6Table(database),
     () => createASRS18Table(database),
     () => createScaleEntriesTable(database),
+    () => createScaleDraftsTable(database),
     () => createMoodMarkersTable(database),
     () => createCustomDimensionsTable(database),
     () => createPlanItemsTable(database),
@@ -1618,6 +1619,84 @@ export async function saveCrisisAnchor(anchor: Omit<CrisisAnchor, 'created_at'>)
 export async function deleteCrisisAnchor(id: string): Promise<void> {
   const database = getDb()
   await database.runAsync('DELETE FROM crisis_anchors WHERE id = ?', [id])
+}
+
+// ─── scale_drafts : saisie d'échelle en cours, STRICTEMENT locale (#412) ─────
+//
+// Un brouillon n'est pas une passation : il ne quitte jamais le téléphone. Voir la
+// JSDoc de `scaleDraftService` pour la justification complète (exception assumée à
+// la règle sync-service).
+//
+// Un brouillon par échelle, d'où `scale_id` en clé primaire : reprendre le PHQ-9 ne
+// doit pas écraser un GAD-7 commencé la veille.
+
+export async function createScaleDraftsTable(database: SQLite.SQLiteDatabase): Promise<void> {
+  await database.execAsync(`
+    CREATE TABLE IF NOT EXISTS scale_drafts (
+      scale_id   TEXT PRIMARY KEY,
+      answers    TEXT NOT NULL,
+      position   INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
+  `)
+}
+
+export interface ScaleDraftRow {
+  scale_id: string
+  /** Réponses sérialisées : tableau JSON de `number | null`, une case par item posé. */
+  answers: string
+  /** Rang de l'item où la saisie s'est arrêtée, à partir de 0. */
+  position: number
+  created_at: string
+  updated_at: string
+}
+
+export async function getScaleDraft(scaleId: string): Promise<ScaleDraftRow | null> {
+  const database = getDb()
+  await createScaleDraftsTable(database).catch(() => {})
+  const row = await database.getFirstAsync<ScaleDraftRow>(
+    'SELECT * FROM scale_drafts WHERE scale_id = ?',
+    [scaleId]
+  )
+  return row ?? null
+}
+
+export async function saveScaleDraft(
+  scaleId: string,
+  answers: string,
+  position: number
+): Promise<void> {
+  const database = getDb()
+  await createScaleDraftsTable(database).catch(() => {})
+  // `created_at` n'est posé qu'à la première écriture : c'est lui qui date le début
+  // de la saisie (« Commencé hier à 21:40 ») et qui fait vieillir le brouillon.
+  await database.runAsync(
+    `INSERT INTO scale_drafts (scale_id, answers, position)
+     VALUES (?, ?, ?)
+     ON CONFLICT(scale_id) DO UPDATE SET
+       answers = excluded.answers,
+       position = excluded.position,
+       updated_at = CURRENT_TIMESTAMP`,
+    [scaleId, answers, position]
+  )
+}
+
+export async function deleteScaleDraft(scaleId: string): Promise<void> {
+  const database = getDb()
+  await createScaleDraftsTable(database).catch(() => {})
+  await database.runAsync('DELETE FROM scale_drafts WHERE scale_id = ?', [scaleId])
+}
+
+/** Supprime les brouillons commencés avant `cutoffIso`. Retourne le nombre effacé. */
+export async function deleteStaleScaleDrafts(cutoffIso: string): Promise<number> {
+  const database = getDb()
+  await createScaleDraftsTable(database).catch(() => {})
+  const result = await database.runAsync(
+    'DELETE FROM scale_drafts WHERE created_at < ?',
+    [cutoffIso]
+  )
+  return result.changes ?? 0
 }
 
 // ─── scale_entries — table générique pour tous les questionnaires cliniques ───
