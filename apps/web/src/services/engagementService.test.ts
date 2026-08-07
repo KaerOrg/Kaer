@@ -19,6 +19,7 @@ import {
   fetchChronoEntries,
   fetchFormEntries,
   fetchActivityEntries,
+  fetchScalePassations,
 } from './engagementService'
 
 // Chaîne Supabase mockée : chaque méthode renvoie la chaîne, l'await résout `result`.
@@ -70,6 +71,48 @@ describe('engagementService.fetchScaleEvolution', () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
 
     expect(await fetchScaleEvolution('p1', 'phq9')).toEqual([])
+  })
+})
+
+describe('engagementService.fetchScalePassations', () => {
+  it('mappe chaque passation avec ses réponses et son total (happy path)', async () => {
+    const rows = [
+      { local_id: 'a', client_created_at: '2026-07-14T09:00:00Z', payload: { answers: [1, 2, 3], total_score: 6 } },
+      { local_id: 'b', client_created_at: '2026-07-28T21:12:00Z', payload: { answers: [0, 0, 0], total_score: 0 } },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    const result = await fetchScalePassations('p1', 'phq9')
+
+    expect(supabase.from).toHaveBeenCalledWith('patient_entries')
+    expect(result).toEqual([
+      { id: 'a', date: '2026-07-14T09:00:00Z', answers: [1, 2, 3], totalScore: 6 },
+      { id: 'b', date: '2026-07-28T21:12:00Z', answers: [0, 0, 0], totalScore: 0 },
+    ])
+  })
+
+  it('garde `null` pour une réponse absente, sans la confondre avec zéro', async () => {
+    const rows = [
+      { local_id: 'a', client_created_at: '2026-07-14T09:00:00Z', payload: { answers: [1, null, 'x'], total_score: 1 } },
+    ]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    expect((await fetchScalePassations('p1', 'phq9'))[0].answers).toEqual([1, null, null])
+  })
+
+  it('tolère un payload sans réponses ni total plutôt que de planter', async () => {
+    const rows = [{ local_id: 'a', client_created_at: '2026-07-14T09:00:00Z', payload: {} }]
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
+
+    expect(await fetchScalePassations('p1', 'phq9')).toEqual([
+      { id: 'a', date: '2026-07-14T09:00:00Z', answers: [], totalScore: null },
+    ])
+  })
+
+  it('retourne [] en cas d’erreur Supabase', async () => {
+    vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
+
+    expect(await fetchScalePassations('p1', 'phq9')).toEqual([])
   })
 })
 

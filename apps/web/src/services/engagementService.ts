@@ -127,6 +127,62 @@ export async function fetchScaleEvolution(
   return points
 }
 
+// ── Détail des passations d'une échelle (#418, QW-1) ─────────────────────────
+
+/**
+ * Une passation, telle qu'elle est arrivée du mobile.
+ *
+ * `answers` est indexé sur l'ordre des items POSÉS au moment de la saisie : une
+ * passation antérieure à l'arrivée d'un item en porte simplement moins, et ce trou
+ * ne se comble pas. C'est ce qui garde lisibles les passations d'avant #410, et ce
+ * qui interdit de dimensionner le tableau sur la configuration d'aujourd'hui.
+ *
+ * `totalScore` est le total tel que le mobile l'a calculé, jamais recalculé ici :
+ * deux calculs divergeraient au premier changement de configuration, et le praticien
+ * verrait un chiffre que le patient n'a jamais vu.
+ */
+export type ScalePassation = {
+  readonly id: string
+  /** Instant de la passation (horodatage d'événement, ISO UTC). */
+  readonly date: string
+  readonly answers: readonly (number | null)[]
+  readonly totalScore: number | null
+}
+
+/** Une réponse absente reste absente : `null` porte « non répondu », pas zéro. */
+function toAnswers(raw: unknown): (number | null)[] {
+  if (!Array.isArray(raw)) return []
+  return raw.map(value => toNumber(value) ?? null)
+}
+
+/**
+ * Passations d'une échelle pour un patient, de la plus ancienne à la plus récente.
+ *
+ * Les libellés ne sont PAS lus ici : ils vivent dans `module_content_fields` et se
+ * résolvent par leur clé i18n au rendu. Recopier un item dans un composant web le
+ * ferait diverger de l'écran patient à la première correction de traduction.
+ */
+export async function fetchScalePassations(
+  patientId: string,
+  moduleType: string,
+): Promise<ScalePassation[]> {
+  const { data, error } = await supabase
+    .from('patient_entries')
+    .select('local_id, client_created_at, payload')
+    .eq('patient_id', patientId)
+    .eq('entry_kind', 'scale_entry')
+    .eq('module_id', moduleType)
+    .order('client_created_at')
+
+  if (error || !data) return []
+  return data.map(row => ({
+    id: row.local_id,
+    date: row.client_created_at,
+    answers: toAnswers(row.payload.answers),
+    totalScore: toNumber(row.payload.total_score) ?? null,
+  }))
+}
+
 // ── Évolution de l'humeur (6 dimensions dans subscale_scores) ────────────────
 
 export async function fetchMoodEvolution(patientId: string): Promise<MoodPoint[]> {

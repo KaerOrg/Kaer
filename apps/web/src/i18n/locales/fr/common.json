@@ -228,6 +228,24 @@
       "last_none": "aucune",
       "preview": "Aperçu de l'échelle"
     },
+    "entry_detail": {
+      "list_title": "Passations",
+      "header_date": "Passation du {{date}}",
+      "empty": "Aucune passation enregistrée.",
+      "total_label": "Total {{scale}}",
+      "total_aria": "{{score}} sur {{max}}",
+      "previous": "Précédente : {{score}} le {{date}}",
+      "min_change_note": "Le plus petit écart interprétable individuellement est de {{points}} points.",
+      "unscored_title": "Item {{position}}, hors score",
+      "unscored_caption": "Cet item est posé, il n'entre pas dans le total.",
+      "follow_up_title": "Suivi",
+      "patient_sees": "Le patient voit cette passation dans son application.",
+      "next_due": "Prochaine échéance : {{date}}",
+      "answers_title_one": "La réponse",
+      "answers_title_other": "Les {{count}} réponses",
+      "instrument_note": "Note portée par le questionnaire",
+      "not_scored_aria": "Hors score"
+    },
     "validated_prefix": "Validé",
     "age": {
       "perinatal": "Périnatal",
@@ -1416,7 +1434,8 @@
       "score_max": "/ 27",
       "footer": "Le score est transmis à votre soignant. Son interprétation lui appartient.",
       "progress": "{answered} / {total} réponses",
-      "submit": "Envoyer mes réponses"
+      "submit": "Envoyer mes réponses",
+      "practitioner_note_item9": "Si le patient répond oui à la question 9, une évaluation du risque suicidaire ou de l'auto-agressivité par un professionnel qualifié est conseillée."
     },
     "gad7": {
       "label": "GAD-7",

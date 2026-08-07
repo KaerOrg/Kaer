@@ -1,0 +1,214 @@
+/* Détail d'une passation d'échelle, vue praticien (#418, QW-1).
+   Aucune règle de ce fichier n'est conditionnée par la valeur d'une réponse : toutes
+   les lignes partagent exactement le même habillage, y compris celle de l'item 9. */
+
+.spd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.spd__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.spd__scale {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  color: var(--color-text);
+}
+
+.spd__date {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* Deux colonnes sur écran large, empilées en dessous : la synthèse ne doit jamais
+   pousser les réponses hors du cadre. */
+.spd__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 860px) {
+  .spd__layout {
+    grid-template-columns: minmax(200px, 260px) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.spd__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.spd-total {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-xs);
+  margin: 0;
+}
+
+.spd-total__score {
+  font-size: var(--font-size-h1);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.spd-total__max,
+.spd-total__previous {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.spd-total__previous {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin: var(--spacing-sm) 0 0;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+/* L'écart est une soustraction adressée à un professionnel : même couleur que le
+   reste, aucune teinte de progression ni de dégradation. */
+.spd-total__delta {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.spd-total__note {
+  margin: var(--spacing-xs) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.spd-unscored__value {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  color: var(--color-text);
+}
+
+.spd-unscored__caption,
+.spd-follow__line {
+  margin: var(--spacing-xs) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.spd-follow__line:first-child {
+  margin-top: 0;
+}
+
+.spd__answers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.spd__answers-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+}
+
+.spd__answers-title {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.spd__instructions {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  text-align: right;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.spd-rows {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.spd-rows--unscored {
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+.spd-row {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr) auto 1.5rem;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-caption);
+}
+
+.spd-rows > .spd-row:last-child {
+  border-bottom: none;
+}
+
+.spd-row__num {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.spd-row__label {
+  min-width: 0;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.spd-row__option {
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.spd-row__value {
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: right;
+}
+
+/* Note de l'instrument : encart neutre, jamais un bandeau d'alerte. Elle est toujours
+   là, elle ne signale rien. */
+.spd-note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.spd-note__label {
+  font-weight: 700;
+  color: var(--color-text);
+}

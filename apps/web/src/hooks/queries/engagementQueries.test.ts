@@ -7,6 +7,7 @@ vi.mock('@services/engagementService', () => ({
   fetchChronoEntries: vi.fn(),
   fetchFormEntries: vi.fn(),
   fetchActivityEntries: vi.fn(),
+  fetchScalePassations: vi.fn(),
 }))
 
 import { engagementQueries } from './engagementQueries'
@@ -17,6 +18,9 @@ describe('engagementQueries', () => {
     expect(engagementQueries.moduleData('pt1', 'phq9', 'scale').queryKey).toEqual([
       'engagement', 'moduleData', 'pt1', 'phq9',
     ])
+    expect(engagementQueries.scalePassations('pt1', 'phq9').queryKey).toEqual([
+      'engagement', 'scalePassations', 'pt1', 'phq9',
+    ])
   })
 
   it('patientDataKeys renvoie les préfixes à invalider pour un patient (Realtime #103)', () => {
@@ -25,6 +29,9 @@ describe('engagementQueries', () => {
       ['engagement', 'moduleData', 'pt1'],
       ['engagement', 'lastActivity', 'pt1'],
       ['engagement', 'moodMarkers', 'pt1'],
+      // Le détail des passations (#418) suit le même sort : une passation qui arrive
+      // en temps réel doit rafraîchir l'écran de lecture, pas seulement la courbe.
+      ['engagement', 'scalePassations', 'pt1'],
     ])
   })
 })

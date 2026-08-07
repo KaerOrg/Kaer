@@ -966,6 +966,22 @@ values
     2
   ),
 
+  -- Löwe et al. 2004, Medical Care (essai IMPACT, n = 434, dépression du sujet âgé)
+  --    PMID 15550799, doi:10.1097/00005650-200412000-00006 (vérifié PubMed, abstract lu)
+  --    Source du seul chiffre psychométrique que l'app affiche au praticien : les
+  --    5 points de `scale_meta.min_interpretable_change`. Un nombre montré sans sa
+  --    provenance n'est pas vérifiable, et celui-ci pèse sur une lecture clinique.
+  (
+    'cccccccc-0001-0001-0001-000000000003',
+    'phq9',
+    'Löwe et al. : suivi de l''évolution sous traitement avec le PHQ-9 (Medical Care, 2004)',
+    'rct',
+    'https://doi.org/10.1097/00005650-200412000-00006',
+    null,
+    'Fidélité test-retest excellente à 7 jours ; le plus petit changement individuel interprétable, estimé à 2 erreurs-types de mesure, est de 5 points sur l''échelle 0 à 27 (essai IMPACT, n = 434, âge moyen 71 ans). C''est la valeur affichée au praticien à côté de l''écart entre deux passations.',
+    3
+  ),
+
 -- ── gad7 ─────────────────────────────────────────────────────────────────────
 -- GAD-7 — Trouble anxieux généralisé (7 items)
 -- Source vérifiée : PMID 16717171 — Spitzer et al. 2006 (vérifié PubMed, abstract lu)
