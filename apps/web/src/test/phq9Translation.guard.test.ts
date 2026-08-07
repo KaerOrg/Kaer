@@ -3,17 +3,18 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
-// ─── Garde-fou : la traduction Kær du PHQ-9 ne bouge pas (#407, Q-3) ────────
+// ─── Garde-fou : les libellés du PHQ-9 ne bougent pas (#407, Q-3) ───────────
 //
 // Les libellés du PHQ-9 étaient une traduction maison d'origine inconnue et non
 // tracée : un seul item sur neuf correspondait à une version publiée. Ce n'est pas
 // tenable pour un produit commercial, où l'on doit pouvoir dire d'où viennent les mots
 // affichés et à quel titre on a le droit de les afficher.
 //
-// Le PHQ-9 est libre (Pfizer : « no permission is required to reproduce, translate,
-// display or distribute »), mais ce droit ne porte pas sur la traduction d'un tiers,
-// qui est une oeuvre dérivée avec ses propres ayants droit. Kær produit donc sa propre
-// traduction, versionnée dans `docs/instruments/phq9.md`, qui est LA référence.
+// L'app emploie désormais la version française OFFICIELLE, « French for France »,
+// publiée sur phqscreeners.com. Le document porte lui-même « La reproduction, la
+// traduction, l'affichage ou la distribution de ce document sont autorisés » : il n'y
+// a donc aucun ayant droit tiers, contrairement à la traduction MAPI distribuée par
+// eProvide, qui reste hors de portée. La référence est `docs/instruments/phq9.md`.
 //
 // Ce garde-fou a deux rôles :
 //
@@ -81,18 +82,33 @@ describe('PHQ-9 : conformité au fichier de référence (#407)', () => {
     })
   }
 
-  it('le fichier de référence porte sa date, son auteur et la source anglaise', () => {
+  it('le fichier de référence porte ses auteurs, sa provenance et la source anglaise', () => {
     const doc = readFileSync(join(repoRoot, 'docs', 'instruments', 'phq9.md'), 'utf8')
     expect(doc).toContain('Kroenke, Spitzer & Williams, 2001')
-    expect(doc).toMatch(/Date de la traduction/)
-    expect(doc).toMatch(/Traduction française \| Kær/)
+    expect(doc).toMatch(/French for France/)
+    // L'URL du document source : sans elle, « version officielle » n'est qu'une
+    // affirmation, et personne ne peut vérifier les mots affichés.
+    expect(doc).toContain('phqscreeners.com')
   })
 
-  it('la fiche destinée au soignant assume que la traduction n\'est pas validée', () => {
+  it('le document source est accessible au praticien depuis l\'app', () => {
+    // La provenance ne sert à rien si elle reste dans le dépôt : le praticien doit
+    // pouvoir ouvrir le PDF d'où viennent les libellés qu'il propose à son patient.
+    const seed = readFileSync(join(repoRoot, 'supabase', 'seed', 'sources_seed.sql'), 'utf8')
+    expect(seed).toContain('PHQ9_French%20for%20France.pdf')
+  })
+
+  it('la fiche destinée au soignant dit quelle version française est employée', () => {
+    // Elle disait « traduction Kær, non validée » : c'est devenu faux le jour où l'app
+    // est passée à la version officielle. Une limite qu'on assume doit rester exacte.
     const fr = JSON.parse(
       readFileSync(join(repoRoot, 'apps', 'web', 'src', 'i18n', 'locales', 'fr', 'common.json'), 'utf8'),
     ) as { scales?: { descriptions?: Record<string, string> } }
-    expect(fr.scales?.descriptions?.phq9 ?? '').toContain('non validée')
+    const description = fr.scales?.descriptions?.phq9 ?? ''
+    expect(description).toContain('French for France')
+    expect(description).not.toContain('Traduction Kær')
+    // La limite qui subsiste porte sur l'instrument en français, pas sur la traduction.
+    expect(description).toContain('INESSS')
   })
 
   it('aucun contenu psychométrique n\'est surchargé dans teen.json', () => {
