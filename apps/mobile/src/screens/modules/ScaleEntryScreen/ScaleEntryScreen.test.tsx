@@ -47,12 +47,16 @@ jest.mock('@services/notificationService', () => ({
 jest.mock('@theme', () => ({
   colors: {
     primary: '#000', primaryLight: '#eef', danger: '#f00', neutral: '#f3f4f6',
-    background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999',
+    background: '#fff', border: '#ccc', white: '#fff', text: '#111', textMuted: '#999',
+    card: '#fff',
   },
   spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
-  radius: { sm: 6, md: 8 },
+  radius: { sm: 6, md: 8, lg: 16, full: 999 },
+  fontSize: { xxs: 11, xs: 12, sm: 13, caption: 14, label: 15, body: 16, h3: 18, h2: 22, h1: 28, display: 32 },
   typography: {},
 }))
+
+jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
 
 jest.mock('../../../components/features/ModuleRenderer/FieldRenderer', () => {
   const React = require('react')
@@ -165,5 +169,62 @@ describe('ScaleEntryScreen', () => {
         subscale_scores: null,
       })
     )
+  })
+
+  // #409. Deux mécanismes fabriquaient de faux points et ont été retirés.
+  it('ne propose plus de reprendre les valeurs de la passation précédente', async () => {
+    // Pré-remplir avec la saisie précédente est un biais d'ancrage sur un instrument
+    // de mesure : le patient valide ce qui est déjà coché au lieu de répondre.
+    render(<ScaleEntryScreen />)
+    await waitFor(() => expect(screen.getByText('submit')).toBeTruthy())
+    expect(screen.queryByText('reuse_last_values')).toBeNull()
+  })
+
+  it('ne propose plus de choisir la date de la saisie', async () => {
+    // Déplacer une passation au 12 juillet ne recrée pas la fenêtre du 28 juin au
+    // 12 juillet : la passation porte la date de son envoi, point.
+    render(<ScaleEntryScreen />)
+    await waitFor(() => expect(screen.getByText('submit')).toBeTruthy())
+    expect(screen.queryByText('entry_date')).toBeNull()
+  })
+})
+
+// ── Mode de saisie piloté par la configuration ──────────────────────────────
+//
+// Le critère du ticket : basculer `scale_meta.entry_mode` change le mode SANS
+// toucher au composant. Les deux tests ci-dessous ne diffèrent que par la valeur de
+// cette prop, jamais par un identifiant de module.
+
+const META = (entryMode: string): moduleService.ContentField => ({
+  id: 'phq9.scale_meta', module_id: 'phq9', section_id: null, parent_field_id: null,
+  field_type: 'scale_meta', text_code: null, sort_order: 0,
+  props: { entry_mode: entryMode }, children: [],
+})
+
+describe('ScaleEntryScreen : mode de saisie configuré', () => {
+  beforeEach(() => jest.clearAllMocks())
+
+  it('rend la liste défilante quand entry_mode vaut scrolling_list', async () => {
+    ;(moduleService.fetchModuleFields as jest.Mock).mockResolvedValue({
+      preview_kind: 'questionnaire',
+      fields: [META('scrolling_list'), ...MOCK_FIELDS],
+    })
+    render(<ScaleEntryScreen />)
+    // La liste rend TOUTES les questions d'un coup, plus le compteur global.
+    await waitFor(() => expect(screen.getByTestId('answer_0')).toBeTruthy())
+    expect(screen.getByTestId('answer_1')).toBeTruthy()
+    expect(screen.getByText('progress')).toBeTruthy()
+  })
+
+  it('rend un item par écran quand entry_mode vaut one_per_screen', async () => {
+    ;(moduleService.fetchModuleFields as jest.Mock).mockResolvedValue({
+      preview_kind: 'questionnaire',
+      fields: [META('one_per_screen'), ...MOCK_FIELDS],
+    })
+    render(<ScaleEntryScreen />)
+    // Un seul item à l'écran : le second n'est pas rendu.
+    await waitFor(() => expect(screen.getByText('q1')).toBeTruthy())
+    expect(screen.queryByText('q2')).toBeNull()
+    expect(screen.getByTestId('stepper-progress')).toBeTruthy()
   })
 })

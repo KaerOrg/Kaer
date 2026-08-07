@@ -53,6 +53,7 @@ jest.mock('@theme', () => ({
   colors: { primary: '#000', background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999', card: '#f5f5f5', text: '#111' },
   spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
   radius: { sm: 4, md: 8, full: 999 },
+  fontSize: { xxs: 11, xs: 12, sm: 13, caption: 14, label: 15, body: 16, h3: 18, h2: 22, h1: 28, display: 32 },
   typography: { h2: {}, h3: {}, caption: {} },
 }))
 

@@ -101,7 +101,7 @@ Ajouter un nouvel alias = mettre à jour ces trois endroits dans le même commit
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, EmptyState, InputField, PhotoCarousel, ProgressRing, Radio, RatingSelector, Slider, TimePicker, TreeSelector, StatusBadge, Toast |
+| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, EmptyState, InputField, PhotoCarousel, ProgressBar, ProgressRing, Radio, RatingSelector, Slider, TimePicker, TreeSelector, StatusBadge, Toast |
 | `components/features/` | Composants métier — DimensionTrackerView, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent, TodaySchedule |
 
 **Règle de dépendance : `features → ui` uniquement.**
@@ -391,6 +391,41 @@ remplit dans le sens horaire. Usage : anneau d'efficacité de l'agenda du sommei
 
 ---
 
+### ProgressBar (`src/components/ui/ProgressBar/`)
+
+Barre de progression **linéaire**. Pendant de `ProgressRing` pour les cas où la
+progression accompagne un en-tête plutôt qu'un chiffre central : parcours en
+plusieurs étapes, questionnaire un item par écran, exercice guidé.
+
+> **Purement présentationnelle.** Elle ne connaît ni étape, ni module, ni donnée
+> patient : le libellé (« 8 / 10 ») appartient à l'appelant, qui seul sait ce qu'il
+> compte et dans quelle langue. Comme `ProgressRing`, **une seule couleur, jamais
+> conditionnée à la valeur** (MDR 2017/745) : une barre qui change de teinte selon
+> la donnée porterait un jugement.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `value` | `number` | Valeur remplie, bornée à `[0, max]` au rendu |
+| `max?` | `number` | Valeur de remplissage complet (défaut `100`) |
+| `color?` | `string` | Couleur de la portion remplie (défaut `colors.primary`) |
+| `trackColor?` | `string` | Couleur de la piste vide (défaut `colors.border`) |
+| `height?` | `number` | Épaisseur en px (défaut `4`) |
+| `style?` | `StyleProp<ViewStyle>` | Style du conteneur (largeur, marges) |
+| `testID?` | `string` | Identifiant de test |
+
+```tsx
+// En-tête d'un questionnaire un item par écran : la barre, le compteur reste à côté
+<ProgressBar value={index + 1} max={total} color={accentColor} style={styles.headerBar} />
+<Text style={styles.headerCount}>{t('modules.scale_entry.progress', { current: index + 1, total })}</Text>
+```
+
+> **Dette connue, à migrer.** Le motif piste + remplissage est encore réimplémenté à
+> la main dans `TreeSelector`, `GuidedExerciseLayout`, `CrisisCompanionLayout` et
+> `WordRepetitionExercise`. Toute nouvelle barre passe par ce primitive ; ces quatre
+> occurrences sont à reprendre quand on touchera à ces écrans.
+
+---
+
 ### TimePicker (`src/components/ui/TimePicker/`)
 
 Saisie d'une heure « HH:MM » — **le picker horaire unique du design system**. Bouton à
@@ -624,14 +659,16 @@ flèche, aucun taux (conforme MDR 2017/745).
 
 ### `Radio` (`src/components/ui/Radio/`)
 
-Sélecteur à **choix exclusif** (radio). Trois habillages via `variant` : `list` (radio classique, rangées rond + label, défaut), `pills` (pilules en ligne, fond coloré sur l'option active) ou `grid` (colonnes de largeur égale, label centré multiligne, fond coloré sur l'option active, pour l'échelle Likert d'un questionnaire clinique). Couleur d'accent configurable. `readonly` rend le même visuel sans interaction (options en `View`, pas en `Pressable`) : pour un aperçu / affichage en lecture seule, jamais un composant « display-only » parallèle. Réutilisable pour tout choix mono-sélection : type fond/PRN, filtre de période, mode, aperçu de champ, échelle Likert, etc.
+Sélecteur à **choix exclusif** (radio). Quatre habillages via `variant` : `list` (radio classique, rangées rond + label, défaut), `pills` (pilules en ligne, fond coloré sur l'option active), `grid` (colonnes de largeur égale, label centré multiligne, fond coloré sur l'option active, pour l'échelle Likert d'un questionnaire clinique) ou `stack` (rangées encadrées pleine largeur, cible d'au moins 44 pt, libellé jamais tronqué, coche sur l'option active, pour une saisie un item par écran). Couleur d'accent configurable.
+
+> **`grid` ou `stack` ?** `grid` compte la place verticale : il sert une liste défilante où les items s'enchaînent, au prix d'un libellé court et tronqué à deux lignes. `stack` sert l'inverse, un item seul à l'écran où le libellé EST le stimulus : il se lit en entier ou la mesure est faussée. Une échelle de plus d'une vingtaine d'items reste en `grid` ; en deçà, `stack` supprime la troncature (#409). `readonly` rend le même visuel sans interaction (options en `View`, pas en `Pressable`) : pour un aperçu / affichage en lecture seule, jamais un composant « display-only » parallèle. Réutilisable pour tout choix mono-sélection : type fond/PRN, filtre de période, mode, aperçu de champ, échelle Likert, etc.
 
 | Prop | Type | Défaut | Rôle |
 |---|---|---|---|
 | `options` | `RadioOption[]` | — | Options `{ value, label, sublabel? }` dans l'ordre d'affichage (obligatoire). `sublabel` n'est rendu qu'en variant `list` |
 | `value` | `string \| null` | — | Identifiant de l'option sélectionnée (`null` = aucune) (obligatoire) |
 | `onChange` | `(v: string) => void` | — | Callback de sélection. Optionnel : inutile (et ignoré) en `readonly` |
-| `variant` | `'list' \| 'pills' \| 'grid'` | `'list'` | Habillage : radio classique, pilules, ou colonnes Likert (largeurs égales, label centré multiligne) |
+| `variant` | `'list' \| 'pills' \| 'grid' \| 'stack'` | `'list'` | Habillage : radio classique, pilules, colonnes Likert (largeurs égales, label centré multiligne) ou rangées pleine largeur (44 pt, libellé complet, coche) |
 | `readonly` | `boolean` | `false` | Lecture seule : même rendu, aucune interaction (options en `View`) |
 | `color` | `string` | `colors.primary` | Couleur d'accentuation de l'option active |
 | `testID` | `string` | — | testID du conteneur |
@@ -677,9 +714,21 @@ Sélecteur à **choix exclusif** (radio). Trois habillages via `variant` : `list
   onChange={onSelect}
   color={accentColor}
 />
+
+// Rangées pleine largeur (saisie un item par écran, ex. StepperEntry du PHQ-9)
+<Radio
+  variant="stack"
+  options={[
+    { value: '0', label: 'Jamais' },
+    { value: '2', label: 'Plus de la moitié des jours' },
+  ]}
+  value={selected}
+  onChange={onSelect}
+  color={accentColor}
+/>
 ```
 
-> **Règle : tout sélecteur à choix exclusif passe par `Radio`, jamais `Pressable + styles.btn` ad hoc ni un composant radio parallèle. L'habillage pilules est le `variant="pills"`, les colonnes Likert le `variant="grid"`. Un aperçu / affichage en lecture seule reste un `Radio readonly`, jamais un composant « display-only » dupliquant l'habillage. `LikertWidget` (`QuestionnaireLayout`) est un simple adaptateur numérique au-dessus de `variant="grid"` : `ui/Radio` opérant sur des `string`, la conversion nombre↔chaîne se fait à sa frontière.**
+> **Règle : tout sélecteur à choix exclusif passe par `Radio`, jamais `Pressable + styles.btn` ad hoc ni un composant radio parallèle. L'habillage pilules est le `variant="pills"`, les colonnes Likert le `variant="grid"`, les rangées pleine largeur le `variant="stack"`. Un aperçu / affichage en lecture seule reste un `Radio readonly`, jamais un composant « display-only » dupliquant l'habillage. `LikertWidget` (`QuestionnaireLayout`, `StepperEntry`) est un simple adaptateur numérique au-dessus de `Radio` : `ui/Radio` opérant sur des `string`, la conversion nombre↔chaîne se fait à sa frontière, et sa prop `layout` choisit entre `grid` et `stack`.**
 
 ---
 
