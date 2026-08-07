@@ -21,6 +21,7 @@ import { TeenAccent } from '../../../components/features/TeenAccent'
 import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
 import { useScaleScreen } from '../../../hooks/useScaleScreen'
 import { loadDraft, discardDraft, type ScaleDraft } from '@services/scaleDraftService'
+import { fetchScaleReadReceipts, type ReadReceiptsByEntry } from '@services/scaleReceiptService'
 import { fetchModuleFields } from '@services/moduleService'
 import { formatDateTime, formatDateLong } from '../../../lib/dateUtils'
 import { EntryCard } from './EntryCard'
@@ -83,6 +84,9 @@ export default function ScaleHistoryScreen() {
   // Posture vis-à-vis du score, lue en base (#408). Jamais un test sur le module.
   const [scoreDisplay, setScoreDisplay] = useState<'inline' | 'collapsed'>('inline')
   const [scoresOpen, setScoresOpen] = useState(false)
+  // Accusés de lecture (#419), lus sur le serveur : une passation absente de la map
+  // n'a pas été ouverte, et rien ne s'affiche pour elle.
+  const [receipts, setReceipts] = useState<ReadReceiptsByEntry>(() => new Map())
 
   const chartPoints = useMemo(() => buildTotalScoreChartData(entries, range), [entries, range])
   const xLabels = useMemo(() => buildXLabels(range, i18n.language), [range, i18n.language])
@@ -110,6 +114,12 @@ export default function ScaleHistoryScreen() {
       fetchModuleFields(scale_id)
         .then(result => { if (active) setScoreDisplay(readScoreDisplay(result.fields)) })
         .catch(() => { if (active) setScoreDisplay('inline') })
+      // Relu à chaque retour sur l'écran : le praticien a pu ouvrir la passation
+      // entre-temps. Hors ligne, la lecture échoue et la ligne reste absente : on
+      // n'affiche pas un accusé qu'on n'a pas vu.
+      fetchScaleReadReceipts(scale_id)
+        .then(found => { if (active) setReceipts(found) })
+        .catch(() => { if (active) setReceipts(new Map()) })
       return () => { active = false }
     }, [scale_id])
   )
@@ -174,6 +184,24 @@ export default function ScaleHistoryScreen() {
     ],
     [t, scale_id, clinician],
   )
+
+  /**
+   * Ligne « Vu par … le … » du dernier envoi (#419), ou `null` si personne ne l'a
+   * ouvert.
+   *
+   * Aucun état intermédiaire quand l'accusé manque : ni « transmis », ni « en attente
+   * de lecture ». Ces mots laisseraient entendre un engagement que personne n'a pris.
+   * Mieux vaut un silence qu'une fausse promesse.
+   */
+  const readNotice = useMemo(() => {
+    const last = entries[0]
+    const readAt = last != null ? receipts.get(last.id) : undefined
+    if (readAt == null) return null
+    return t('modules.scale_history.read_notice', {
+      name: clinician,
+      date: formatDateLong(readAt),
+    })
+  }, [entries, receipts, clinician, t])
 
   // Les totaux du dépli : ordre du temps, jamais trié par valeur, aucun écart calculé.
   const scoreLines = useMemo<ScoreLine[]>(
@@ -252,8 +280,7 @@ export default function ScaleHistoryScreen() {
               <LastSubmissionBanner
                 label={t('modules.scale_history.last_sent_label')}
                 date={formatDateLong(entries[0].created_at)}
-                // L'accusé de lecture arrive avec QW-2 : jusque-là, la ligne n'existe pas.
-                readNotice={null}
+                readNotice={readNotice}
               />
               <View style={styles.list}>
                 <Text style={homeStyles.sectionLabel}>{t('modules.scale_history.entries_section')}</Text>

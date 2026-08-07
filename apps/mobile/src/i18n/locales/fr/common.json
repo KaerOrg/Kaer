@@ -212,6 +212,7 @@
       "last_sent_label": "Dernier envoi",
       "entries_section": "Mes passations",
       "sent_status": "envoyé",
+      "read_notice": "Vu par {{name}} le {{date}}",
       "score_details": "Voir le détail chiffré",
       "score_note": "Ces totaux ne posent pas de diagnostic et ne se lisent pas seuls. Ils servent à en parler avec {{name}}.",
       "start_btn": "Commencer",

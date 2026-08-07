@@ -8,6 +8,7 @@ import ScaleHistoryScreen from './ScaleHistoryScreen'
 import * as database from '../../../lib/database'
 import * as draftService from '@services/scaleDraftService'
 import * as moduleService from '@services/moduleService'
+import * as receiptService from '@services/scaleReceiptService'
 import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
 
 jest.setTimeout(15000)
@@ -57,6 +58,12 @@ jest.mock('@services/scaleDraftService', () => ({
 
 jest.mock('@services/moduleService', () => ({
   fetchModuleFields: jest.fn().mockResolvedValue({ preview_kind: 'questionnaire', fields: [] }),
+}))
+
+// Accusés de lecture (#419) mockés au niveau du SERVICE : l'écran dépend de lui, pas
+// du client Supabase.
+jest.mock('@services/scaleReceiptService', () => ({
+  fetchScaleReadReceipts: jest.fn().mockResolvedValue(new Map()),
 }))
 
 jest.mock('../../../lib/scaleScoring', () => ({
@@ -278,12 +285,46 @@ describe('ScaleHistoryScreen : posture collapsed', () => {
     expect(screen.getAllByText('sent_status').length).toBe(2)
   })
 
-  it('se rend sans accusé de lecture tant que QW-2 n\'est pas livré', async () => {
-    // Pas de placeholder, pas de ligne fantôme : l'information absente ne s'affiche pas.
+  it('n\'affiche aucun accusé tant que le praticien n\'a pas ouvert la passation', async () => {
+    // Pas de placeholder, pas de ligne fantôme, et surtout aucun état intermédiaire :
+    // ni « transmis », ni « en attente de lecture ». Ces mots laisseraient entendre un
+    // engagement que personne n'a pris (#419).
     render(<ScaleHistoryScreen />)
     const banner = await waitFor(() => screen.getByTestId('last-submission-banner'))
     expect(banner).toBeTruthy()
     expect(screen.getByText('last_sent_label')).toBeTruthy()
+    expect(screen.queryByText('read_notice')).toBeNull()
+  })
+
+  it('affiche « Vu par … le … » sur le dernier envoi quand il a été ouvert (#419)', async () => {
+    ;(receiptService.fetchScaleReadReceipts as jest.Mock).mockResolvedValue(
+      new Map([['phq9-1', '2026-04-21T08:00:00.000Z']]),
+    )
+    render(<ScaleHistoryScreen />)
+
+    await waitFor(() => expect(screen.getByText('read_notice')).toBeTruthy())
+  })
+
+  it('ne prend l\'accusé que du dernier envoi, pas d\'une passation plus ancienne', async () => {
+    // Le bandeau parle du DERNIER envoi : un accusé posé sur une passation antérieure
+    // ne doit pas s'y afficher, sinon le patient croit qu'on vient de le lire.
+    ;(receiptService.fetchScaleReadReceipts as jest.Mock).mockResolvedValue(
+      new Map([['phq9-2', '2026-04-07T08:00:00.000Z']]),
+    )
+    render(<ScaleHistoryScreen />)
+
+    await waitFor(() => expect(screen.getByTestId('last-submission-banner')).toBeTruthy())
+    expect(screen.queryByText('read_notice')).toBeNull()
+  })
+
+  it('n\'affiche aucun accusé quand la lecture serveur échoue (hors ligne)', async () => {
+    // On ne sait pas : ne rien afficher est la bonne réponse. Le patient ne doit pas
+    // lire « Vu par votre soignant » sur la foi d'un défaut.
+    ;(receiptService.fetchScaleReadReceipts as jest.Mock).mockRejectedValue(new Error('offline'))
+    render(<ScaleHistoryScreen />)
+
+    await waitFor(() => expect(screen.getByTestId('last-submission-banner')).toBeTruthy())
+    expect(screen.queryByText('read_notice')).toBeNull()
   })
 
   it('présente le module et propose de commencer quand rien n\'a été rempli', async () => {

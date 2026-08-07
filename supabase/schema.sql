@@ -1914,6 +1914,113 @@ create policy "patient_entries_practitioner_select"
     )
   );
 
+-- ── Accusé de lecture d'une passation (#419, QW-2) ───────────────────────────
+--
+-- Une date, et une seule : celle de la PREMIÈRE ouverture de la passation par un
+-- praticien rattaché. Elle alimente la ligne « Vu par … le … » côté patient, qui est
+-- le levier de rétention que la littérature soutient : le retour humain, pas la donnée.
+--
+-- Trois décisions portées ici, et pas ailleurs :
+--   • UN SEUL horodatage. Il n'est jamais réécrit aux consultations suivantes : le
+--     patient n'a pas à savoir combien de fois son praticien a rouvert sa passation.
+--   • AUCUN état intermédiaire. Si la passation n'a pas été ouverte, la colonne est
+--     nulle et le patient ne voit rien. Un « transmis » ou un « en attente de lecture »
+--     laisserait entendre un engagement que personne n'a pris ; mieux vaut un silence
+--     qu'une fausse promesse.
+--   • Ce n'est PAS un accusé de réception automatique : il atteste d'une ouverture par
+--     un humain, jamais d'une réception par un serveur.
+--
+-- MDR : une date d'ouverture est un fait administratif, sans aucun lien avec le contenu
+-- des réponses. Elle ne doit jamais être transformée en indicateur adressé au patient
+-- (« votre praticien ne vous a pas lu depuis 3 semaines ») : ce serait un jugement.
+alter table public.patient_entries
+  add column if not exists practitioner_read_at timestamptz;
+
+-- Le patient a un UPDATE plein sur ses propres lignes (l'upsert de sync y retombe) :
+-- sans garde, il pourrait forger l'accusé et se voir répondre « vu par votre soignant »
+-- alors que personne n'a ouvert sa passation. Un mensonge dans un dossier de santé.
+--
+-- La garde ne regarde qu'une chose : l'auteur de l'écriture est-il le patient lui-même ?
+-- Le RPC ci-dessous est SECURITY DEFINER et appelé par le praticien (auth.uid() ≠
+-- patient_id), les migrations et le service_role n'ont pas d'auth.uid() : les deux
+-- chemins légitimes passent. Un upsert de sync qui ne touche pas la colonne passe aussi,
+-- puisque la valeur reste identique.
+create or replace function public.fn_guard_entry_read_receipt()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if tg_op = 'INSERT' then
+    if new.practitioner_read_at is not null and auth.uid() = new.patient_id then
+      raise exception 'practitioner_read_at ne peut pas être posé par le patient'
+        using errcode = 'check_violation';
+    end if;
+    return new;
+  end if;
+
+  if new.practitioner_read_at is distinct from old.practitioner_read_at
+     and auth.uid() = old.patient_id then
+    raise exception 'practitioner_read_at ne peut pas être modifié par le patient'
+      using errcode = 'check_violation';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_guard_entry_read_receipt on public.patient_entries;
+create trigger trg_guard_entry_read_receipt
+  before insert or update on public.patient_entries
+  for each row execute function public.fn_guard_entry_read_receipt();
+
+-- Pose l'accusé de lecture, UNE SEULE FOIS, et renvoie la date retenue.
+--
+-- SECURITY DEFINER parce que le praticien n'a que le SELECT sur `patient_entries` :
+-- lui ouvrir un UPDATE général le laisserait modifier le payload, c'est-à-dire réécrire
+-- les réponses de son patient. Le seul geste qu'on lui accorde est celui-ci, et il est
+-- borné à une colonne.
+--
+-- Le `practitioner_read_at is null` du WHERE rend l'appel idempotent : rappeler la
+-- fonction à chaque consultation ne déplace pas la date. C'est ce qui permet au client
+-- d'appeler sans se demander si c'est la première fois.
+create or replace function public.mark_entry_read(
+  p_patient_id uuid,
+  p_local_id   text
+)
+returns timestamptz
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_read_at timestamptz;
+begin
+  if not exists (
+    select 1 from public.practitioner_patients pp
+    where pp.practitioner_id = auth.uid()
+      and pp.patient_id = p_patient_id
+  ) then
+    raise exception 'accès refusé : praticien non rattaché à ce patient'
+      using errcode = 'insufficient_privilege';
+  end if;
+
+  update public.patient_entries
+     set practitioner_read_at = now()
+   where patient_id = p_patient_id
+     and local_id = p_local_id
+     and practitioner_read_at is null;
+
+  select pe.practitioner_read_at into v_read_at
+    from public.patient_entries pe
+   where pe.patient_id = p_patient_id
+     and pe.local_id = p_local_id;
+
+  return v_read_at;
+end;
+$$;
+
+grant execute on function public.mark_entry_read(uuid, text) to authenticated;
+
 -- Realtime (issue #103) : le web praticien s'abonne aux changements de
 -- patient_entries pour rafraîchir instantanément quand un patient saisit sur
 -- mobile. Postgres Changes RESPECTE la RLS ci-dessus : un praticien ne reçoit que

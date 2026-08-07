@@ -1,9 +1,11 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { todayIso } from '@kaer/shared'
 import type { ModuleType } from '../../../lib/database.types'
-import { engagementQueries, moduleQueries, scaleQueries, scaleScheduleQueries } from '../../../hooks/queries'
+import {
+  engagementQueries, moduleQueries, scaleQueries, scaleScheduleQueries, useMarkPassationRead,
+} from '../../../hooks/queries'
 import { computeScheduleStatus } from '../../../lib/scaleScheduleStatus'
 import { ScalePassationDetail, ScalePassationList } from '../../../components/features/ScalePassationDetail'
 import './ScalePassationsPanel.css'
@@ -63,6 +65,30 @@ export function ScalePassationsPanel({ patientId, moduleType }: Props) {
 
   const handleSelect = useCallback((index: number) => setSelectedIndex(index), [])
 
+  // Une passation supprimée peut rendre l'index caduc : on borne au lieu de rendre vide.
+  const index = Math.min(selectedIndex, records.length - 1)
+  const selected = index >= 0 ? records[index] : null
+  // « Précédente » = la suivante dans l'ordre antichronologique.
+  const previous = index >= 0 && index < records.length - 1 ? records[index + 1] : null
+
+  /**
+   * Accusé de lecture (#419) : posé à l'OUVERTURE du détail, sans bouton.
+   *
+   * Un « j'ai lu » à cliquer crée une corvée et une culpabilité. Le geste qui atteste
+   * qu'un humain a regardé, c'est d'avoir ouvert la passation.
+   *
+   * Déclenché sur l'identité de la passation affichée, donc à chaque changement de
+   * sélection. La base ne retient que la première ouverture : rappeler ne déplace
+   * jamais la date, et le patient n'apprend pas combien de fois on a rouvert sa
+   * passation.
+   */
+  const { mutate: markRead } = useMarkPassationRead()
+  const selectedId = selected?.id ?? null
+  useEffect(() => {
+    if (selectedId == null) return
+    markRead({ patientId, localId: selectedId, moduleId: moduleType })
+  }, [markRead, patientId, selectedId, moduleType])
+
   if (passationsQuery.isLoading || fieldsQuery.isLoading) {
     return (
       <div className="module-data-panel">
@@ -71,19 +97,13 @@ export function ScalePassationsPanel({ patientId, moduleType }: Props) {
     )
   }
 
-  if (records.length === 0) {
+  if (selected == null) {
     return (
       <div className="module-data-panel">
         <p className="module-data-panel__message">{t('scales.entry_detail.empty')}</p>
       </div>
     )
   }
-
-  // Une passation supprimée peut rendre l'index caduc : on borne au lieu de rendre vide.
-  const index = Math.min(selectedIndex, records.length - 1)
-  const selected = records[index]
-  // « Précédente » = la suivante dans l'ordre antichronologique.
-  const previous = index < records.length - 1 ? records[index + 1] : null
 
   return (
     <div className="module-data-panel spd-panel">

@@ -643,6 +643,12 @@ export interface Database {
           payload: Record<string, unknown>
           client_created_at: string
           synced_at: string
+          /**
+           * Première ouverture de la passation par un praticien rattaché (#419).
+           * `null` tant que personne ne l'a ouverte : c'est un état légitime, et le
+           * patient ne voit alors rien. Posée par le seul RPC `mark_entry_read`.
+           */
+          practitioner_read_at: string | null
         }
         Insert: {
           patient_id: string
@@ -931,6 +937,13 @@ export interface Database {
           p_metadata?: Record<string, string | number | boolean | null>
         }
         Returns: undefined
+      }
+      // Accusé de lecture d'une passation (#419) : pose la date de PREMIÈRE ouverture
+      // et renvoie celle qui fait foi. Idempotent, rappeler ne déplace pas la date.
+      // Le rattachement praticien ↔ patient est re-vérifié côté base (SECURITY DEFINER).
+      mark_entry_read: {
+        Args: { p_patient_id: string; p_local_id: string }
+        Returns: string | null
       }
       // Droits patient RGPD (#27) — export (art. 15/20). Renvoie un jsonb brut
       // (miroir neutre des données saisies, aucune interprétation — conforme MDR).

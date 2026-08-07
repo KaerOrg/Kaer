@@ -1,4 +1,4 @@
-import { queryOptions } from '@tanstack/react-query'
+import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   fetchScaleEvolution,
   fetchMoodEvolution,
@@ -14,6 +14,7 @@ import {
   fetchFormEntries,
   fetchActivityEntries,
   fetchScalePassations,
+  markPassationRead,
   type ScalePassation,
   type ScorePoint,
   type MoodPoint,
@@ -186,4 +187,29 @@ export const engagementQueries = {
     ['engagement', 'moodMarkers', patientId],
     ['engagement', 'scalePassations', patientId],
   ],
+}
+
+/**
+ * Pose l'accusé de lecture d'une passation à l'ouverture de son détail (#419).
+ *
+ * Écriture déclenchée par une consultation, pas par un clic : la mutation est appelée
+ * depuis un effet, sans bouton. Invalide la clé des passations pour que la ligne
+ * « Ouverte le … » apparaisse dans la foulée, sans rechargement.
+ *
+ * `onError` est volontairement absent : le service reporte déjà l'échec à la
+ * télémétrie, et un toast d'erreur ici parasiterait la lecture d'une passation pour
+ * un accusé que le praticien n'a pas demandé.
+ */
+export function useMarkPassationRead() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ patientId, localId, moduleId }: {
+      patientId: string
+      localId: string
+      moduleId: string
+    }) => markPassationRead(patientId, localId, moduleId),
+    onSuccess: (_data, { patientId, moduleId }) => {
+      qc.invalidateQueries({ queryKey: engagementQueries.scalePassations(patientId, moduleId).queryKey })
+    },
+  })
 }

@@ -1038,5 +1038,8 @@
       "label": "C-SSRS, Risque suicidaire",
       "description": ""
     }
+  },
+  "common": {
+    "your_clinician": "ton soignant"
   }
 }

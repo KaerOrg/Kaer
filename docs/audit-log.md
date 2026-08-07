@@ -131,9 +131,21 @@ await logDataAccess({
 - L'appel se fait **depuis la couche service** (jamais depuis un composant — cf.
   `.claude/rules/coding-standards.md` § *Accès aux données*).
 
-**Consommateur instrumenté en v1** : `patientService.fetchPatientHeader` (= « le
-praticien a ouvert le dossier du patient X »). Les autres points de lecture seront
-instrumentés incrémentalement avec le même helper.
+**Consommateurs instrumentés :**
+
+| Appelant | Ce que la ligne d'audit veut dire | `metadata` |
+|---|---|---|
+| `patientService.fetchPatientHeader` | Le praticien a ouvert le dossier du patient X | `{ scope: 'header' }` |
+| `engagementService.markPassationRead` (#419) | Le praticien a ouvert **une passation d'échelle** : c'est une donnée de santé, sa consultation doit être traçable | `{ scope: 'passation', module_id }` |
+
+Les autres points de lecture seront instrumentés incrémentalement avec le même helper.
+
+> **À ne pas confondre avec l'accusé de lecture.** Les deux partent du même geste, mais
+> ne servent pas la même chose : le journal d'audit enregistre **chaque** consultation,
+> pour une obligation RGPD/HDS ; l'accusé de lecture
+> (`patient_entries.practitioner_read_at`) ne retient que la **première**, parce que le
+> patient n'a pas à savoir combien de fois son praticien a rouvert sa passation. Un
+> échec de l'un n'empêche jamais l'autre.
 
 ---
 

@@ -1,7 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('../lib/supabase', () => ({
-  supabase: { from: vi.fn() },
+  supabase: { from: vi.fn(), rpc: vi.fn() },
+}))
+
+const mockLogDataAccess = vi.fn()
+vi.mock('./auditService', () => ({
+  logDataAccess: (...args: unknown[]) => mockLogDataAccess(...args),
+}))
+
+const mockReportFailedOperation = vi.fn()
+vi.mock('./errorReportingService', () => ({
+  reportFailedOperation: (...args: unknown[]) => mockReportFailedOperation(...args),
 }))
 
 import { supabase } from '../lib/supabase'
@@ -20,6 +30,7 @@ import {
   fetchFormEntries,
   fetchActivityEntries,
   fetchScalePassations,
+  markPassationRead,
 } from './engagementService'
 
 // Chaîne Supabase mockée : chaque méthode renvoie la chaîne, l'await résout `result`.
@@ -75,10 +86,10 @@ describe('engagementService.fetchScaleEvolution', () => {
 })
 
 describe('engagementService.fetchScalePassations', () => {
-  it('mappe chaque passation avec ses réponses et son total (happy path)', async () => {
+  it('mappe chaque passation avec ses réponses, son total et son accusé de lecture', async () => {
     const rows = [
-      { local_id: 'a', client_created_at: '2026-07-14T09:00:00Z', payload: { answers: [1, 2, 3], total_score: 6 } },
-      { local_id: 'b', client_created_at: '2026-07-28T21:12:00Z', payload: { answers: [0, 0, 0], total_score: 0 } },
+      { local_id: 'a', client_created_at: '2026-07-14T09:00:00Z', payload: { answers: [1, 2, 3], total_score: 6 }, practitioner_read_at: '2026-07-15T08:00:00Z' },
+      { local_id: 'b', client_created_at: '2026-07-28T21:12:00Z', payload: { answers: [0, 0, 0], total_score: 0 }, practitioner_read_at: null },
     ]
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
 
@@ -86,14 +97,15 @@ describe('engagementService.fetchScalePassations', () => {
 
     expect(supabase.from).toHaveBeenCalledWith('patient_entries')
     expect(result).toEqual([
-      { id: 'a', date: '2026-07-14T09:00:00Z', answers: [1, 2, 3], totalScore: 6 },
-      { id: 'b', date: '2026-07-28T21:12:00Z', answers: [0, 0, 0], totalScore: 0 },
+      { id: 'a', date: '2026-07-14T09:00:00Z', answers: [1, 2, 3], totalScore: 6, readAt: '2026-07-15T08:00:00Z' },
+      // Jamais ouverte : `null`, et c'est un état normal, pas une donnée manquante.
+      { id: 'b', date: '2026-07-28T21:12:00Z', answers: [0, 0, 0], totalScore: 0, readAt: null },
     ])
   })
 
   it('garde `null` pour une réponse absente, sans la confondre avec zéro', async () => {
     const rows = [
-      { local_id: 'a', client_created_at: '2026-07-14T09:00:00Z', payload: { answers: [1, null, 'x'], total_score: 1 } },
+      { local_id: 'a', client_created_at: '2026-07-14T09:00:00Z', payload: { answers: [1, null, 'x'], total_score: 1 }, practitioner_read_at: null },
     ]
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
 
@@ -101,11 +113,11 @@ describe('engagementService.fetchScalePassations', () => {
   })
 
   it('tolère un payload sans réponses ni total plutôt que de planter', async () => {
-    const rows = [{ local_id: 'a', client_created_at: '2026-07-14T09:00:00Z', payload: {} }]
+    const rows = [{ local_id: 'a', client_created_at: '2026-07-14T09:00:00Z', payload: {}, practitioner_read_at: null }]
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: rows, error: null }) as never)
 
     expect(await fetchScalePassations('p1', 'phq9')).toEqual([
-      { id: 'a', date: '2026-07-14T09:00:00Z', answers: [], totalScore: null },
+      { id: 'a', date: '2026-07-14T09:00:00Z', answers: [], totalScore: null, readAt: null },
     ])
   })
 
@@ -113,6 +125,59 @@ describe('engagementService.fetchScalePassations', () => {
     vi.mocked(supabase.from).mockReturnValue(makeChain({ data: null, error: new Error('rls') }) as never)
 
     expect(await fetchScalePassations('p1', 'phq9')).toEqual([])
+  })
+})
+
+describe('engagementService.markPassationRead', () => {
+  it('pose l\'accusé par le RPC et renvoie la date qui fait foi', async () => {
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: '2026-07-29T08:00:00Z', error: null } as never)
+
+    const result = await markPassationRead('p1', 'entry-1', 'phq9')
+
+    expect(supabase.rpc).toHaveBeenCalledWith('mark_entry_read', {
+      p_patient_id: 'p1',
+      p_local_id: 'entry-1',
+    })
+    expect(result).toBe('2026-07-29T08:00:00Z')
+  })
+
+  it('trace la consultation au journal d\'audit, sans aucun contenu clinique', async () => {
+    // Une passation est une donnée de santé : sa lecture doit être traçable. Les
+    // métadonnées restent techniques : jamais une réponse, jamais un score (RGPD/MDR).
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: null } as never)
+
+    await markPassationRead('p1', 'entry-1', 'phq9')
+
+    expect(mockLogDataAccess).toHaveBeenCalledWith({
+      action: 'read',
+      targetTable: 'patient_entries',
+      targetId: 'entry-1',
+      patientId: 'p1',
+      metadata: { scope: 'passation', module_id: 'phq9' },
+    })
+  })
+
+  it('reporte l\'échec du RPC à la télémétrie, sans rien afficher', async () => {
+    // Un accusé qui ne se pose pas est invisible à l'écran du praticien, et le patient
+    // attendrait un « Vu le … » qui ne vient jamais. Personne ne l'apprendrait sans ça.
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: { message: 'rls' } } as never)
+
+    expect(await markPassationRead('p1', 'entry-1', 'phq9')).toBeNull()
+    expect(mockReportFailedOperation).toHaveBeenCalledWith(
+      'patient/phq9/passation',
+      'mark_entry_read failed',
+      'rls',
+    )
+  })
+
+  it('trace l\'accès même quand le RPC échoue', async () => {
+    // L'audit porte sur la CONSULTATION, pas sur la réussite de l'accusé : le praticien
+    // a bien ouvert la passation dans les deux cas.
+    vi.mocked(supabase.rpc).mockResolvedValue({ data: null, error: { message: 'rls' } } as never)
+
+    await markPassationRead('p1', 'entry-1', 'phq9')
+
+    expect(mockLogDataAccess).toHaveBeenCalledTimes(1)
   })
 })
 
