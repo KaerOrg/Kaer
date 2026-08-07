@@ -125,7 +125,7 @@ inatteignables après la migration des autres modules vers des layouts dédiés,
 | Dossier | Rôle |
 |---|---|
 | `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, ProgressRing, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle, TreeSelector |
-| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModuleFilterBar, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, OverdueScalesReminder, PatientDataRights, DormantScalesCard, ScaleEvalBadge, ScaleMetaBadges, ScalePassationDetail, ScheduleCell, SourceCitation, SupportRequestModal, WeekGrid |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModuleFilterBar, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, OverdueScalesReminder, PatientDataRights, DormantScalesCard, ScaleEvalBadge, ScaleEvolutionChart, ScaleMetaBadges, ScalePassationDetail, ScheduleCell, SourceCitation, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
 
@@ -1326,6 +1326,38 @@ faux, et c'est `modules.hidden_reason` (#406) qui tranche, jamais une liste écr
 le composant. **Aucun contrôle** n'y figure (un test vérifie l'absence de `button`,
 `input` et `a`) : la carte informe, elle n'assigne rien, le filtre général `is_hidden`
 n'est pas relâché, et la base refuserait l'assignation de toute façon.
+
+### `ScaleEvolutionChart` (`components/features/`)
+
+`components/features/ScaleEvolutionChart/`. Vue Évolution d'une échelle (#420) : courbe
+des totaux sur fond neutre, graduations au pas de 5, et une bande par item suivi sous
+l'axe, alignée sur les mêmes abscisses que les points. Pied de vue : `SourceCitation`.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `entries` | `readonly EvolutionEntry[]` | Passations (`date`, `score`, `bandCodes`) |
+| `bands` | `readonly EvolutionBand[]` | Bandes, dans l'ordre des `bandCodes`. Libellés déjà traduits |
+| `yMax` | `number` | Borne haute de l'axe, dérivée de la config de l'échelle |
+| `color` | `string` | Accent d'identité de l'échelle (tracé et points) |
+| `citation` / `translationAttribution` | `string` / `string \| null` | Mentions dues (#417) |
+| `locale`, `t` | `string`, `(key, options?) => string` | Formatage et traduction injectés |
+
+**L'alignement des bandes est structurel, pas surveillé.** Le défaut trouvé en revue de
+maquette était que les bandes vivaient dans un espace de coordonnées indépendant de la
+courbe : la valeur du 28 juillet s'affichait sous le point du 14, écran crédible et
+entièrement faux, invisible tant qu'on teste à intervalles réguliers. Ici, points,
+étiquettes et cellules lisent la **même** abscisse, calculée une fois par
+`buildEvolutionLayout` (`evolutionLayout.ts`, pur et testé à part). Il n'y a pas deux
+espaces à synchroniser, donc rien à désynchroniser ; un test le prouve à intervalles
+irréguliers.
+
+**L'axe des x est régulier en TEMPS**, pas en rang : deux passations à 14 jours
+d'intervalle occupent le même espace horizontal partout, sinon les pentes ne seraient
+pas comparables d'un segment à l'autre.
+
+**MDR** : aucune bande de sévérité en fond, aucune ligne de seuil, aucune flèche, aucune
+moyenne, aucune projection. Toutes les cellules de bande se rendent à l'identique, quelle
+que soit la réponse (test de signature de balisage).
 
 ### `SourceCitation` (`components/features/`)
 

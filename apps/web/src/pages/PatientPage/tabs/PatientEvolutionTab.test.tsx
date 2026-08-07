@@ -20,6 +20,15 @@ vi.mock('../../../components/ui/Chart', async (importActual) => {
   }
 })
 
+// La vue Évolution d'une échelle est couverte par ScaleEvolutionSection.test.tsx et
+// ScaleEvolutionChart.test.tsx : ici on vérifie seulement qu'elle est montée pour la
+// bonne échelle (routage des sections).
+vi.mock('./ScaleEvolutionSection', () => ({
+  ScaleEvolutionSection: ({ moduleType }: { moduleType: string }) => (
+    <div data-testid="scale-evolution" data-module={moduleType} />
+  ),
+}))
+
 // Le panneau détaillé lui-même est couvert par ColumnFormDataPanel.test.tsx :
 // ici on vérifie seulement qu'il est monté avec les fiches de l'agrégat.
 // Le bandeau d'aperçu est couvert par EvolutionOverviewBand.test.tsx ; ici on
@@ -232,7 +241,9 @@ describe('PatientEvolutionTab — sections converties (échelle, effets)', () =>
       </QueryClientProvider>,
     )
     await waitFor(() => expect(getByRole('button', { name: /evolution\.scale_phq9/ })).toBeTruthy())
-    expect(getAllByTestId('linechart').length).toBeGreaterThanOrEqual(1)
+    // La courbe générique a laissé la place à la vue Évolution dédiée (#420).
+    expect(getAllByTestId('scale-evolution')).toHaveLength(1)
+    expect(getAllByTestId('scale-evolution')[0].getAttribute('data-module')).toBe('phq9')
     fireEvent.click(getByRole('button', { name: /evolution\.view_data/ }))
     expect(onOpen).toHaveBeenCalledWith('phq9')
   })

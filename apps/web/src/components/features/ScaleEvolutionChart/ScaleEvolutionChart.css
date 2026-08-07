@@ -1,0 +1,117 @@
+/* Vue Évolution d'une échelle (#420). Fond neutre, sans exception : aucune bande de
+   sévérité, aucune ligne de seuil, aucune teinte de progression. La seule couleur est
+   celle de l'identité de l'échelle, portée par le tracé et les points. */
+
+.sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Au-delà de quelques passations, le tracé s'élargit et le cadre défile plutôt que
+   d'empiler des étiquettes illisibles. */
+.sec__scroll {
+  overflow-x: auto;
+}
+
+.sec__plot {
+  position: relative;
+}
+
+.sec__chart {
+  position: relative;
+  height: 220px;
+  /* Marge pour les graduations à gauche et les valeurs au-dessus des points. */
+  margin: var(--spacing-lg) 0 0 var(--spacing-lg);
+}
+
+.sec__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.sec__grid {
+  stroke: var(--color-border);
+  stroke-width: 1;
+}
+
+.sec__tick {
+  position: absolute;
+  left: 0;
+  transform: translate(-100%, -50%);
+  padding-right: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.sec__point {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-card);
+  transform: translate(-50%, -50%);
+}
+
+.sec__value {
+  position: absolute;
+  transform: translate(-50%, -160%);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.sec__dates {
+  position: relative;
+  height: 1.5rem;
+  margin-left: var(--spacing-lg);
+  padding-top: var(--spacing-xs);
+  border-top: 1px solid var(--color-border);
+}
+
+.sec__date {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.sec__band {
+  margin-left: var(--spacing-lg);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+.sec__band-label {
+  margin: 0 0 var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.sec__band-row {
+  position: relative;
+  height: 1.5rem;
+}
+
+/* Même habillage pour toutes les cellules : la modalité choisie ne teinte rien, et
+   « Presque tous les jours » se rend exactement comme « Jamais » (MDR). */
+.sec__band-cell {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.sec__empty {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}

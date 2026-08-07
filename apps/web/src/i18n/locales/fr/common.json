@@ -303,6 +303,15 @@
       "title": "En veille, non assignables",
       "reason_rights": "Droits d'usage en cours de vérification. Elles réapparaîtront ici une fois réglés.",
       "reason_beta_scope": "Hors du périmètre de la bêta. Leurs droits sont acquis, elles reviendront."
+    },
+    "evolution": {
+      "window_label": "Fenêtre de lecture",
+      "window_6m": "6 mois",
+      "window_1y": "1 an",
+      "window_all": "Tout",
+      "band_item": "Réponse à l'item {{position}}",
+      "band_item_unscored": "Item {{position}}, hors score",
+      "empty": "Aucune passation sur cette fenêtre."
     }
   },
   "patient_rights": {

@@ -199,7 +199,7 @@ create table public.module_content_fields (
 | `scale_legend_item` | Légende numérique (BSL-23) | `value` (obligatoire) |
 | `scale_warning` | Bandeau jaune avertissement | — |
 | `scale_section` | En-tête de section | — |
-| `scale_question` | Question + LikertWidget | `scored='false'` marque un item **posé mais non coté** (#410) |
+| `scale_question` | Question + LikertWidget | `scored='false'` marque un item **posé mais non coté** (#410) ; `track_in_evolution='true'` le fait suivre en bande sous la courbe d'évolution (#420) |
 | `scale_slider_question` | Question + pips numériques | `min`, `max`, `color`, `icon`, `low_hint_code`, `high_hint_code` |
 | `scale_number_input` | Champ numérique libre | `subscale_key` |
 | `scale_text_input` | Champ texte libre | `placeholder_code`, `subscale_key` |
@@ -210,6 +210,14 @@ create table public.module_content_fields (
 > note est affichée **en permanence** dans `ScalePassationDetail`, jamais en fonction
 > d'une réponse : une note qui n'apparaîtrait qu'au-delà d'une valeur serait une alerte
 > déclenchée par une donnée patient, donc hors du statut non-dispositif médical.
+
+> **`track_in_evolution` : quel item mérite une bande, c'est de la config.** La vue
+> Évolution est partagée par toutes les échelles ; y écrire « le 9ᵉ item du PHQ-9 »
+> serait le `if (moduleId === 'phq9')` que l'Epic interdit. Chaque item marqué produit
+> une bande sous la courbe, alignée sur les mêmes abscisses que les points. L'intitulé
+> se dérive du **rang** de l'item et de son `scored` (`scales.evolution.band_item` /
+> `band_item_unscored`), jamais du nom d'un module. Aucun item marqué = aucune bande, et
+> la vue se réduit à la courbe.
 
 **Layout `guided_exercise`**
 

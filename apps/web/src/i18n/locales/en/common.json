@@ -303,6 +303,15 @@
       "title": "Dormant, not assignable",
       "reason_rights": "Usage rights being verified. They will reappear here once settled.",
       "reason_beta_scope": "Outside the beta scope. Their rights are secured, they will come back."
+    },
+    "evolution": {
+      "window_label": "Reading window",
+      "window_6m": "6 months",
+      "window_1y": "1 year",
+      "window_all": "All",
+      "band_item": "Answer to item {{position}}",
+      "band_item_unscored": "Item {{position}}, not scored",
+      "empty": "No administration in this window."
     }
   },
   "patient_rights": {
