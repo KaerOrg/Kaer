@@ -3,29 +3,13 @@ import type { LikertOption } from '../../../components/features/ModuleRenderer/f
 import type { StepperQuestion, Translate } from './StepperEntry'
 
 /**
- * Mode de saisie d'une échelle.
- *
- * - `scrolling_list` : tous les items sur une page défilante. Défaut historique, et
- *   le seul tenable au-delà d'une vingtaine d'items (RCADS-47, NSI-22), où un item
- *   par écran devient punitif.
- * - `one_per_screen` : un item par écran, avance automatique, relecture avant envoi.
- *
- * C'est une CONFIGURATION, lue depuis `scale_meta`, jamais un test sur le module :
- * `ScaleEntryScreen` est partagé par les neuf modules d'échelle.
+ * Le mode de saisie est remonté dans `@kaer/shared` (#422) : le patient saisit dans ce
+ * mode, et l'aperçu praticien doit montrer le MÊME. Deux lectures divergeraient au
+ * premier changement de configuration, et l'aperçu montrerait une interface qui
+ * n'existe plus. Ré-exporté ici pour que les appelants mobiles restent inchangés.
  */
-export type EntryMode = 'scrolling_list' | 'one_per_screen'
-
-const DEFAULT_ENTRY_MODE: EntryMode = 'scrolling_list'
-
-/**
- * Lit `scale_meta.entry_mode`. Toute valeur absente ou inconnue retombe sur le mode
- * défilant : une configuration erronée dégrade vers le comportement historique, elle
- * ne casse pas la saisie.
- */
-export function readEntryMode(fields: readonly ContentField[] | null): EntryMode {
-  const raw = fields?.find(f => f.field_type === 'scale_meta')?.props['entry_mode']
-  return raw === 'one_per_screen' || raw === 'scrolling_list' ? raw : DEFAULT_ENTRY_MODE
-}
+export { readEntryMode } from '@kaer/shared'
+export type { EntryMode } from '@kaer/shared'
 
 /** Consignes du questionnaire, dans l'ordre, résolues en texte affichable. */
 export function readInstructions(fields: readonly ContentField[], t: Translate): string[] {

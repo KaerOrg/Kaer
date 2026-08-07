@@ -312,6 +312,11 @@
       "band_item": "Réponse à l'item {{position}}",
       "band_item_unscored": "Item {{position}}, hors score",
       "empty": "Aucune passation sur cette fenêtre."
+    },
+    "preview": {
+      "one_per_screen_note": "Le patient répond à un item par écran, dans cet ordre.",
+      "step_progress": "Écran {{index}} sur {{total}}",
+      "unscored": "hors score"
     }
   },
   "patient_rights": {
