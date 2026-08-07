@@ -13,6 +13,7 @@ const SPINNER_COLOR: Record<ButtonVariant, string> = {
   ghost: colors.primary,
   danger: colors.danger,
   ghostDanger: colors.danger,
+  dangerSolid: colors.white,
 }
 
 export const Button = React.memo(function Button({ label, sublabel, onPress, variant = 'primary', size = 'md', loading, disabled, style, iconLeft, iconRight, accessibilityLabel, testID }: ButtonProps) {

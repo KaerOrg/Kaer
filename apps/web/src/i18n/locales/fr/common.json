@@ -647,10 +647,18 @@
       "anchor_phrase_label": "Ma phrase d'ancrage",
       "anchors_preview_info": "Le patient ajoute jusqu'à 3 photos et une phrase personnelle sur son téléphone.",
       "emergency_bar_label": "Numéros d'urgence, toujours accessibles",
-      "emergency_samu": "15, SAMU",
-      "emergency_samu_label": "Urgence médicale",
-      "emergency_3114": "3114, Prévention",
-      "emergency_3114_label": "Numéro national"
+      "emergency_3114": "3114",
+      "emergency_3114_label": "Parler, 24h/24",
+      "emergency_3114_action": "Appeler le 3114",
+      "emergency_3114_detail": "Souffrance psychique · 24h/24 · gratuit · aussi pour mes proches",
+      "emergency_samu": "15",
+      "emergency_samu_label": "Danger vital",
+      "emergency_samu_action": "Appeler le 15",
+      "emergency_samu_detail": "Danger immédiat pour ma vie · 112 en Europe",
+      "emergency_114": "114",
+      "emergency_114_label": "Par écrit",
+      "emergency_114_action": "Écrire au 114",
+      "emergency_114_detail": "Le même secours, par SMS ou visio, si je suis sourd(e) ou malentendant(e)"
     },
     "therapeutic_commitment": {
       "label": "Contrat d'engagement thérapeutique",

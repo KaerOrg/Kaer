@@ -148,12 +148,18 @@
       "carousel_prev": "Foto anterior",
       "carousel_next": "Foto seguinte",
       "delete_item_title": "Eliminar este elemento",
-      "emergency_samu": "112, Emergência",
-      "emergency_samu_label": "Emergência médica",
       "emergency_3114": "SOS Voz Amiga",
-      "emergency_3114_label": "Linha de apoio",
-      "emergency_samu_a11y": "Ligar para o 112, emergência médica",
-      "emergency_3114_a11y": "Ligar para a linha de prevenção do suicídio"
+      "emergency_3114_label": "Falar, 24 h",
+      "emergency_3114_action": "Ligar para a SOS Voz Amiga",
+      "emergency_3114_detail": "Sofrimento psíquico · 24 h · gratuito · também para os meus próximos",
+      "emergency_samu": "112",
+      "emergency_samu_label": "Perigo de vida",
+      "emergency_samu_action": "Ligar para o 112",
+      "emergency_samu_detail": "Perigo imediato para a minha vida · 112 na Europa",
+      "emergency_114": "114",
+      "emergency_114_label": "Por escrito",
+      "emergency_114_action": "Escrever para o 114",
+      "emergency_114_detail": "O mesmo socorro, por SMS ou vídeo, se for surdo ou tiver dificuldades auditivas"
     },
     "therapeutic_commitment": {
       "label": "Compromisso terapêutico",

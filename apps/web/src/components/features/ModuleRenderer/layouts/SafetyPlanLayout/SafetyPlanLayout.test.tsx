@@ -31,7 +31,8 @@ const sections = new Map<string, ContentField[]>([
 ])
 
 const unsectioned: ContentField[] = [
-  field({ id: 'em', field_type: 'exercise_safety', text_code: 'num', sort_order: 130, props: { phone: '15', bgColor: '#0D9488', label_code: 'lbl' } }),
+  // `tone` sémantique, plus de `bgColor` en dur : la couleur appartient au composant (P-3).
+  field({ id: 'em', field_type: 'exercise_safety', text_code: 'num', sort_order: 130, props: { phone: '15', tone: 'danger', label_code: 'lbl' } }),
   field({ id: 'anchors', field_type: 'crisis_anchors_preview', sort_order: 70 }),
 ]
 
@@ -39,7 +40,9 @@ describe('SafetyPlanLayout (web)', () => {
   it('affiche le titre de consultation, le numéro d\'urgence et l\'étape', () => {
     renderWithClient(<SafetyPlanLayout sections={sections} unsectioned={unsectioned} moduleId="crisis_plan" t={t} />)
     expect(screen.getByText('modules.crisis_plan.consultation_title')).toBeInTheDocument()
-    expect(screen.getByText('15')).toBeInTheDocument()
+    // Le libellé du numéro passe par i18n (`text_code`), le numéro brut n'est plus
+    // qu'un repli quand le field n'en porte aucun.
+    expect(screen.getByText('num')).toBeInTheDocument()
     expect(screen.getByText('modules.crisis_plan.step_1_title')).toBeInTheDocument()
     expect(screen.getByText('modules.crisis_plan.step_private_note')).toBeInTheDocument()
   })

@@ -44,6 +44,9 @@ export function injectTheme(): void {
   root.setProperty('--color-primary-light', colors.primaryLight)
   root.setProperty('--color-danger', colors.danger)
   root.setProperty('--color-danger-light', colors.dangerLight)
+  // Rouge foncé de crise : le seul des deux rouges qui porte un libellé blanc à ≈ 4,8:1.
+  root.setProperty('--color-danger-text', colors.dangerText)
+  root.setProperty('--color-white', colors.white)
   root.setProperty('--color-success', colors.success)
   root.setProperty('--color-success-light', colors.successLight)
   root.setProperty('--color-warning', colors.warning)
