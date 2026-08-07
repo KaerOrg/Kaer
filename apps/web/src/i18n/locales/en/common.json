@@ -317,6 +317,11 @@
       "one_per_screen_note": "The patient answers one item per screen, in this order.",
       "step_progress": "Screen {{index}} of {{total}}",
       "unscored": "not scored"
+    },
+    "realtime": {
+      "new_passation_one": "An administration just arrived.",
+      "new_passation_other": "{{count}} administrations just arrived.",
+      "open": "View"
     }
   },
   "patient_rights": {

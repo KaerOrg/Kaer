@@ -125,7 +125,7 @@ inatteignables après la migration des autres modules vers des layouts dédiés,
 | Dossier | Rôle |
 |---|---|
 | `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, ProgressRing, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle, TreeSelector |
-| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModuleFilterBar, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, OverdueScalesReminder, PatientDataRights, DormantScalesCard, ScaleEvalBadge, ScaleEvolutionChart, ScaleMetaBadges, ScalePassationDetail, ScheduleCell, SourceCitation, SupportRequestModal, WeekGrid |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModuleFilterBar, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, OverdueScalesReminder, PatientDataRights, DormantScalesCard, NewPassationBanner, ScaleEvalBadge, ScaleEvolutionChart, ScaleMetaBadges, ScalePassationDetail, ScheduleCell, SourceCitation, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
 
@@ -1326,6 +1326,26 @@ faux, et c'est `modules.hidden_reason` (#406) qui tranche, jamais une liste écr
 le composant. **Aucun contrôle** n'y figure (un test vérifie l'absence de `button`,
 `input` et `a`) : la carte informe, elle n'assigne rien, le filtre général `is_hidden`
 n'est pas relâché, et la base refuserait l'assignation de toute façon.
+
+### `NewPassationBanner` (`components/features/`)
+
+`components/features/NewPassationBanner/`. Bandeau de fiche patient (#423) : une
+passation vient d'arriver depuis le mobile, **sans rechargement**. Enveloppe
+`ui/Banner variant="info"` avec une action « Voir » (ouvre l'onglet Échelles) et une
+fermeture. Rien n'est rendu quand `count` vaut 0.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `count` | `number` | Passations arrivées depuis la dernière consultation. `0` → aucun rendu |
+| `onOpen` | `() => void` | Ouvre l'onglet Échelles et éteint le signal |
+| `onDismiss` | `() => void` | Ferme le bandeau sans naviguer |
+
+**MDR** : un badge neutre est un **fait**, pas une interprétation. Il annonce qu'une
+passation est arrivée, jamais ce qu'elle contient : aucun score, aucun adjectif, aucune
+couleur d'alerte (test dédié sur la variante et le texte). Son déclencheur est l'arrivée
+d'une saisie, quel qu'en soit le contenu, et `patientRealtimeService` n'expose même pas
+le payload à ses abonnés. Aucun courriel n'est émis : cela créerait une attente de
+réactivité que personne ne s'est engagé à tenir.
 
 ### `ScaleEvolutionChart` (`components/features/`)
 

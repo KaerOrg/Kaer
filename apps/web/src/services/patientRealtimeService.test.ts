@@ -45,14 +45,56 @@ describe('subscribePatientEntries', () => {
     expect(mockSubscribe).toHaveBeenCalled()
   })
 
-  it('déclenche onChange à la réception d\'un événement', () => {
+  /** Le 3ᵉ argument de `.on` est le callback Realtime : le simuler. */
+  function emit(payload: Record<string, unknown>): void {
+    const realtimeCallback = mockOn.mock.calls[0][2] as (p: Record<string, unknown>) => void
+    realtimeCallback(payload)
+  }
+
+  it('déclenche onChange avec la NATURE du changement, jamais son contenu', () => {
     const onChange = vi.fn()
     subscribePatientEntries('pt1', onChange)
-    // Le 3e argument de .on est le callback Realtime — le simuler.
-    const realtimeCallback = mockOn.mock.calls[0][2] as () => void
-    realtimeCallback()
+
+    emit({
+      eventType: 'INSERT',
+      // Le payload complet arrive du serveur ; le service ne doit en laisser passer
+      // que l'espèce. Un abonné qui lirait les réponses franchirait la ligne MDR.
+      new: { entry_kind: 'scale_entry', module_id: 'phq9', payload: { answers: [3, 3, 3] } },
+    })
 
     expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange).toHaveBeenCalledWith({
+      eventType: 'INSERT',
+      entryKind: 'scale_entry',
+      moduleId: 'phq9',
+    })
+  })
+
+  it('lit la ligne supprimée sur un DELETE', () => {
+    const onChange = vi.fn()
+    subscribePatientEntries('pt1', onChange)
+
+    emit({ eventType: 'DELETE', old: { entry_kind: 'scale_entry', module_id: 'gad7' } })
+
+    expect(onChange).toHaveBeenCalledWith({
+      eventType: 'DELETE',
+      entryKind: 'scale_entry',
+      moduleId: 'gad7',
+    })
+  })
+
+  it('signale quand même le changement si la ligne ne porte rien d\'exploitable', () => {
+    // Le rafraîchissement des données ne doit pas dépendre de la forme du payload.
+    const onChange = vi.fn()
+    subscribePatientEntries('pt1', onChange)
+
+    emit({ eventType: 'INSERT', new: {} })
+
+    expect(onChange).toHaveBeenCalledWith({
+      eventType: 'INSERT',
+      entryKind: null,
+      moduleId: null,
+    })
   })
 
   it('renvoie une fonction de désabonnement qui retire le canal', () => {
