@@ -950,6 +950,22 @@ values
     1
   ),
 
+  -- Document source de la version française employée dans l'app (« French for France »).
+  --    Publié sur phqscreeners.com, le site des auteurs. Le PDF porte lui-même la
+  --    mention « La reproduction, la traduction, l'affichage ou la distribution de ce
+  --    document sont autorisés » : c'est ce qui rend son emploi libre, et c'est la
+  --    raison pour laquelle le praticien doit pouvoir y accéder d'un clic.
+  (
+    'cccccccc-0001-0001-0001-000000000002',
+    'phq9',
+    'PHQ-9 : version française officielle « French for France » (phqscreeners.com)',
+    'expert_opinion',
+    'https://www.phqscreeners.com/images/sites/g/files/g10060481/f/201412/PHQ9_French%20for%20France.pdf',
+    null,
+    'Document source des libellés affichés dans Kær, repris au mot et à la virgule près. Développé par les Dr Robert L. Spitzer, Janet B.W. Williams, Kurt Kroenke et leurs collègues grâce à une allocation d''études de Pfizer Inc. Reproduction, traduction, affichage et distribution autorisés.',
+    2
+  ),
+
 -- ── gad7 ─────────────────────────────────────────────────────────────────────
 -- GAD-7 — Trouble anxieux généralisé (7 items)
 -- Source vérifiée : PMID 16717171 — Spitzer et al. 2006 (vérifié PubMed, abstract lu)

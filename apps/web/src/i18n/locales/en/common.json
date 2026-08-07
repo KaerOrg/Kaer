@@ -261,7 +261,7 @@
       "cssrs": "Columbia Suicide Severity Rating Scale"
     },
     "descriptions": {
-      "phq9": "9-item depression screening and severity questionnaire. Global reference for longitudinal follow-up. Kær translation, not psychometrically validated: totals do not compare to the published French corpus. INESSS notes the lack of French validation, and a Geneva University Hospitals study found about 50 % false negatives against the psychiatric interview.",
+      "phq9": "9-item depression screening and severity questionnaire. Global reference for longitudinal follow-up. Official “French for France” version, free to reproduce. INESSS notes the lack of French validation, and a Geneva University Hospitals study found about 50 % false negatives against the psychiatric interview.",
       "gad7": "7-item rapid assessment of generalized anxiety disorder. Sensitive to therapeutic change.",
       "epds": "Perinatal depression screening (antenatal and postnatal). International reference recommended by NICE.",
       "rcads": "Measures anxious and depressive symptoms in children and adolescents. Self-report and parent versions available.",
