@@ -7,12 +7,6 @@ export interface LastSubmissionBannerProps {
   label: string
   /** Date du dernier envoi, déjà formatée. */
   date: string
-  /**
-   * Ligne d'accusé de lecture, déjà formatée, ou `null` s'il n'y en a pas.
-   * L'accusé arrive avec QW-2 : d'ici là, la ligne n'existe pas. Pas de placeholder,
-   * pas de ligne fantôme : l'information absente ne s'affiche pas.
-   */
-  readNotice: string | null
 }
 
 /**
@@ -20,15 +14,22 @@ export interface LastSubmissionBannerProps {
  *
  * Conformité MDR : il annonce une DATE, jamais un score, jamais un écart. Sa couleur
  * est un accent d'identité fixe et ne dépend d'aucune réponse du patient.
+ *
+ * **Pas d'accusé de lecture ici.** Le champ existait, il a été retiré : le patient
+ * remplit le questionnaire parce que son soignant le lui a prescrit, et l'échange a
+ * lieu en séance. Surtout, une ligne « Vu le … » qui apparaît une fois puis plus
+ * ensuite fait lire quelque chose dans son absence, et un biais d'interprétation
+ * négatif fait partie du tableau clinique qu'on suit ici. Le retour humain qui compte
+ * est la consigne écrite par le soignant (#421), pas un horodatage automatique.
+ * L'accusé reste enregistré et visible côté praticien.
  */
 export const LastSubmissionBanner = React.memo(function LastSubmissionBanner({
-  label, date, readNotice,
+  label, date,
 }: LastSubmissionBannerProps) {
   return (
     <View style={styles.banner} testID="last-submission-banner">
       <Text style={styles.bannerLabel}>{label}</Text>
       <Text style={styles.bannerDate}>{date}</Text>
-      {readNotice != null ? <Text style={styles.bannerRead}>{readNotice}</Text> : null}
     </View>
   )
 })

@@ -141,9 +141,9 @@ export function ScalePassationDetail({
           ))}
 
           <Card header={{ title: t('scales.entry_detail.follow_up_title') }}>
-            {/* Accusé de lecture (#419) : la date de PREMIÈRE ouverture, celle que le
-                patient voit de son côté. Absente tant que personne n'a ouvert, et
-                aucun état intermédiaire ne la remplace. */}
+            {/* Accusé de lecture (#419) : la date de PREMIÈRE ouverture. Rappel adressé
+                au praticien, jamais montré au patient. Absente tant que personne n'a
+                ouvert, et aucun état intermédiaire ne la remplace. */}
             {passation.readAt != null && (
               <p className="spd-follow__line">
                 {t('scales.entry_detail.opened_at', { date: formatDate(passation.readAt, locale) })}

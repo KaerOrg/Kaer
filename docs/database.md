@@ -426,7 +426,16 @@ le complète pas, et ne le déclenche jamais à partir d'une réponse.
 ## Accusé de lecture d'une passation : `patient_entries.practitioner_read_at` (#419)
 
 Une date, et une seule : celle de la **première ouverture** d'une passation par un
-praticien rattaché. Elle alimente la ligne « Vu par … le … » côté patient.
+praticien rattaché. Elle est affichée **au praticien**, dans le détail d'une passation.
+
+> ⚠️ **Elle n'est pas montrée au patient**, et ne doit pas le redevenir. Le champ avait
+> d'abord été conçu pour lui afficher « Vu par votre soignant le … » ; la décision a été
+> renversée après livraison. Une ligne présente une fois puis absente ensuite fait lire
+> quelque chose dans son **absence**, et le biais d'interprétation négatif fait partie du
+> tableau clinique suivi ici. Par ailleurs, un horodatage automatique n'est pas un retour
+> humain, c'en est l'apparence : le retour qui compte est la consigne écrite par le
+> soignant (`scale_schedules.instruction`, #421). Enfin, le questionnaire est prescrit et
+> l'échange a lieu en séance : la date n'apprend rien au patient.
 
 | Élément | Rôle |
 |---|---|

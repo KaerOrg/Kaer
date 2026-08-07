@@ -1037,6 +1037,9 @@
     "cssrs": {
       "label": "C-SSRS, Risque suicidaire",
       "description": ""
+    },
+    "scale_history": {
+      "start_hint": "Tu peux t'arrêter et reprendre."
     }
   },
   "common": {

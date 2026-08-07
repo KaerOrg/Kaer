@@ -143,9 +143,9 @@ Les autres points de lecture seront instrumentés incrémentalement avec le mêm
 > **À ne pas confondre avec l'accusé de lecture.** Les deux partent du même geste, mais
 > ne servent pas la même chose : le journal d'audit enregistre **chaque** consultation,
 > pour une obligation RGPD/HDS ; l'accusé de lecture
-> (`patient_entries.practitioner_read_at`) ne retient que la **première**, parce que le
-> patient n'a pas à savoir combien de fois son praticien a rouvert sa passation. Un
-> échec de l'un n'empêche jamais l'autre.
+> (`patient_entries.practitioner_read_at`) ne retient que la **première**, et sert à
+> rappeler au praticien qu'il a déjà ouvert cette passation. Ni l'un ni l'autre n'est
+> montré au patient. Un échec de l'un n'empêche jamais l'autre.
 
 ---
 
