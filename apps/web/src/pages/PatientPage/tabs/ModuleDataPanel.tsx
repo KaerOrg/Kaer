@@ -19,6 +19,7 @@ import { ChronoDataPanel } from './ChronoDataPanel'
 import { ColumnFormDataPanel } from './ColumnFormDataPanel'
 import { EmotionNamingDataPanel } from './EmotionNamingDataPanel'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
+import { ScalePassationsPanel } from './ScalePassationsPanel'
 import './ModuleDataPanel.css'
 
 // Modules « évidents » pour un graphique d'évolution : séries temporelles
@@ -131,14 +132,20 @@ export function ModuleDataPanel({ patientId, moduleType }: Props) {
       {state.status === 'scale' && (() => {
         const cfg = SCALE_CONFIG[moduleType] ?? { color: DEFAULT_SCALE_COLOR, yMax: 27 }
         return (
-          <ModuleChart
-            title={t(`evolution.scale_${moduleType}`, { defaultValue: t(`modules.${moduleType}.label`) })}
-            count={state.points.length}
-            data={state.points.map(p => ({ date: p.date, score: p.score }))}
-            series={[{ key: 'score', color: cfg.color, label: t(`evolution.scale_${moduleType}`, { defaultValue: t(`modules.${moduleType}.label`) }) }]}
-            yDomain={[0, cfg.yMax]}
-            locale={locale}
-          />
+          <>
+            <ModuleChart
+              title={t(`evolution.scale_${moduleType}`, { defaultValue: t(`modules.${moduleType}.label`) })}
+              count={state.points.length}
+              data={state.points.map(p => ({ date: p.date, score: p.score }))}
+              series={[{ key: 'score', color: cfg.color, label: t(`evolution.scale_${moduleType}`, { defaultValue: t(`modules.${moduleType}.label`) }) }]}
+              yDomain={[0, cfg.yMax]}
+              locale={locale}
+            />
+            {/* Le détail réponse par réponse (#418) : la courbe ne dit que le total,
+                et la réponse à l'item sur les pensées de mort était jusqu'ici dans le
+                dossier sans que rien ne la donne à lire. */}
+            <ScalePassationsPanel patientId={patientId} moduleType={moduleType} />
+          </>
         )
       })()}
 

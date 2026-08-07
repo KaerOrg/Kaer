@@ -228,6 +228,24 @@
       "last_none": "none",
       "preview": "Preview the scale"
     },
+    "entry_detail": {
+      "list_title": "Administrations",
+      "header_date": "Administered on {{date}}",
+      "empty": "No administration recorded.",
+      "total_label": "{{scale}} total",
+      "total_aria": "{{score}} out of {{max}}",
+      "previous": "Previous: {{score}} on {{date}}",
+      "min_change_note": "The smallest individually interpretable change is {{points}} points.",
+      "unscored_title": "Item {{position}}, not scored",
+      "unscored_caption": "This item is asked, it does not count towards the total.",
+      "follow_up_title": "Follow-up",
+      "patient_sees": "The patient sees this administration in their app.",
+      "next_due": "Next due: {{date}}",
+      "answers_title_one": "The answer",
+      "answers_title_other": "The {{count}} answers",
+      "instrument_note": "Note carried by the questionnaire",
+      "not_scored_aria": "Not scored"
+    },
     "validated_prefix": "Validated",
     "age": {
       "perinatal": "Perinatal",
@@ -660,7 +678,8 @@
       "score_max": "/ 27",
       "footer": "The score is shared with your clinician. Interpretation is their responsibility.",
       "progress": "{answered} / {total} answers",
-      "submit": "Send my answers"
+      "submit": "Send my answers",
+      "practitioner_note_item9": "If the patient answers positively to question 9, an evaluation of suicide risk or self-harm by a qualified professional is advised."
     },
     "gad7": {
       "label": "GAD-7",

@@ -1,0 +1,15 @@
+/* Panneau maître-détail des passations d'une échelle (#418). Même gabarit que les
+   fiches `column_form` : liste étroite à gauche, détail à droite sur écran large. */
+
+.spd-panel__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--spacing-md);
+}
+
+@media (min-width: 720px) {
+  .spd-panel__layout {
+    grid-template-columns: minmax(120px, 160px) minmax(0, 1fr);
+    align-items: start;
+  }
+}

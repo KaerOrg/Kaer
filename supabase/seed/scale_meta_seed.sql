@@ -58,6 +58,15 @@ values
   -- et « 4 points de plus » tombe sur quelqu'un dont le biais interprétatif négatif
   -- fait partie du tableau clinique. Absent = 'inline', le comportement historique.
   ('phq9.scale_meta', 'score_display',     'collapsed'),
+  -- Plus petit changement individuel interprétable, en points (#418). Löwe et al.
+  -- l'estiment à 2 erreurs-types de mesure, soit 5 points sur l'échelle 0 à 27
+  -- (Medical Care, 2004, cohorte IMPACT, n = 434 ; PMID 15550799).
+  --
+  -- Affiché au PRATICIEN comme une propriété de l'instrument, en permanence dès qu'un
+  -- écart est montré, et JAMAIS comparé à l'écart du patient : « votre écart est trop
+  -- petit pour être interprété » serait une conclusion tirée d'une donnée patient. On
+  -- donne la règle, le clinicien l'applique. Absent = aucune mention affichée.
+  ('phq9.scale_meta', 'min_interpretable_change', '5'),
   ('phq9.scale_meta', 'reference_label',   'NICE NG222 — Dépression adulte : PHQ-9 recommandé pour le suivi régulier (2022). Également recommandé par l''APA Clinical Practice Guidelines.'),
   ('phq9.scale_meta', 'reference_url',     'https://www.nice.org.uk/guidance/ng222'),
   -- Citation des auteurs (#417). C'est une OBLIGATION, condition de la libération du

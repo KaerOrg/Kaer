@@ -125,7 +125,7 @@ inatteignables après la migration des autres modules vers des layouts dédiés,
 | Dossier | Rôle |
 |---|---|
 | `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, ProgressRing, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle, TreeSelector |
-| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModuleFilterBar, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, OverdueScalesReminder, PatientDataRights, ScaleEvalBadge, ScaleMetaBadges, ScheduleCell, SupportRequestModal, WeekGrid |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModuleFilterBar, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, OverdueScalesReminder, PatientDataRights, ScaleEvalBadge, ScaleMetaBadges, ScalePassationDetail, ScheduleCell, SourceCitation, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
 
@@ -1309,6 +1309,58 @@ retard (nom + jours de retard) qui remonte l'ouverture de la fiche. **MDR** : co
 |---|---|---|
 | `items` | `readonly OverdueScaleItem[]` | Échelles en retard (`moduleType`, `label`, `overdueDays`) |
 | `onOpen` | `(moduleType: ModuleType) => void` | Ouvre la fiche de l'échelle (onglet Programmation) |
+
+### `SourceCitation` (`components/features/`)
+
+`components/features/SourceCitation/`. Mention de source d'un instrument clinique
+(#417) : citation des auteurs, et attribution de traduction quand un tiers l'impose.
+**C'est une obligation de licence, pas un ornement** : elle doit être rendue partout où
+les items de l'instrument sont montrés à un humain, et un garde-fou CI
+(`sourceCitation.guard.test.ts`) échoue si un écran l'oublie. Ne rend rien si la
+citation est vide. La recommandation clinique (`reference_label`) n'y figure pas : c'est
+un argument de crédibilité, il vit au moment du choix du praticien.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `citation` | `string` | Citation des auteurs. Vide → aucun rendu |
+| `translationAttribution` | `string \| null` | Attribution de la traduction. `null` est le cas nominal (aucune ligne, aucun espace parasite) |
+
+Les mentions se lisent depuis `scale_meta` avec `readScaleSource` (`@kaer/shared`),
+jamais codées dans un écran : chaque échelle a sa propre formule.
+
+### `ScalePassationDetail` (`components/features/`)
+
+`components/features/ScalePassationDetail/`. Détail d'une passation d'échelle côté
+praticien (#418) : synthèse à gauche (total, écart avec la passation précédente, items
+hors score, suivi), réponses item par item à droite, note(s) du questionnaire, puis la
+mention de source (`SourceCitation`). Le dossier porte aussi `ScalePassationList`, la
+liste latérale de sélection. Présentationnel pur : `ScalePassationsPanel`
+(`pages/PatientPage/tabs/`) orchestre les lectures et injecte les données.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `fields` | `readonly ContentField[]` | Fields du module : libellés, modalités, notes, mentions de source (config-first) |
+| `passation` | `ScalePassation` | La passation affichée (`answers` bruts + total) |
+| `previous` | `ScalePassation \| null` | Passation qui précède, `null` pour la première |
+| `scaleLabel` | `string` | Nom de l'échelle **déjà traduit** : le composant ne connaît aucun module |
+| `nextDueIso` | `string \| null` | Prochaine échéance de calendrier, `null` si passation à la demande |
+| `locale` | `string` | Locale de formatage des dates |
+| `t` | `(key, options?) => string` | Fonction de traduction injectée |
+
+**MDR 2017/745.** Aucun style, aucune classe, aucune couleur ne dépend de la valeur
+d'une réponse : une ligne à 3 se rend exactement comme une ligne à 0, et l'item sur les
+pensées de mort n'est pas teinté. La note du questionnaire s'affiche **en permanence**,
+y compris quand la réponse est « Jamais ». Elle appartient à l'instrument, elle n'est
+pas déclenchée par une donnée. Aucun adjectif de sévérité, aucune tranche de score.
+L'écart en points est montré parce qu'il s'adresse à un professionnel, et il est
+accompagné du plus petit écart interprétable de l'instrument, jamais comparé à lui.
+Deux tests structurels tiennent ces deux points : la signature de balisage de toutes
+les lignes doit être identique entre deux passations opposées, et la note doit être
+présente à réponse nulle.
+
+La logique de mise en correspondance (`buildPassationRows`, `readMinInterpretableChange`,
+`readPractitionerNotes`) vit dans `passationRows.ts`, pure et testée à part : une réponse
+alignée sur le mauvais item produirait un écran crédible et entièrement faux.
 
 ### `TimeDial`
 

@@ -177,6 +177,16 @@ insert into public.module_content_fields (id, module_id, field_type, text_code, 
   -- Il distingue quelqu'un à 14 qui fonctionne de quelqu'un à 14 qui ne sort plus,
   -- et c'est la seule question qui parle du vécu plutôt que d'un symptôme coché.
   ('phq9.q10',    'phq9', 'scale_question',     'modules.phq9.q10',            109),
+  -- Note que le questionnaire porte sur l'item 9, destinée au PRATICIEN (#418). Elle
+  -- appartient à l'instrument, et elle s'affiche EN PERMANENCE dans le détail d'une
+  -- passation, quelle que soit la réponse : la faire apparaître seulement quand la
+  -- réponse est non nulle serait un affichage déclenché par une donnée patient, ce
+  -- que la RÈGLE D'OR interdit. Ce n'est pas non plus un support de citation : la
+  -- mention de source (#417) est rendue à part, pour qu'une obligation de licence ne
+  -- dépende jamais d'un bloc qui existe pour une autre raison.
+  -- Aucun écran patient ne rend ce field_type : les layouts de saisie filtrent par
+  -- type connu, donc la note reste côté praticien.
+  ('phq9.note_item9', 'phq9', 'scale_practitioner_note', 'modules.phq9.practitioner_note_item9', 990),
   ('phq9.footer', 'phq9', 'footer_note',         'modules.phq9.footer',         999)
 on conflict (id) do update set module_id = excluded.module_id, field_type = excluded.field_type, text_code = excluded.text_code, sort_order = excluded.sort_order;
 

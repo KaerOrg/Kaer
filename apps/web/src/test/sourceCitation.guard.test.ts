@@ -37,12 +37,19 @@ const RENDERS_ITEMS = /'scale_question'/
 /** Marqueurs d'un rendu de la mention de source. */
 const RENDERS_CITATION = /SourceCitation|readScaleSource/
 
+/**
+ * Seuls les `.tsx` sont inspectés : ce qui est en cause est la **diffusion** des items
+ * à un humain, et un module `.ts` ne rend rien (le JSX impose l'extension `.tsx` dans
+ * ce projet). Un helper pur qui nomme `scale_question` pour trier des fields n'est pas
+ * une surface de diffusion, et l'inscrire en exemption reviendrait à user l'exemption
+ * jusqu'à ce qu'elle couvre un vrai écran.
+ */
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
     if (entry === 'node_modules' || entry.startsWith('.')) continue
     const full = join(dir, entry)
     if (statSync(full).isDirectory()) { walk(full, out); continue }
-    if (/\.tsx?$/.test(entry) && !/\.test\.tsx?$/.test(entry)) out.push(full)
+    if (/\.tsx$/.test(entry) && !/\.test\.tsx$/.test(entry)) out.push(full)
   }
   return out
 }

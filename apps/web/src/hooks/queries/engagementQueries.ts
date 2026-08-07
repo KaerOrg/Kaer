@@ -13,6 +13,8 @@ import {
   fetchChronoEntries,
   fetchFormEntries,
   fetchActivityEntries,
+  fetchScalePassations,
+  type ScalePassation,
   type ScorePoint,
   type MoodPoint,
   type MoodMarkerRow,
@@ -165,6 +167,15 @@ export const engagementQueries = {
       queryFn: (): Promise<MoodMarkerRow[]> => fetchMoodMarkers(patientId),
     }),
 
+  // Passations d'une échelle, réponse par réponse (#418). Distincte de `moduleData`,
+  // qui n'en rapporte que le total : le détail n'est chargé que si le praticien
+  // ouvre l'onglet Données d'une échelle, pas pour dessiner une courbe.
+  scalePassations: (patientId: string, moduleType: string) =>
+    queryOptions({
+      queryKey: ['engagement', 'scalePassations', patientId, moduleType],
+      queryFn: (): Promise<ScalePassation[]> => fetchScalePassations(patientId, moduleType),
+    }),
+
   // Préfixes de clés dérivées de `patient_entries` pour UN patient — à invalider
   // quand une entrée de ce patient change (Realtime #103). Prefix match : couvre
   // l'évolution ET toutes les cards `moduleData` (tous modules/kinds) du patient.
@@ -173,5 +184,6 @@ export const engagementQueries = {
     ['engagement', 'moduleData', patientId],
     ['engagement', 'lastActivity', patientId],
     ['engagement', 'moodMarkers', patientId],
+    ['engagement', 'scalePassations', patientId],
   ],
 }

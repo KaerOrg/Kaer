@@ -199,10 +199,17 @@ create table public.module_content_fields (
 | `scale_legend_item` | Légende numérique (BSL-23) | `value` (obligatoire) |
 | `scale_warning` | Bandeau jaune avertissement | — |
 | `scale_section` | En-tête de section | — |
-| `scale_question` | Question + LikertWidget | — |
+| `scale_question` | Question + LikertWidget | `scored='false'` marque un item **posé mais non coté** (#410) |
 | `scale_slider_question` | Question + pips numériques | `min`, `max`, `color`, `icon`, `low_hint_code`, `high_hint_code` |
 | `scale_number_input` | Champ numérique libre | `subscale_key` |
 | `scale_text_input` | Champ texte libre | `placeholder_code`, `subscale_key` |
+| `scale_practitioner_note` | **Rien côté patient.** Note que le questionnaire porte à l'attention du praticien, rendue dans le détail d'une passation (#418) | - |
+
+> **`scale_practitioner_note` ne descend jamais vers le patient.** Les layouts de
+> saisie filtrent par type connu : un type qu'ils ne listent pas n'est pas rendu. La
+> note est affichée **en permanence** dans `ScalePassationDetail`, jamais en fonction
+> d'une réponse : une note qui n'apparaîtrait qu'au-delà d'une valeur serait une alerte
+> déclenchée par une donnée patient, donc hors du statut non-dispositif médical.
 
 **Layout `guided_exercise`**
 
@@ -766,6 +773,7 @@ Les attributs structurés sont stockés dans **`field_props`** (une ligne par at
 | `score_display` | `'inline'` (défaut) ou `'collapsed'` | Posture de l'accueil du module vis-à-vis du score, lue par `ScaleHistoryScreen` (#408) |
 | `instrument_citation` | `'PHQ-9, Kroenke, Spitzer & Williams, 2001'` | Citation des auteurs. **Obligation de licence** (#417) |
 | `translation_attribution` | Formule imposée par le traducteur tiers | Attribution de la traduction. **Nullable**, et l'absence est le cas nominal (#417) |
+| `min_interpretable_change` | `'5'` | Plus petit changement individuel interprétable, en points. Affiché au **praticien** à côté de l'écart entre deux passations (#418), lu par `readMinInterpretableChange`. Absent = aucune mention |
 
 **`entry_mode` : le mode de saisie est une configuration, pas une règle globale.**
 `ScaleEntryScreen` est partagé par les neuf modules d'échelle : un `if (moduleId === 'phq9')`

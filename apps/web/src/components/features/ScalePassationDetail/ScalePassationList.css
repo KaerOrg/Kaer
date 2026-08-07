@@ -1,0 +1,48 @@
+/* Liste latérale des passations (#418). Rendu identique pour toutes les lignes :
+   seule la sélection change l'habillage, jamais le total affiché. */
+
+.spd-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.spd-list__title {
+  margin: 0 0 var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.spd-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.spd-item:hover {
+  border-color: var(--color-primary);
+}
+
+.spd-item--active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.spd-item__score {
+  font-weight: 700;
+}
