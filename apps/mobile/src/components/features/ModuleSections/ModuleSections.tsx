@@ -14,6 +14,11 @@ interface ModuleSectionsProps {
   /** Un module est-il ouvrable (écran custom ou non `coming_soon`) ? */
   isAvailable: (mod: UnlockedModule) => boolean
   onModulePress: (mod: UnlockedModule) => void
+  /**
+   * Échéance de la prochaine passation par module, déjà formatée (#414). Un module
+   * absent de la map n'a pas d'échéance : sa carte ne porte alors aucune pastille.
+   */
+  dueByModule?: ReadonlyMap<string, string>
 }
 
 /**
@@ -23,7 +28,7 @@ interface ModuleSectionsProps {
  * groupes.
  */
 export const ModuleSections = React.memo(function ModuleSections({
-  modules, isTeenMode, teenColor, isAvailable, onModulePress,
+  modules, isTeenMode, teenColor, isAvailable, onModulePress, dueByModule,
 }: ModuleSectionsProps) {
   const { t } = useTranslation()
   const sections = useMemo(() => groupModulesByCategory(modules), [modules])
@@ -46,6 +51,7 @@ export const ModuleSections = React.memo(function ModuleSections({
                   comingSoonLabel={t('home.coming_soon')}
                   onSelect={onModulePress}
                   accentColor={isTeenMode ? teenColor(mod.module_type) : undefined}
+                  dueLabel={dueByModule?.get(mod.module_type) ?? null}
                 />
               </View>
             ))}

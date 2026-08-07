@@ -50,6 +50,53 @@ describe('ModuleSections', () => {
     expect(screen.queryByText('PHQ-9')).toBeNull()
   })
 
+  // ── Pastille d'échéance (#414) ────────────────────────────────────────────
+
+  it('affiche la pastille d\'échéance du module concerné', () => {
+    render(
+      <ModuleSections
+        {...baseProps}
+        modules={[mk('phq9', 'assessments')]}
+        dueByModule={new Map([['phq9', 'À remplir avant le 5 août']])}
+      />,
+    )
+    expect(screen.getByTestId('module-due-badge')).toBeTruthy()
+    expect(screen.getByText('À remplir avant le 5 août')).toBeTruthy()
+  })
+
+  it('n\'affiche aucune pastille pour un module sans échéance', () => {
+    render(
+      <ModuleSections
+        {...baseProps}
+        modules={[mk('phq9', 'assessments'), mk('crisis_plan', 'safety')]}
+        dueByModule={new Map([['phq9', 'À remplir avant le 5 août']])}
+      />,
+    )
+    // Une seule pastille : celle du module programmé.
+    expect(screen.getAllByTestId('module-due-badge')).toHaveLength(1)
+  })
+
+  it('n\'affiche aucune pastille quand aucune programmation n\'existe', () => {
+    render(<ModuleSections {...baseProps} modules={[mk('phq9', 'assessments')]} />)
+    expect(screen.queryByTestId('module-due-badge')).toBeNull()
+  })
+
+  it('MDR : la pastille ne porte ni retard, ni compte à rebours, ni couleur d\'alerte', () => {
+    // « En retard » serait un jugement adressé à quelqu'un dont le biais interprétatif
+    // négatif fait partie du tableau clinique. Une date, affichée, rien d'autre.
+    const { toJSON } = render(
+      <ModuleSections
+        {...baseProps}
+        modules={[mk('phq9', 'assessments')]}
+        dueByModule={new Map([['phq9', 'À remplir avant le 5 août']])}
+      />,
+    )
+    const rendered = JSON.stringify(toJSON())
+    expect(rendered).not.toMatch(/retard|overdue|jours restants|urgent/i)
+    // Aucune teinte d'alerte : la pastille porte le couple de marque, pas du rouge.
+    expect(rendered).not.toMatch(/#EF4444|#DC2626/i)
+  })
+
   it('appelle onModulePress avec le bon module au tap', () => {
     const onModulePress = jest.fn()
     const mod = mk('crisis_plan', 'safety')

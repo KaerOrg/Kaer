@@ -12,6 +12,7 @@ function schedule(over: Partial<ScaleSchedule> = {}): ScaleSchedule {
   return {
     moduleId: 'phq9', mode: 'home', frequency: 'biweekly',
     dayOfWeek: 3, timeOfDay: '19:00', endsOn: null, patientReminder: true,
+    createdAtIso: '2026-07-01T09:00:00.000Z',
     ...over,
   }
 }

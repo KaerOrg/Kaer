@@ -134,7 +134,8 @@
     "section_tools": "Outils thérapeutiques",
     "section_scales": "Échelles et questionnaires",
     "today_section": "Prévu aujourd'hui",
-    "crisis_subtitle": "Aide immédiate, à toute heure"
+    "crisis_subtitle": "Aide immédiate, à toute heure",
+    "due_before": "À remplir avant le {{date}}"
   },
   "wip": {
     "title": "Page en chantier",

@@ -26,6 +26,8 @@ export interface ScaleSchedule {
   endsOn: string | null
   /** Le praticien souhaite-t-il qu'un rappel calendaire accompagne cette cadence ? */
   patientReminder: boolean
+  /** Mise en place de la programmation. Sert d'ancre quand aucune passation n'existe. */
+  createdAtIso: string
 }
 
 interface ScheduleRow {
@@ -36,6 +38,7 @@ interface ScheduleRow {
   time_of_day: string | null
   ends_on: string | null
   patient_reminder: boolean
+  created_at: string
 }
 
 const FREQUENCIES: readonly string[] = ['weekly', 'biweekly', 'monthly', 'quarterly', 'on_demand']
@@ -52,6 +55,7 @@ function toSchedule(row: ScheduleRow): ScaleSchedule {
     timeOfDay: row.time_of_day,
     endsOn: row.ends_on,
     patientReminder: row.patient_reminder,
+    createdAtIso: row.created_at,
   }
 }
 
@@ -73,7 +77,7 @@ export async function fetchScaleSchedule(
 ): Promise<ScaleSchedule | null> {
   const { data, error } = await supabase
     .from('scale_schedules')
-    .select('module_id, mode, frequency, day_of_week, time_of_day, ends_on, patient_reminder')
+    .select('module_id, mode, frequency, day_of_week, time_of_day, ends_on, patient_reminder, created_at')
     .eq('patient_id', patientId)
     .eq('module_id', moduleId)
     .maybeSingle()
@@ -86,7 +90,7 @@ export async function fetchScaleSchedule(
 export async function fetchScaleSchedules(patientId: string): Promise<Map<string, ScaleSchedule>> {
   const { data } = await supabase
     .from('scale_schedules')
-    .select('module_id, mode, frequency, day_of_week, time_of_day, ends_on, patient_reminder')
+    .select('module_id, mode, frequency, day_of_week, time_of_day, ends_on, patient_reminder, created_at')
     .eq('patient_id', patientId)
 
   const byModule = new Map<string, ScaleSchedule>()

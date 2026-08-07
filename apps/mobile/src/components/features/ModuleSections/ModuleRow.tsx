@@ -4,6 +4,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { IconChip } from '@ui/IconChip'
 import { colors, spacing, fonts } from '@theme'
 import type { UnlockedModule } from '@services/homeService'
+import { DueBadge } from './DueBadge'
 
 type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name']
 
@@ -18,6 +19,11 @@ interface ModuleRowProps {
   onSelect: (mod: UnlockedModule) => void
   /** Fond de pastille en mode ado (accent du module) ; sinon `colors.primary`. */
   accentColor?: string
+  /**
+   * Échéance de la prochaine passation, déjà formatée (#414). `null` quand aucune
+   * programmation n'en porte : la pastille est alors absente, pas vide.
+   */
+  dueLabel?: string | null
 }
 
 /**
@@ -27,7 +33,7 @@ interface ModuleRowProps {
  * explicitement toléré par le design system.
  */
 export const ModuleRow = React.memo(function ModuleRow({
-  mod, title, subtitle, available, comingSoonLabel, onSelect, accentColor,
+  mod, title, subtitle, available, comingSoonLabel, onSelect, accentColor, dueLabel = null,
 }: ModuleRowProps) {
   const icon = (mod.module?.mobile_icon ?? 'help-circle-outline') as IconName
   const chipColor = available ? (accentColor ?? colors.primary) : colors.neutral
@@ -47,6 +53,7 @@ export const ModuleRow = React.memo(function ModuleRow({
       <View style={styles.content}>
         <Text style={styles.title}>{title}</Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+        {dueLabel != null ? <DueBadge label={dueLabel} /> : null}
         {available ? null : <Text style={styles.comingSoon}>{comingSoonLabel}</Text>}
       </View>
       {available ? (
