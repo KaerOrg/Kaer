@@ -20,7 +20,10 @@ import { colors, spacing, radius, typography } from '@theme'
 import { TeenAccent } from '../../../components/features/TeenAccent'
 import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
 import { useScaleScreen } from '../../../hooks/useScaleScreen'
+import { loadDraft, discardDraft, type ScaleDraft } from '@services/scaleDraftService'
+import { formatDateTime } from '../../../lib/dateUtils'
 import { EntryCard } from './EntryCard'
+import { DraftResumeCard } from './DraftResumeCard'
 
 type Nav = NativeStackNavigationProp<AppStackParamList>
 type RouteT = RouteProp<AppStackParamList, 'ScaleHistory'>
@@ -49,6 +52,8 @@ export default function ScaleHistoryScreen() {
   const [entries, setEntries] = useState<ScaleEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [range, setRange] = useState<TimeRange>('1A')
+  // Brouillon d'une saisie interrompue (#412). `null` = aucune saisie en cours.
+  const [draft, setDraft] = useState<ScaleDraft | null>(null)
 
   const chartPoints = useMemo(() => buildTotalScoreChartData(entries, range), [entries, range])
   const xLabels = useMemo(() => buildXLabels(range, i18n.language), [range, i18n.language])
@@ -66,6 +71,11 @@ export default function ScaleHistoryScreen() {
           if (active) { setEntries(data); setLoading(false) }
         })
         .catch(() => { if (active) setLoading(false) })
+      // Relu à chaque retour sur l'écran : la saisie qu'on quitte vient peut-être
+      // d'en laisser un, ou de le consommer en envoyant la passation.
+      loadDraft(scale_id)
+        .then(found => { if (active) setDraft(found) })
+        .catch(() => { if (active) setDraft(null) })
       return () => { active = false }
     }, [scale_id])
   )
@@ -74,6 +84,22 @@ export default function ScaleHistoryScreen() {
     () => navigation.navigate('ScaleEntry', { scale_id }),
     [navigation, scale_id],
   )
+
+  const handleResumeDraft = useCallback(
+    () => navigation.navigate('ScaleEntry', { scale_id, resume: true }),
+    [navigation, scale_id],
+  )
+
+  const handleRestartDraft = useCallback(() => {
+    // « Recommencer » efface tout, brouillon compris, avant même d'ouvrir la saisie :
+    // le patient a demandé à repartir de zéro, il ne doit rien retrouver de l'ancien.
+    discardDraft(scale_id)
+      .catch(() => {})
+      .finally(() => {
+        setDraft(null)
+        navigation.navigate('ScaleEntry', { scale_id })
+      })
+  }, [navigation, scale_id])
 
   const handleOpen = useCallback(
     (entryId: string) => navigation.navigate('ScaleEntry', { scale_id, entry_id: entryId }),
@@ -111,12 +137,25 @@ export default function ScaleHistoryScreen() {
           <Text style={typography.h2}>{t(`modules.${scale_id}.label`)}</Text>
         </View>
 
-        <Button
-          label={t(`modules.${scale_id}.new_btn`)}
-          onPress={handleNew}
-          iconLeft={PLUS_ICON}
-          style={newBtnStyle}
-        />
+        {draft != null ? (
+          <DraftResumeCard
+            position={draft.position}
+            title={t('modules.scale_entry.draft_title', { question: draft.position + 1 })}
+            subtitle={t('modules.scale_entry.draft_subtitle', { date: formatDateTime(draft.startedAt) })}
+            resumeLabel={t('modules.scale_entry.draft_resume')}
+            restartLabel={t('modules.scale_entry.draft_restart')}
+            onResume={handleResumeDraft}
+            onRestart={handleRestartDraft}
+            accentColor={accentColor}
+          />
+        ) : (
+          <Button
+            label={t(`modules.${scale_id}.new_btn`)}
+            onPress={handleNew}
+            iconLeft={PLUS_ICON}
+            style={newBtnStyle}
+          />
+        )}
 
         {/* ── Graphe d'évolution ────────────────────────────────── */}
         {entries.length >= 2 && (

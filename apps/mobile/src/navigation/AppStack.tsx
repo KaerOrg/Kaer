@@ -22,7 +22,9 @@ import { colors } from '@theme'
 export type AppStackParamList = {
   Tabs: undefined
   ScaleHistory: { scale_id: string }
-  ScaleEntry: { scale_id: string; entry_id?: string }
+  // resume : reprend le brouillon local laissé par une saisie interrompue (#412).
+  // Sans lui, on repart d'un questionnaire vierge : c'est ce que fait « Recommencer ».
+  ScaleEntry: { scale_id: string; entry_id?: string; resume?: boolean }
   // previewKindOverride : force un layout précis au lieu de celui du module (ex. la
   // roue crantée du plan de crise ouvre le module en mode édition `editable_steps`).
   // startEntry : ouvre directement la saisie plutôt que l'accueil du module. Posé par

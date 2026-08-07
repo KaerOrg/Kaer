@@ -6,6 +6,7 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import ScaleHistoryScreen from './ScaleHistoryScreen'
 import * as database from '../../../lib/database'
+import * as draftService from '@services/scaleDraftService'
 import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
 
 jest.setTimeout(15000)
@@ -42,19 +43,15 @@ jest.mock('react-i18next', () => ({
 
 jest.mock('../../../navigation/AppStack', () => ({}))
 
-jest.mock('@theme', () => ({
-  colors: {
-    primary: '#000', primaryLight: '#eef', danger: '#f00', neutral: '#f3f4f6',
-    background: '#fff', border: '#ccc', white: '#fff', textMuted: '#999', card: '#f5f5f5', text: '#111',
-  },
-  spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
-  radius: { sm: 6, md: 8 },
-  typography: { h2: {}, h3: {}, caption: {} },
-}))
-
 jest.mock('../../../lib/database', () => ({
   getAllScaleEntries: jest.fn().mockResolvedValue([]),
   deleteScaleEntry: jest.fn().mockResolvedValue(undefined),
+}))
+
+// Brouillon (#412) mocké au niveau du SERVICE : l'écran en dépend, pas de la base.
+jest.mock('@services/scaleDraftService', () => ({
+  loadDraft: jest.fn().mockResolvedValue(null),
+  discardDraft: jest.fn().mockResolvedValue(undefined),
 }))
 
 jest.mock('../../../lib/scaleScoring', () => ({
@@ -92,6 +89,7 @@ describe('ScaleHistoryScreen', () => {
     jest.clearAllMocks()
     mockScaleId = 'phq9'
     ;(database.getAllScaleEntries as jest.Mock).mockResolvedValue([])
+    ;(draftService.loadDraft as jest.Mock).mockResolvedValue(null)
   })
 
   it('navigue vers ScaleEntry au clic sur le bouton nouveau', async () => {
@@ -144,5 +142,51 @@ describe('ScaleHistoryScreen', () => {
     render(<ScaleHistoryScreen />)
     await waitFor(() => expect(screen.getByText('chip_i')).toBeTruthy())
     expect(screen.getByText('chip_hi')).toBeTruthy()
+  })
+})
+
+// ── Carte de reprise d'un brouillon (#412) ──────────────────────────────────
+
+describe('ScaleHistoryScreen : brouillon en cours', () => {
+  const DRAFT = {
+    scaleId: 'phq9', answers: [1, 2, null], position: 5, startedAt: '2026-08-01T21:40:00.000Z',
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockScaleId = 'phq9'
+    ;(database.getAllScaleEntries as jest.Mock).mockResolvedValue([])
+    ;(draftService.loadDraft as jest.Mock).mockResolvedValue(DRAFT)
+  })
+
+  it('remplace le bouton de nouvelle saisie par la carte de reprise', async () => {
+    // Une saisie est déjà en cours : proposer « Nouveau questionnaire » à côté
+    // inviterait à en ouvrir une seconde et à perdre la première.
+    render(<ScaleHistoryScreen />)
+    await waitFor(() => expect(screen.getByTestId('draft-resume-card')).toBeTruthy())
+    expect(screen.queryByText('new_btn')).toBeNull()
+  })
+
+  it('reprend la saisie là où elle s\'est arrêtée', async () => {
+    render(<ScaleHistoryScreen />)
+    await waitFor(() => expect(screen.getByText('draft_resume')).toBeTruthy())
+    fireEvent.press(screen.getByText('draft_resume'))
+    expect(mockNavigate).toHaveBeenCalledWith('ScaleEntry', { scale_id: 'phq9', resume: true })
+  })
+
+  it('efface le brouillon avant de repartir de zéro', async () => {
+    render(<ScaleHistoryScreen />)
+    await waitFor(() => expect(screen.getByText('draft_restart')).toBeTruthy())
+    fireEvent.press(screen.getByText('draft_restart'))
+    await waitFor(() => expect(draftService.discardDraft).toHaveBeenCalledWith('phq9'))
+    // Sans `resume` : la saisie s'ouvre vierge.
+    expect(mockNavigate).toHaveBeenCalledWith('ScaleEntry', { scale_id: 'phq9' })
+  })
+
+  it('ne montre aucune carte quand il n\'y a pas de brouillon', async () => {
+    ;(draftService.loadDraft as jest.Mock).mockResolvedValue(null)
+    render(<ScaleHistoryScreen />)
+    await waitFor(() => expect(screen.getByText('new_btn')).toBeTruthy())
+    expect(screen.queryByTestId('draft-resume-card')).toBeNull()
   })
 })

@@ -199,7 +199,11 @@
       "progress": "{{current}} / {{total}}",
       "review_title": "Before sending",
       "review_hint": "Tap a row to change it.",
-      "unanswered": "No answer"
+      "unanswered": "No answer",
+      "draft_title": "You had reached question {{question}}",
+      "draft_subtitle": "Started on {{date}}. Your answers are kept on this phone.",
+      "draft_resume": "Resume",
+      "draft_restart": "Start over"
     },
     "crisis_plan": {
       "sequence_home_title": "I'm here with you.",

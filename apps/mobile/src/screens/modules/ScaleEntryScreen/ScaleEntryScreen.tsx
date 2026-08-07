@@ -6,6 +6,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { fetchModuleFields, type ContentField } from '@services/moduleService'
 import { getScaleEntryById, generateId } from '../../../lib/database'
 import { saveScaleEntry } from '@services/scaleEntryService'
+import { loadDraft, saveDraft, discardDraft } from '@services/scaleDraftService'
 import { FieldRenderer } from '../../../components/features/ModuleRenderer/FieldRenderer'
 import { AppStackParamList } from '../../../navigation/AppStack'
 import { colors, spacing } from '@theme'
@@ -27,7 +28,7 @@ type LoadState =
 export default function ScaleEntryScreen() {
   const navigation = useNavigation<Nav>()
   const { params } = useRoute<RouteT>()
-  const { scale_id, entry_id } = params
+  const { scale_id, entry_id, resume } = params
   const isEditing = entry_id != null
   const { config, accentColor, activeColor, t } = useScaleScreen(scale_id)
   const { showToast } = useToast()
@@ -54,10 +55,13 @@ export default function ScaleEntryScreen() {
       // en deux effets laissait une course : la saisie existante pouvait remplacer le
       // tableau dimensionné sur les items posés, ou être écrasée par lui selon l'ordre
       // d'arrivée. La saisie ne serait alors ni de la bonne taille ni pré-remplie.
-      const [result, existing] = await Promise.all([
+      const [result, existing, draft] = await Promise.all([
         fetchModuleFields(scale_id),
         // Une saisie absente n'est pas une erreur : on ouvre alors un formulaire vide.
         entry_id != null ? getScaleEntryById(entry_id).catch(() => null) : Promise.resolve(null),
+        // Le brouillon (#412) ne concerne qu'une saisie NEUVE : rouvrir une passation
+        // déjà envoyée part de ses propres réponses, pas d'un brouillon resté en route.
+        entry_id == null && resume ? loadDraft(scale_id).catch(() => null) : Promise.resolve(null),
       ])
       if (!isMounted.current) return
       const questions = result.fields
@@ -66,9 +70,11 @@ export default function ScaleEntryScreen() {
       // Le tableau est TOUJOURS dimensionné sur les items posés en base. Une passation
       // enregistrée avant l'arrivée d'un item en porte moins : les cases manquantes
       // restent nulles, elles ne décalent aucune réponse et la saisie ne se croit pas
-      // complète (#410, rétrocompatibilité).
+      // complète (#410, rétrocompatibilité). Un brouillon suit la même règle : le
+      // questionnaire a pu gagner un item depuis qu'il a été commencé.
       const next: (number | null)[] = Array(questions.length).fill(null)
-      existing?.answers.forEach((value: number | null, index: number) => {
+      const restored = existing?.answers ?? draft?.answers ?? []
+      restored.forEach((value: number | null, index: number) => {
         if (index < next.length) next[index] = value ?? null
       })
       if (existing) editedCreatedAt.current = existing.created_at
@@ -78,7 +84,7 @@ export default function ScaleEntryScreen() {
       if (!isMounted.current) return
       setLoadState({ status: 'error', message: t('common.error') })
     }
-  }, [scale_id, entry_id, t])
+  }, [scale_id, entry_id, resume, t])
 
   useEffect(() => { void loadFields() }, [loadFields])
 
@@ -86,9 +92,14 @@ export default function ScaleEntryScreen() {
     setAnswers(prev => {
       const next = [...prev]
       next[index] = value
+      // Brouillon local écrit à CHAQUE réponse (#412) : c'est un appui qui peut être
+      // le dernier avant un appel entrant. Écriture au fil de l'eau, jamais attendue :
+      // un brouillon qui échoue ne doit pas bloquer la saisie en cours.
+      // Édition d'une passation déjà envoyée : rien à brouillonner, elle est en base.
+      if (entry_id == null) void saveDraft(scale_id, next, index).catch(() => {})
       return next
     })
-  }, [])
+  }, [scale_id, entry_id])
 
   const handleTextInput = useCallback((fieldId: string, value: string) => {
     setTextInputValues(prev => ({ ...prev, [fieldId]: value }))
@@ -157,6 +168,9 @@ export default function ScaleEntryScreen() {
       // légitime : ce n'est pas une date métier choisie par le patient.
       created_at: editedCreatedAt.current ?? new Date().toISOString(),
     })
+    // La passation est enregistrée : le brouillon n'a plus d'objet. Purgé APRÈS
+    // l'enregistrement, jamais avant, pour qu'un échec d'envoi laisse de quoi reprendre.
+    await discardDraft(scale_id).catch(() => {})
     if (isMounted.current) setSaving(false)
     navigation.goBack()
   }, [allAnswered, answers, config, entry_id, navigation, scale_id, posedItems, scoredItems, answeredCount, loadState, textInputValues, showToast, t])
