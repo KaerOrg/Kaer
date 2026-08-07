@@ -406,6 +406,10 @@
       "add_trigger": "Hinzufügen",
       "saved_message": "Ihre Entscheidungswaage wurde gespeichert.",
       "save": "Speichern"
+    },
+    "phq9": {
+      "label": "Meine Stimmung der letzten 2 Wochen",
+      "description": "Fragebogen PHQ-9 · 10 Fragen, 4 Min."
     }
   }
 }

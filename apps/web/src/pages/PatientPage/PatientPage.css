@@ -762,6 +762,11 @@
   gap: 16px;
 }
 
+/* Sous-onglets « Actifs » / « Évolution » de l'armoire (K-2) : espace sous la rangée. */
+.wardrobe__subtabs {
+  margin-bottom: var(--spacing-lg);
+}
+
 /* Vue active : barre de filtres (lentille) + grille des modules actifs */
 .wardrobe__active {
   display: flex;
@@ -1544,28 +1549,6 @@
   opacity: 0.6;
   flex-shrink: 0;
 }
-
-/* ── Échelles et questionnaires — liste unifiée ─────────────────────────────── */
-
-.scales-list__view-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: #DC2626;
-  background: #FEF2F2;
-  border: 1px solid #FECACA;
-  border-radius: var(--radius-sm);
-  padding: 5px 12px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.scales-list__view-btn:hover {
-  background: #FEE2E2;
-}
-
 
 /* ── Popover Sources (diet_weight_psycho) ────────────────────────────────── */
 

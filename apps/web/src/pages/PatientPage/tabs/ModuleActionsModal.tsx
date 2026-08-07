@@ -1,6 +1,5 @@
 import { useCallback, useMemo, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Eye, BookOpen, LineChart, Bell, Settings } from 'lucide-react'
 import { Modal } from '@ui/Modal'
 import { Tabs, type TabItem } from '@ui/Tabs'
 import { LUCIDE_ICONS } from '../../../lib/lucideIcons'
@@ -9,6 +8,7 @@ import { ModuleSourcesPanel } from '../../../components/features/ModuleSources/M
 import { NotificationRoutinePanel } from '../../../components/features/NotificationRoutinePanel/NotificationRoutinePanel'
 import type { ModuleType } from '../../../lib/database.types'
 import { ModuleDataPanel } from './ModuleDataPanel'
+import { TAB_LABEL_KEY, tabIcon } from './moduleActionTabMeta'
 import './ModuleActionsModal.css'
 
 /**
@@ -16,25 +16,9 @@ import './ModuleActionsModal.css'
  * est Données → Configuration → Notifications → Vue patient → Sources (porté par
  * `computeModuleTabs`) ; cette union sert au typage, `TAB_ORDER` à la validation.
  */
-export type ModuleActionTab = 'preview' | 'sources' | 'data' | 'notifications' | 'config'
+export type ModuleActionTab = 'preview' | 'sources' | 'data' | 'notifications' | 'config' | 'schedule' | 'passation'
 
-const TAB_ORDER: readonly ModuleActionTab[] = ['data', 'config', 'notifications', 'preview', 'sources']
-
-const TAB_LABEL_KEY: Record<ModuleActionTab, string> = {
-  preview: 'patient.patient_view_tab',
-  sources: 'patient.sources_tab',
-  data: 'patient.data_button',
-  notifications: 'notifications.modal_title',
-  config: 'patient.config_tab',
-}
-
-function tabIcon(tab: ModuleActionTab) {
-  if (tab === 'preview') return <Eye size={15} />
-  if (tab === 'sources') return <BookOpen size={15} />
-  if (tab === 'data') return <LineChart size={15} />
-  if (tab === 'notifications') return <Bell size={15} />
-  return <Settings size={15} />
-}
+const TAB_ORDER: readonly ModuleActionTab[] = ['schedule', 'passation', 'data', 'config', 'notifications', 'preview', 'sources']
 
 function isActionTab(id: string): id is ModuleActionTab {
   return (TAB_ORDER as readonly string[]).includes(id)
@@ -59,6 +43,11 @@ interface Props {
    * d'édition et leurs données de synthèse). Requis dès que `tabs` contient `config`.
    */
   configPanel?: ReactNode
+  /**
+   * Contenu de l'onglet Programmation (auto) ou Passation (hétéro) d'une échelle (K-6),
+   * construit par le parent. Requis dès que `tabs` contient `schedule` ou `passation`.
+   */
+  schedulePanel?: ReactNode
   onClose: () => void
 }
 
@@ -80,6 +69,7 @@ export function ModuleActionsModal({
   activeTab,
   onTabChange,
   configPanel,
+  schedulePanel,
   onClose,
 }: Props) {
   const { t } = useTranslation()
@@ -121,6 +111,7 @@ export function ModuleActionsModal({
             />
           )}
           {activeTab === 'config' && configPanel}
+          {(activeTab === 'schedule' || activeTab === 'passation') && schedulePanel}
         </div>
       </div>
     </Modal>

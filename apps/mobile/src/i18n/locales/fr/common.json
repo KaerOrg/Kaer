@@ -63,6 +63,8 @@
     "done_title": "Exercice terminé",
     "saving": "Enregistrement…",
     "reuse_last_values": "Reprendre les valeurs du {{date}}",
+    "unanswered_count_one": "{{count}} question sans réponse.",
+    "unanswered_count_other": "{{count}} questions sans réponse.",
     "save_and_finish": "Enregistrer et terminer",
     "in_case_of_distress": "En cas de détresse",
     "phone_3114": "3114, Numéro national prévention suicide",
@@ -80,7 +82,8 @@
     "exercise_steps_overview": "Les étapes",
     "optional_info_label": "Informations complémentaires (facultatif)",
     "step": "Étape",
-    "read_sheet": "Lire la fiche"
+    "read_sheet": "Lire la fiche",
+    "your_clinician": "votre soignant"
   },
   "global": {
     "greeting": "Bienvenue",
@@ -204,7 +207,25 @@
   "modules": {
     "scale_history": {
       "evolution_label": "Évolution du score",
-      "avg": "Moy. : {{value}}"
+      "avg": "Moy. : {{value}}",
+      "last_sent_label": "Dernier envoi",
+      "entries_section": "Mes passations",
+      "sent_status": "envoyé",
+      "score_details": "Voir le détail chiffré",
+      "score_note": "Ces totaux ne posent pas de diagnostic et ne se lisent pas seuls. Ils servent à en parler avec {{name}}.",
+      "start_btn": "Commencer",
+      "fill_now_btn": "Remplir maintenant",
+      "start_hint": "Vous pouvez vous arrêter et reprendre."
+    },
+    "scale_entry": {
+      "progress": "{{current}} / {{total}}",
+      "review_title": "Avant d'envoyer",
+      "review_hint": "Touchez une ligne pour la modifier.",
+      "unanswered": "Sans réponse",
+      "draft_title": "Vous en étiez à la question {{question}}",
+      "draft_subtitle": "Commencé le {{date}}. Vos réponses sont gardées sur ce téléphone.",
+      "draft_resume": "Reprendre",
+      "draft_restart": "Recommencer"
     },
     "crisis_plan": {
       "sequence_home_title": "Je suis là avec vous.",
@@ -1457,8 +1478,8 @@
       "missing_intensity_msg": "Indiquez l'intensité de l'envie avant d'enregistrer."
     },
     "phq9": {
-      "label": "PHQ-9",
-      "description": "",
+      "label": "Mon humeur ces 2 semaines",
+      "description": "Questionnaire PHQ-9 · 10 questions, 4 min",
       "new_btn": "Nouveau questionnaire",
       "empty_title": "Aucun questionnaire rempli",
       "empty_text": "Utilisez le bouton ci-dessus pour compléter votre premier PHQ-9.",
@@ -1469,19 +1490,27 @@
       "opt_2": "Plus de la moitié des jours",
       "opt_3": "Presque tous les jours",
       "q1": "Peu d'intérêt ou de plaisir à faire les choses",
-      "q2": "Vous sentir triste, déprimé(e) ou sans espoir",
-      "q3": "Difficultés à vous endormir ou à rester endormi(e), ou au contraire dormir trop",
-      "q4": "Se sentir fatigué(e) ou manquer d'énergie",
-      "q5": "Manque d'appétit ou au contraire manger trop",
-      "q6": "Vous sentir négatif(ve) par rapport à vous-même, avoir le sentiment d'être nul(le) ou d'avoir déçu votre entourage",
-      "q7": "Avoir du mal à vous concentrer, lire ou regarder la télévision par exemple",
-      "q8": "Bouger ou parler si lentement que les autres ont pu le remarquer, ou au contraire être si agité(e) que vous bougez beaucoup plus que d'habitude",
-      "q9": "Avoir des pensées comme quoi vous seriez mieux mort(e) ou que vous souhaiteriez vous faire du mal d'une façon ou d'une autre",
+      "q2": "Vous sentir abattu(e), déprimé(e) ou sans espoir",
+      "q3": "Des difficultés à vous endormir ou à rester endormi(e), ou dormir trop",
+      "q4": "Vous sentir fatigué(e) ou avoir peu d'énergie",
+      "q5": "Peu d'appétit ou manger trop",
+      "q6": "Avoir une mauvaise opinion de vous-même, ou penser que vous avez échoué, ou que vous vous êtes déçu(e) ou avez déçu votre famille",
+      "q7": "Des difficultés à vous concentrer, par exemple pour lire le journal ou regarder la télévision",
+      "q8": "Bouger ou parler si lentement que d'autres personnes ont pu le remarquer. Ou à l'inverse, être si agité(e) ou nerveux(se) que vous avez bougé beaucoup plus que d'habitude",
+      "q9": "Penser que vous seriez mieux mort(e), ou penser à vous faire du mal d'une manière ou d'une autre",
+      "q10": "Si vous avez signalé au moins un problème, quel degré de difficulté ces problèmes vous ont-ils causé dans votre travail, dans la tenue de votre foyer ou dans vos relations avec les autres ?",
+      "q10_opt_0": "Aucune difficulté",
+      "q10_opt_1": "Une certaine difficulté",
+      "q10_opt_2": "Une grande difficulté",
+      "q10_opt_3": "Une difficulté extrême",
       "score_label": "Score total",
       "score_max": "/ 27",
       "footer": "Le score est transmis à votre soignant. Son interprétation lui appartient.",
       "progress": "{{answered}} / {{total}} réponses",
-      "submit": "Valider le questionnaire"
+      "submit": "Envoyer mes réponses",
+      "intro_length": "10 questions, environ 4 minutes.",
+      "intro_window": "Elles portent sur les 2 dernières semaines.",
+      "intro_recipient": "Vos réponses partent à {{name}}."
     },
     "bsl23": {
       "label": "BSL-23",

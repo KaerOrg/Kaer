@@ -67,6 +67,20 @@ describe('ModuleTable', () => {
     expect(screen.getByText('-')).toBeInTheDocument()
   })
 
+  it('rend le badge accolé au nom (titleBadge) quand fourni', () => {
+    const rows: ModuleTableRow[] = [{ ...ROWS[0], titleBadge: <span>badge-x</span> }]
+    render(<ModuleTable rows={rows} firstColumnLabel="MODULE" ariaLabel="modules" />)
+    expect(screen.getByText('badge-x')).toBeInTheDocument()
+  })
+
+  it('remplace la date « Débloqué le » par unlockedLabelOverride quand fourni', () => {
+    const rows: ModuleTableRow[] = [{ ...ROWS[0], unlockedLabelOverride: 'Toujours dispo.' }]
+    render(<ModuleTable rows={rows} firstColumnLabel="MODULE" ariaLabel="modules" />)
+    expect(screen.getByText('Toujours dispo.')).toBeInTheDocument()
+    // La date brute de déblocage n'est plus formatée/affichée.
+    expect(screen.queryByText(new Date('2026-01-10T00:00:00Z').toLocaleDateString('fr'))).not.toBeInTheDocument()
+  })
+
   it('conserve l’ordre métier fourni tant qu’aucun tri n’est actif', () => {
     renderTable()
     expect(titleOrder()).toEqual(['Alpha', 'Beta'])
@@ -98,5 +112,56 @@ describe('ModuleTable', () => {
     renderTable([], <p>vide</p>)
     expect(screen.getByText('vide')).toBeInTheDocument()
     expect(screen.queryByText('Alpha')).not.toBeInTheDocument()
+  })
+
+  describe('clic de ligne + actions au survol (K-3)', () => {
+    it('sans onRowClick : aucune colonne d’actions ni ligne cliquable', () => {
+      const { container } = renderTable()
+      expect(container.querySelector('.module-table__actions')).toBeNull()
+      expect(container.querySelector('.data-table__row--clickable')).toBeNull()
+    })
+
+    it('avec onRowClick : la ligne appelle onRowClick avec son id', () => {
+      const onRowClick = vi.fn()
+      render(
+        <ModuleTable rows={ROWS} firstColumnLabel="MODULE" ariaLabel="modules" onRowClick={onRowClick} />,
+      )
+      fireEvent.click(screen.getByText('Alpha'))
+      expect(onRowClick).toHaveBeenCalledWith('alpha')
+    })
+
+    it('rend la cellule d’actions de chaque ligne quand la table est cliquable', () => {
+      const rows: ModuleTableRow[] = [{ ...ROWS[0], actions: <button>ouvrir données</button> }]
+      const { container } = render(
+        <ModuleTable rows={rows} firstColumnLabel="MODULE" ariaLabel="modules" onRowClick={() => {}} />,
+      )
+      expect(container.querySelector('.module-table__actions')).not.toBeNull()
+      expect(screen.getByRole('button', { name: 'ouvrir données' })).toBeInTheDocument()
+    })
+  })
+
+  describe('colonne « Programmée » (K-7)', () => {
+    it('remplace « Débloqué le » par l’en-tête fourni et rend scheduleCell', () => {
+      const rows: ModuleTableRow[] = [{ ...ROWS[0], scheduleCell: <span>prog-a</span> }]
+      render(
+        <ModuleTable
+          rows={rows}
+          firstColumnLabel="ÉCHELLE"
+          ariaLabel="échelles"
+          programmedColumn={{ label: 'PROGRAMMÉE' }}
+        />,
+      )
+      // En-tête « Programmée » présent, en-tête « Débloqué le » absent.
+      expect(screen.getByText('PROGRAMMÉE')).toBeInTheDocument()
+      expect(screen.queryByText('patient.module_table.col_unlocked')).not.toBeInTheDocument()
+      // La cellule de programmation est rendue ; la date de déblocage ne l’est pas.
+      expect(screen.getByText('prog-a')).toBeInTheDocument()
+      expect(screen.queryByText(new Date('2026-01-10T00:00:00Z').toLocaleDateString('fr'))).not.toBeInTheDocument()
+    })
+
+    it('sans programmedColumn : la colonne « Débloqué le » reste (onglet Modules)', () => {
+      render(<ModuleTable rows={ROWS} firstColumnLabel="MODULE" ariaLabel="modules" />)
+      expect(screen.getByText('patient.module_table.col_unlocked')).toBeInTheDocument()
+    })
   })
 })

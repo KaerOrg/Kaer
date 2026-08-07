@@ -55,24 +55,6 @@ jest.mock('react-i18next', () => ({
 
 jest.mock('../../../navigation/AppStack', () => ({}))
 
-jest.mock('@theme', () => ({
-  colors: {
-    primary: '#000',
-    background: '#fff',
-    border: '#ccc',
-    white: '#fff',
-    textMuted: '#999',
-    card: '#f5f5f5',
-    text: '#111',
-    neutral: '#f3f4f6',
-    neutralBar: '#94A3B8',
-    overlay: 'rgba(0,0,0,0.45)',
-  },
-  spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
-  radius: { sm: 4, md: 8, lg: 16, full: 999 },
-  typography: { h2: {}, h3: {}, caption: {} },
-}))
-
 jest.mock('@react-native-community/datetimepicker', () => 'DateTimePicker')
 
 jest.mock('../../../store/authStore', () => ({

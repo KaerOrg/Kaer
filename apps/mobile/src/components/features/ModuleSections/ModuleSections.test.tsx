@@ -41,6 +41,15 @@ describe('ModuleSections', () => {
     expect(screen.getByText('Plan de crise')).toBeTruthy()
   })
 
+  it('affiche le PHQ-9 sous son nom en clair et son sous-titre de format (#405)', () => {
+    // Écran 01 de la maquette : le sigle n'est plus le titre, il passe en second rang
+    // dans le sous-titre, qui annonce aussi la longueur et la durée.
+    render(<ModuleSections {...baseProps} modules={[mk('phq9', 'assessments')]} />)
+    expect(screen.getByText('Mon humeur ces 2 semaines')).toBeTruthy()
+    expect(screen.getByText('Questionnaire PHQ-9 · 10 questions, 4 min')).toBeTruthy()
+    expect(screen.queryByText('PHQ-9')).toBeNull()
+  })
+
   it('appelle onModulePress avec le bon module au tap', () => {
     const onModulePress = jest.fn()
     const mod = mk('crisis_plan', 'safety')

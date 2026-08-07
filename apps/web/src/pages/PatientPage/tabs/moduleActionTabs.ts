@@ -51,6 +51,8 @@ export interface ModuleTabContext {
   isScale: boolean
   /** L'échelle expose un aperçu (pertinent uniquement si `isScale`). */
   scaleHasPreview: boolean
+  /** Type d'évaluation d'une échelle (`isScale`) : pilote l'onglet de tête (K-6). */
+  scaleEvaluationType?: 'auto' | 'hetero'
 }
 
 /**
@@ -62,12 +64,23 @@ export interface ModuleTabContext {
  * certaines familles. `rim` n'a aucun onglet en dehors de sa configuration.
  */
 export function computeModuleTabs(type: ModuleType, ctx: ModuleTabContext): ModuleActionTab[] {
+  // Échelles cliniques (K-6) : onglet de tête Programmation (auto) ou Passation (hétéro),
+  // puis Données (si des saisies existent), Vue patient (auto uniquement ; l'hétéro n'est
+  // pas envoyée au patient), Sources. Point d'entrée constant pour toute échelle.
+  if (ctx.isScale) {
+    const scaleTabs: ModuleActionTab[] = []
+    scaleTabs.push(ctx.scaleEvaluationType === 'hetero' ? 'passation' : 'schedule')
+    if (ctx.unlocked) scaleTabs.push('data')
+    if (ctx.scaleHasPreview && ctx.scaleEvaluationType !== 'hetero') scaleTabs.push('preview')
+    scaleTabs.push('sources')
+    return scaleTabs
+  }
+
   const tabs: ModuleActionTab[] = []
 
   // Aperçu (« Vue patient ») + Sources : mêmes conditions de disponibilité.
   let hasPreview: boolean
-  if (ctx.isScale) hasPreview = ctx.scaleHasPreview
-  else if (type === 'rim') hasPreview = false
+  if (type === 'rim') hasPreview = false
   else if (PREVIEW_REQUIRES_UNLOCK.has(type)) hasPreview = ctx.unlocked
   else hasPreview = true
 

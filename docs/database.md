@@ -47,7 +47,7 @@ Créé automatiquement par le trigger lors de l'acceptation d'une invitation.
 | `patient_sex` | text | nullable | Sexe copié depuis l'invitation |
 | `teen_mode` | boolean | NOT NULL, default false | Mode adolescent activé par le praticien |
 | `public_ref` | text | NOT NULL, UNIQUE, default `gen_public_ref()` | Identifiant public opaque exposé dans l'URL (ex. `p_8Kf3aQ`) à la place de `patient_id` — défense en profondeur, voir [`spec/patient-public-ref.md`](spec/patient-public-ref.md) |
-| `created_at` | timestamptz | default now() | – |
+| `created_at` | timestamptz | default now() | - |
 
 Contrainte d'unicité: `(practitioner_id, patient_id)`.
 
@@ -69,7 +69,7 @@ Contrainte d'unicité: `(practitioner_id, patient_id)`.
 | `token` | text | NOT NULL, UNIQUE | UUID envoyé dans le lien |
 | `expires_at` | timestamptz | NOT NULL | `now() + 48h` à la création |
 | `accepted_at` | timestamptz | nullable | NULL = en attente, timestamp = acceptée |
-| `created_at` | timestamptz | default now() | – |
+| `created_at` | timestamptz | default now() | - |
 
 **Règle**: un token expiré (`expires_at < now()`) ou déjà accepté (`accepted_at IS NOT NULL`) ne peut pas être utilisé.
 
@@ -130,7 +130,8 @@ Une ligne par module. `preview_kind` pilote le moteur de rendu.
 | `preview_kind` | text | Layout cible (voir `docs/module-engine.md` pour la table complète) |
 | `sort_order` | int | Ordre dans la catégorie |
 | `is_invite_excluded` | boolean | Si true : exclu de la pré-sélection à l'invitation (config spéciale requise) |
-| `is_hidden` | boolean | Si true : module retiré de l'app sans suppression (droits non acquis). Voir ci-dessous |
+| `is_hidden` | boolean | Si true : module retiré de l'app sans suppression. Voir ci-dessous |
+| `hidden_reason` | text nullable | Motif de la mise en veille : `rights` ou `beta_scope`. Null si visible (#406) |
 | `icon` | text nullable | Icône Lucide (web) |
 | `mobile_icon` | text nullable | Icône MaterialCommunityIcons (mobile) |
 | `color` | text nullable | Couleur accent hex |
@@ -151,13 +152,36 @@ et les saisies déjà faites par les patients. Un module masqué disparaît du
 catalogue praticien, de l'invitation, de l'aperçu, de la liste patient mobile et
 des routines de rappel.
 
-Modules actuellement masqués : `asrs18`, `epds`, `snap_iv`, `rcads`, `nsi`,
-`bsl23`. Le motif juridique de chacun est documenté dans `supabase/seed.sql`,
-au-dessus de l'instruction de masquage.
+**`hidden_reason` : deux motifs qui ne se confondent pas** (issue #406). Le drapeau
+dit *qu'un* module est en veille, le motif dit *pourquoi*, et rien ne permet de le
+déduire de l'identifiant.
 
-**Réactivation** le jour où les droits sont acquis : retirer l'id de la liste du
-seed **et** de `MUST_BE_HIDDEN` dans `apps/web/src/test/hiddenModules.guard.test.ts`,
-puis rejouer le seed. Rien d'autre à toucher.
+| Motif | Modules | Ce que ça implique |
+|---|---|---|
+| `rights` | `asrs18`, `epds`, `snap_iv`, `rcads`, `nsi`, `bsl23` | Droits de reproduction non acquis en usage commercial. Réactivation conditionnée à une démarche juridique aboutie |
+| `beta_scope` | `gad7`, `asrs6` | Droits acquis, hors périmètre de la bêta (PHQ-9 seul). Réactivation = décision produit, aucune démarche |
+
+Le motif est ce que lit la zone « En veille » du praticien : annoncer « droits d'usage
+en cours de vérification » devant le GAD-7, qui est libre au même titre que le PHQ-9,
+serait faux. Le détail du régime de chaque échelle est documenté dans
+`supabase/seed.sql`, au-dessus de l'instruction de mise en veille.
+
+La contrainte `modules_hidden_reason_ck` rend le couple incohérent impossible : masqué
+sans motif, ou motif sans masquage, ne peuvent pas être écrits. Le seed pose le motif
+et **dérive** `is_hidden`, en une seule instruction (la contrainte est vérifiée à la
+fin de chaque instruction, deux `update` successifs échoueraient).
+
+**Un module en veille n'est pas assignable.** Le filtre `is_hidden` des services de
+catalogue est un confort d'interface ; la barrière réelle est le trigger
+`trg_guard_hidden_module_assignment` sur `patient_modules`, qui refuse l'insertion et
+le changement de `module_type` vers un module en veille. Les lignes déjà débloquées
+avant la mise en veille restent intactes et modifiables : le patient ne voit plus le
+module, son historique reste consultable par le praticien.
+
+**Réactivation** : retirer l'id de la liste de son motif dans le seed et rejouer le
+seed. Rien d'autre, aucune migration. Pour une échelle sous `rights`, retirer aussi son
+id de `MUST_BE_HIDDEN` dans `apps/web/src/test/hiddenModules.guard.test.ts`, dans le
+même commit, avec la preuve du droit obtenu.
 
 **Pourquoi le filtre est dans les services et non dans la policy RLS.** Descendre
 `is_hidden = false` dans `modules_read` semble plus sûr (impossible à oublier), mais
@@ -249,7 +273,7 @@ sans redéploiement. Bumpée en fin de `seed.sql` à chaque re-seed. Voir
 |---------|------|-------------|
 | `singleton` | boolean PK, default true | Contrainte `check (singleton)` → une seule ligne |
 | `config_version` | text NOT NULL, default `now()::text` | Jeton opaque, change à chaque bump |
-| `updated_at` | timestamptz NOT NULL, default now() | – |
+| `updated_at` | timestamptz NOT NULL, default now() | - |
 
 RLS : lecture réservée aux praticiens authentifiés (`auth.uid() is not null`) ; **aucune**
 policy d'écriture (bump via seed / `service_role` uniquement).
@@ -287,7 +311,7 @@ restitué tel quel.
 | `cycles_completed` | integer NOT NULL, default 0 | – |
 | `completed` | boolean NOT NULL, default false | Menée au bout vs interrompue |
 | `feeling` | text, nullable | `calmer` \| `same` \| `tenser` \| null (facultatif) |
-| `created_at` | timestamptz NOT NULL, default now() | – |
+| `created_at` | timestamptz NOT NULL, default now() | - |
 
 RLS : le patient a un CRUD complet sur ses propres lignes (`auth.uid() = patient_id`) ;
 le praticien a une **lecture seule** sur les patients liés **et consentants**
@@ -323,11 +347,33 @@ le patient.
 | `ambient_sound_key` | text NOT NULL, default 'river' | `river` \| `waves` \| `rain` \| `wind` \| `bowl` |
 | `breath_sound` | boolean NOT NULL, default false | – |
 | `preferred_duration_min` | integer NOT NULL, default 5 | – |
-| `created_at` / `updated_at` | timestamptz NOT NULL, default now() | – |
+| `created_at` / `updated_at` | timestamptz NOT NULL, default now() | - |
 
 RLS : le patient a un CRUD complet sur sa propre config (`auth.uid() = patient_id`) ; le
 praticien a un accès **lecture + écriture** sur la config de ses patients liés (même
 modèle que `crisis_plan_configs` : config praticien, pas une donnée clinique).
+
+### `scale_schedules` : Programmation des auto-questionnaires (K-6, #236)
+
+Une programmation de passation par `(patient, échelle)`, `unique (patient_id, module_id)`.
+
+| Colonne | Type | Détail |
+|---|---|---|
+| `patient_id` / `practitioner_id` | uuid NOT NULL FK | propriété RLS |
+| `module_id` | text NOT NULL | l'échelle (`phq9`, `gad7`…) |
+| `mode` | text NOT NULL, check `home\|in_session` | à domicile (auto) / en séance |
+| `frequency` | text NOT NULL, check `weekly\|biweekly\|monthly\|quarterly\|on_demand` | cadence **choisie par le praticien** |
+| `day_of_week` | smallint, check 1 à 7 | 1 = lundi … 7 = dimanche (null si à la demande) |
+| `time_of_day` | text | « HH:MM » (null si à la demande) |
+| `ends_on` | date | null = sans limite |
+| `patient_reminder` | boolean NOT NULL default true | rappel **calendaire** (jamais lié à un score) |
+| `created_at` / `updated_at` | timestamptz NOT NULL, default now() | - |
+
+RLS : praticien CRUD complet sur les programmations de ses patients (`auth.uid() =
+practitioner_id`) ; patient **lecture seule** de ses programmations (`auth.uid() =
+patient_id`), il ne fixe pas la cadence. **MDR 2017/745** : l'app ne suggère aucune
+fréquence et ne déclenche aucune relance à partir d'un score (carnet de bord, jamais
+interprétation). Migration : `supabase/migration_scale_schedules.sql`.
 
 ---
 

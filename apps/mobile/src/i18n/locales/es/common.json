@@ -406,6 +406,10 @@
       "add_trigger": "Añadir",
       "saved_message": "Tu balance ha sido guardado.",
       "save": "Guardar"
+    },
+    "phq9": {
+      "label": "Mi estado de ánimo estas 2 semanas",
+      "description": "Cuestionario PHQ-9 · 10 preguntas, 4 min"
     }
   }
 }

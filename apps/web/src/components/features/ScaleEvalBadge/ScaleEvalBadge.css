@@ -1,0 +1,20 @@
+/* Badge Auto/Hétéro d'une échelle : type de passation (administratif), pas une gravité
+   clinique (MDR). Bleu = auto-évaluation, vert = hétéro-évaluation. */
+.scale-eval-badge {
+  display: inline-block;
+  font-size: var(--font-size-xxs);
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.scale-eval-badge--auto {
+  background: #DBEAFE;
+  color: #1D4ED8;
+}
+
+.scale-eval-badge--hetero {
+  background: #DCFCE7;
+  color: #15803D;
+}

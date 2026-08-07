@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native'
-import { colors, spacing, radius } from '@theme'
+import { colors, spacing, radius, fontSize } from '@theme'
 
 export const styles = StyleSheet.create({
   // ── Variant 'list' (radio classique)
@@ -38,4 +38,25 @@ export const styles = StyleSheet.create({
   },
   gridLabel:       { fontSize: 11, color: colors.textMuted, textAlign: 'center', lineHeight: 15 },
   gridLabelActive: { color: colors.white, fontWeight: '600' },
+  // ── Variant 'stack' (rangées pleine largeur, saisie un item par écran)
+  // `minHeight: 52` tient la cible tactile de 44 pt même sur un libellé d'une seule
+  // ligne ; la bordure garde la même épaisseur active ou non, pour qu'une sélection
+  // ne décale pas la liste sous le doigt.
+  stack:       { gap: spacing.xs },
+  stackOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    minHeight: 52,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    backgroundColor: colors.card,
+  },
+  // Le libellé prend la place restante et passe à la ligne : aucune troncature,
+  // c'est le stimulus de l'item.
+  stackLabel:       { flex: 1, fontSize: fontSize.label, color: colors.text, lineHeight: 21 },
+  stackLabelActive: { fontWeight: '700' },
 })

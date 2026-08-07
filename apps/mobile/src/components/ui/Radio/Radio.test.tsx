@@ -59,6 +59,37 @@ describe('Radio', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
+  it('variant stack : rend une rangée par option et remonte le clic', () => {
+    const onChange = jest.fn()
+    render(<Radio options={OPTIONS} value="maintenance" onChange={onChange} variant="stack" />)
+    expect(screen.getByText('Traitement de fond')).toBeTruthy()
+    fireEvent.press(screen.getByText('Si besoin'))
+    expect(onChange).toHaveBeenCalledWith('prn')
+  })
+
+  it('variant stack : expose l\'état sélectionné via accessibilityState', () => {
+    render(<Radio options={OPTIONS} value="prn" onChange={() => {}} variant="stack" />)
+    expect(screen.getByRole('radio', { selected: true })).toBeTruthy()
+  })
+
+  it('variant stack : ne tronque aucun libellé', () => {
+    // La troncature est ce que cette variante existe pour supprimer : le libellé est
+    // le stimulus de l'item, il se lit en entier ou la mesure est faussée.
+    render(<Radio options={OPTIONS} value={null} onChange={() => {}} variant="stack" />)
+    for (const opt of OPTIONS) {
+      expect(screen.getByText(opt.label).props.numberOfLines).toBeUndefined()
+    }
+  })
+
+  it('variant stack + readonly : aucune option n\'a le rôle radio', () => {
+    const onChange = jest.fn()
+    render(<Radio options={OPTIONS} value="maintenance" variant="stack" readonly onChange={onChange} />)
+    expect(screen.getByText('Traitement de fond')).toBeTruthy()
+    expect(screen.queryByRole('radio')).toBeNull()
+    fireEvent.press(screen.getByText('Si besoin'))
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
   it('value null : aucune option sélectionnée, aucun crash', () => {
     render(<Radio options={OPTIONS} value={null} onChange={() => {}} />)
     expect(screen.queryByRole('radio', { selected: true })).toBeNull()

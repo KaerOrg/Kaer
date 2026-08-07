@@ -90,11 +90,17 @@ Rappel de la règle d'or Kær : le code affiche, jamais il ne conclut. Un état 
 **Détails techniques.** Grille CSS en `minmax(0, …fr)` (le `fr` seul se cale sur le contenu et désaligne les colonnes d'une ligne à l'autre). Description sur 1 ligne, `text-overflow: ellipsis`. Le nouveau tableau est un composant `features/` réutilisable (il servira aussi K-4). Réutiliser la barre de filtres existante (`ModuleFilterBar`, dimensions indication/public), le handler du toggle d'activation, l'i18n, les tokens du design system.
 
 **Critères d'acceptation.**
-- [ ] Colonnes strictement alignées sur toutes les lignes.
-- [ ] 15+ modules lisibles sans scroll excessif ; plus aucune carte.
-- [ ] Tri par « Débloqué le » et « Dernière activité ».
-- [ ] Filtres indication/public conservés ; toggle d'activation fonctionnel.
-- [ ] Composant tableau extrait dans `features/`, testé, documenté (design-system.md).
+- [x] Colonnes strictement alignées sur toutes les lignes.
+- [x] 15+ modules lisibles sans scroll excessif ; plus aucune carte.
+- [x] Tri par « Débloqué le » et « Dernière activité ».
+- [x] Filtres indication/public conservés ; toggle d'activation fonctionnel.
+- [x] Composant tableau extrait dans `features/`, testé, documenté (design-system.md).
+
+**Livré.** Composant `features/ModuleTable` (assemble `ui/DataTable`, possède le tri des
+deux colonnes de date) ; source « dernière activité » via `engagementService.fetchModuleLastActivity`
++ query `engagementQueries.lastActivity`. Colonne « Indications » : `ModuleTagChips maxChips={2}`
+(modules) ou `ScaleMetaBadges chipsOnly` (échelles). Documenté dans `apps/web/docs/design-system.md`
+(section `ModuleTable`).
 
 ### K-2 · Modules : sous-onglets « Actifs » / « Évolution » + réintégration de l'Évolution existante (maquette `K-2_modules-evolution_3c`)
 
@@ -105,9 +111,17 @@ Rappel de la règle d'or Kær : le code affiche, jamais il ne conclut. Un état 
 **Réutiliser, ne pas recréer.** Le sous-onglet Évolution monte le `PatientEvolutionTab` existant, **filtré aux modules** (hors échelles). Conserver tel quel : `EvolutionOverviewBand`, `EvolutionSection` (repliables), `onOpenModuleData`, toggle « Afficher les archivés », `SegmentedControl` de période.
 
 **Critères d'acceptation.**
-- [ ] L'Évolution affiche exactement les mêmes courbes/sections qu'avant (filtrées aux modules) ; aucun composant de graphe réécrit.
-- [ ] L'ancienne entrée « Évolution » est retirée de la sidebar.
-- [ ] « Voir les données » ouvre bien la modale sur l'onglet Données du module.
+- [x] L'Évolution affiche exactement les mêmes courbes/sections qu'avant (filtrées aux modules) ; aucun composant de graphe réécrit.
+- [x] L'ancienne entrée « Évolution » est retirée de la sidebar.
+- [x] « Voir les données » ouvre bien la modale sur l'onglet Données du module.
+
+**Livré.** `PatientEvolutionTab` reçoit une prop `family?: 'modules' | 'scales'` (absente →
+tout, comportement historique) : `modules` masque les sections d'échelles cliniques, `scales`
+ne garde qu'elles. K-5 réutilisera `family="scales"` dans l'onglet Échelles. Les sous-onglets
+`Actifs`/`Évolution` sont un `ui/Tabs` dans `PatientModulesTab` ; « Voir les données → » ouvre
+la modale d'actions en interne (le flux `openDataFor` de la sidebar est supprimé). Le titre h2
+« Évolution » redondant devient une légende MDR (« Valeurs brutes, à interpréter en consultation. »),
+le sous-onglet portant déjà le libellé.
 
 ### K-3 · Fiche module au clic sur une ligne (maquette `K-3_fiche-module_3b`)
 
@@ -116,9 +130,18 @@ Rappel de la règle d'or Kær : le code affiche, jamais il ne conclut. Un état 
 **Réutiliser.** La modale existante `ModuleActionsModal`, ordre d'onglets canonique inchangé (`computeModuleTabs` / `TAB_ORDER` : `data → config → notifications → preview → sources`, config seulement si le module en a un). Panneaux existants (`ExposureDataPanel`, `ModulePatientViewPanel`, etc.).
 
 **Critères d'acceptation.**
-- [ ] Aucune action perdue par rapport aux cartes ; aucune nouvelle modale créée.
-- [ ] Le démarrage d'une passation n'est jamais déclenché en un seul clic depuis le tableau.
-- [ ] La ligne entière est une surface cliquable (primitive de surface, pas un `<button>` nu).
+- [x] Aucune action perdue par rapport aux cartes ; aucune nouvelle modale créée.
+- [x] Le démarrage d'une passation n'est jamais déclenché en un seul clic depuis le tableau.
+- [x] La ligne entière est une surface cliquable (primitive de surface, pas un `<button>` nu).
+
+**Livré.** `ui/DataTable` reçoit `onRowActivate` (ligne cliquable souris) ; `ModuleTable` expose
+`onRowClick` (clic ligne → fiche du module sur le 1ᵉʳ onglet de `computeModuleTabs`) et une colonne
+d'**actions au survol** (raccourci par onglet, sauf Sources). Réutilise `ModuleActionsModal`
+existante (aucune nouvelle modale). Le `<tr>` cliquable n'a **ni `role` ni `tabIndex`** (une ligne
+contenant des boutons ne peut pas être un `role="button"` valide) : le chemin clavier/lecteur
+d'écran passe par les contrôles explicites (toggle + boutons d'action), jamais perdu. Aucune action
+au clic ne démarre une passation (le clic ouvre une fiche). Présentation des onglets (icône +
+libellé) extraite dans `moduleActionTabMeta.tsx` (partagée modale ↔ raccourcis).
 
 ### K-4 · Nouvel onglet « Échelles & questionnaires » : tableau jumeau (maquette `K-4_echelles-tableau_4a`)
 
@@ -129,9 +152,19 @@ Rappel de la règle d'or Kær : le code affiche, jamais il ne conclut. Un état 
 **Réutiliser.** Composant tableau de K-1, `scaleService` (`fetchScaleMeta`) + `scaleQueries.meta()`, `ScaleMetaBadges`. Retirer la branche échelle de `renderModuleCard` dans `PatientModulesTab`.
 
 **Critères d'acceptation.**
-- [ ] Visuellement et fonctionnellement identique au tableau Modules, au vocabulaire près.
-- [ ] Les échelles n'apparaissent plus dans l'onglet Modules.
-- [ ] Badge Auto/Hétéro sur chaque ligne ; C-SSRS en tête sans toggle ; filtre Type opérationnel.
+- [x] Visuellement et fonctionnellement identique au tableau Modules, au vocabulaire près.
+- [x] Les échelles n'apparaissent plus dans l'onglet Modules.
+- [x] Badge Auto/Hétéro sur chaque ligne ; C-SSRS en tête sans toggle ; filtre Type opérationnel.
+
+**Livré.** Onglet sidebar « Échelles & questionnaires » (`PatientPage`, entre Modules et Notes)
++ page `PatientScalesTab` : sous-onglets Actives/Évolution (`PatientEvolutionTab family="scales"`),
+`ModuleTable` réutilisé (1ʳᵉ colonne = nom + `ScaleEvalBadge` Auto/Hétéro via `titleBadge`),
+colonne INDICATIONS = `ModuleTagChips`, filtre **Type** (Auto/Hétéro) via `ModuleFilterBar.extraControls`
++ filtre Indication. C-SSRS en tête : `noToggle` (toggle visuel non interactif), « Toujours dispo. »
+(`unlockedLabelOverride`), clic → panneau d'évaluations `CSSRSScreenPanel`. Clic ligne → fiche
+`ModuleActionsModal` (K-3). Les échelles sont **exclues** de `PatientModulesTab` (`collectModules` +
+retrait de la branche échelle de `renderModuleCard`/`renderActiveRow` + modale CSSRS). Badge
+Auto/Hétéro = type de passation, jamais une gravité (MDR).
 
 ### K-5 · Échelles : sous-onglet « Évolution » = plan de mesure (maquettes `K-2_modules-evolution_3c` réf. + `K-5-K-7_programmee_5a`)
 
@@ -155,10 +188,24 @@ Rappel de la règle d'or Kær : le code affiche, jamais il ne conclut. Un état 
 **Trois verbes à ne pas confondre.** Activer ≠ Programmer ≠ Faire passer.
 
 **Critères d'acceptation.**
-- [ ] Geste unique et prévisible ; l'encart est le même pour auto et hétéro, seul le contenu change.
-- [ ] Hétéro sans aucune option de programmation.
-- [ ] Cadence choisie par le praticien, wording neutre, aucune relance déclenchée par un score (MDR).
-- [ ] Accès aux données de programmation par un service dédié (zéro Supabase dans le composant) + RLS ; couvert par tests.
+- [x] Geste unique et prévisible ; l'encart est le même pour auto et hétéro, seul le contenu change.
+- [x] Hétéro sans aucune option de programmation.
+- [x] Cadence choisie par le praticien, wording neutre, aucune relance déclenchée par un score (MDR).
+- [x] Accès aux données de programmation par un service dédié (zéro Supabase dans le composant) + RLS ; couvert par tests.
+
+**Livré (cœur d'abord).** Nouvelle table `scale_schedules` (une programmation par `(patient, échelle)`)
++ RLS (praticien CRUD, patient lecture seule) dans `supabase/schema.sql` + `migration_scale_schedules.sql`.
+Service `scaleScheduleService` (`fetch`/`save` upsert/`delete`) + query `scaleScheduleQueries` + hooks de
+mutation. `computeModuleTabs` ajoute l'onglet de tête **Programmation** (auto → `ScaleProgrammingPanel`) ou
+**Passation** (hétéro → `ScalePassationBlock`, aucune option de programmation) ; l'hétéro n'a pas de Vue
+patient. Panneaux montés via `ModuleActionsModal.schedulePanel`. **MDR** : cadence en préréglages choisie
+par le praticien (aucune suggestion de l'app), rappel calendaire, **aucune relance déclenchée par un
+score**, bandeau MDR repris tel quel. Les actions « Faire passer maintenant » / « Démarrer la passation »
+sont posées avec un câblage minimal (toast) ; la mécanique d'envoi/saisie réelle est un follow-up.
+
+> ⚠️ **Point MDR à instruire** (spec Q2 §4) : le mode « à domicile (auto) récurrent » introduit une
+> auto-évaluation autonome structurée par l'outil, à faire ré-instruire par un référent qualité/réglementaire
+> avant commercialisation. Implémenté conforme aux garde-fous §3 par défaut (position conservatrice non-DM).
 
 ### K-7 · Colonne « Programmée » (remplace « Débloqué le ») + rappel auto en retard (maquette `K-5-K-7_programmee_5a`)
 
@@ -170,10 +217,17 @@ Rappel de la règle d'or Kær : le code affiche, jamais il ne conclut. Un état 
 Bandeau fiche patient : rappel des **auto en retard uniquement** (pas de « prévu en séance »).
 
 **Critères d'acceptation.**
-- [ ] Aucune date fantaisiste pour les hétéro.
-- [ ] Rappel strictement administratif (langage neutre, teinte ambre non clinique).
-- [ ] « Débloqué le » toujours consultable dans la fiche (onglet Configuration).
-- [ ] État « en retard » dérivé de la date de programmation (fait administratif), jamais d'un score.
+- [x] Aucune date fantaisiste pour les hétéro. *(hétéro = « En séance · à la demande », sans date ; le modèle `scale_schedules` ne stocke aucune date de passation hétéro ; la maquette montrait « aujourd'hui / au prochain RDV » mais ce serait une date inventée, écarté.)*
+- [x] Rappel strictement administratif (langage neutre, teinte ambre non clinique). *(`features/OverdueScalesReminder` + pastille `ScheduleCell` en `--color-warning`, wording « en retard N j ».)*
+- [x] « Débloqué le » toujours consultable dans la fiche (onglet Configuration). *(descend dans `ScaleProgrammingPanel` (auto) / `ScalePassationBlock` (hétéro) via `unlockedAtLabel`.)*
+- [x] État « en retard » dérivé de la date de programmation (fait administratif), jamais d'un score. *(`lib/scaleScheduleStatus.computeScheduleStatus` : ancre = dernière passation ou `created_at`, + cadence ; en retard = échéance < aujourd'hui.)*
+
+**Livré (K-7).** Colonne « Programmée » (`features/ScheduleCell`) remplaçant « Débloqué le »
+côté échelles (`ModuleTable programmedColumn`), bandeau auto en retard
+(`features/OverdueScalesReminder`), lecture multi-échelles `fetchScaleSchedules` +
+`scaleScheduleQueries.byPatient`, helper pur `lib/scaleScheduleStatus`. Tests : status pur,
+`ScheduleCell`, `OverdueScalesReminder`, `ModuleTable` (variante), `PatientScalesTab`,
+panneaux (« Débloqué le »). Aucun changement de schéma (réutilise la table `scale_schedules` de K-6).
 
 ---
 

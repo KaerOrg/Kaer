@@ -62,12 +62,15 @@
     "modify": "Edit",
     "saving": "Saving…",
     "reuse_last_values": "Reuse values from {{date}}",
+    "unanswered_count_one": "{{count}} unanswered question.",
+    "unanswered_count_other": "{{count}} unanswered questions.",
     "save_changes": "Save changes",
     "delete_record_title": "Delete this record?",
     "notes_placeholder": "Context, remarks...",
     "step": "Step",
     "read_sheet": "Read the sheet",
-    "close": "Close"
+    "close": "Close",
+    "your_clinician": "your clinician"
   },
   "global": {
     "greeting": "Welcome",
@@ -191,7 +194,25 @@
   "modules": {
     "scale_history": {
       "evolution_label": "Score evolution",
-      "avg": "Avg: {{value}}"
+      "avg": "Avg: {{value}}",
+      "last_sent_label": "Last sent",
+      "entries_section": "My questionnaires",
+      "sent_status": "sent",
+      "score_details": "See the figures",
+      "score_note": "These totals do not make a diagnosis and are not read on their own. They are there to discuss with {{name}}.",
+      "start_btn": "Start",
+      "fill_now_btn": "Fill in now",
+      "start_hint": "You can stop and pick up where you left off."
+    },
+    "scale_entry": {
+      "progress": "{{current}} / {{total}}",
+      "review_title": "Before sending",
+      "review_hint": "Tap a row to change it.",
+      "unanswered": "No answer",
+      "draft_title": "You had reached question {{question}}",
+      "draft_subtitle": "Started on {{date}}. Your answers are kept on this phone.",
+      "draft_resume": "Resume",
+      "draft_restart": "Start over"
     },
     "crisis_plan": {
       "sequence_home_title": "I'm here with you.",
@@ -1418,8 +1439,8 @@
       "values_growth": "Personal growth"
     },
     "phq9": {
-      "label": "PHQ-9",
-      "description": "",
+      "label": "My mood over the past 2 weeks",
+      "description": "PHQ-9 questionnaire · 10 questions, 4 min",
       "new_btn": "New questionnaire",
       "empty_title": "No questionnaire filled in yet",
       "empty_text": "Use the button above to complete your first PHQ-9.",
@@ -1434,15 +1455,23 @@
       "q3": "Trouble falling or staying asleep, or sleeping too much",
       "q4": "Feeling tired or having little energy",
       "q5": "Poor appetite or overeating",
-      "q6": "Feeling bad about yourself, or that you are a failure or have let yourself or your family down",
+      "q6": "Feeling bad about yourself, or that you are a failure, or have let yourself or your family down",
       "q7": "Trouble concentrating on things, such as reading the newspaper or watching television",
       "q8": "Moving or speaking so slowly that other people could have noticed. Or the opposite, being so fidgety or restless that you have been moving around a lot more than usual",
       "q9": "Thoughts that you would be better off dead or of hurting yourself in some way",
+      "q10": "If you checked off any problems, how difficult have these problems made it for you to do your work, take care of things at home, or get along with other people?",
+      "q10_opt_0": "Not difficult at all",
+      "q10_opt_1": "Somewhat difficult",
+      "q10_opt_2": "Very difficult",
+      "q10_opt_3": "Extremely difficult",
       "score_label": "Total score",
       "score_max": "/ 27",
       "footer": "The score is shared with your clinician. Interpretation is their responsibility.",
       "progress": "{{answered}} / {{total}} answers",
-      "submit": "Submit questionnaire"
+      "submit": "Send my answers",
+      "intro_length": "10 questions, about 4 minutes.",
+      "intro_window": "They cover the past 2 weeks.",
+      "intro_recipient": "Your answers go to {{name}}."
     },
     "bsl23": {
       "label": "BSL-23",

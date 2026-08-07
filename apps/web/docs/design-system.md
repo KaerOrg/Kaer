@@ -125,7 +125,7 @@ inatteignables après la migration des autres modules vers des layouts dédiés,
 | Dossier | Rôle |
 |---|---|
 | `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, ProgressRing, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle, TreeSelector |
-| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, PatientDataRights, ScaleMetaBadges, SupportRequestModal, WeekGrid |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModuleFilterBar, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, OverdueScalesReminder, PatientDataRights, ScaleEvalBadge, ScaleMetaBadges, ScheduleCell, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
 
@@ -1170,6 +1170,7 @@ const columns: DataTableColumn<Row>[] = [
 | `sort` | `DataTableSort` | Tri actif `{ column, direction }` (`column` = `DataTableColumn.id`). Pilote l'indicateur + `aria-sort` |
 | `onSortChange` | `(column: string) => void` | Clic sur un en-tête `sortable`. À l'appelant de basculer le sens et de re-trier (souvent un **refetch serveur**) |
 | `pagination` | `DataTablePaginationState` | Pagination **contrôlée** (cf. ci-dessous). Absente ⇒ aucune barre |
+| `onRowActivate` | `(row: T) => void` | Rend chaque ligne **cliquable à la souris** (`.data-table__row--clickable`, curseur main). Le `<tr>` ne reçoit **ni `role` ni `tabIndex`** (une ligne contenant des boutons ne peut pas être un `role="button"` valide) : l'accès clavier/lecteur d'écran passe par les contrôles explicites de la ligne. Un clic sur un élément interactif interne (bouton, toggle, lien) est ignoré. Absent ⇒ lignes non cliquables |
 | `className` | `string` | Classe posée sur le conteneur `.data-table-wrap` — permet de **scoper un habillage propre** (couleurs d'en-tête, dégradé de lignes) sans toucher au style générique. Ex. `CaseloadTable` passe `caseload-data-table` et stylise `.caseload-data-table .data-table__th` (en-tête teal). |
 
 **Tri (`sortable`)** — une colonne `{ …, sortable: true }` rend un bouton de tri dans son
@@ -1222,11 +1223,11 @@ d'un patient** (armoire thérapeutique, K-1). Assemble le primitive `ui/DataTabl
 avec les 5 colonnes de l'armoire : **Module** (icône + nom + description tronquée sur
 une ligne), **Indications**, **Débloqué le**, **Dernière activité**, **Activé**.
 Composant métier : il possède l'état de tri (les deux colonnes de date) et réordonne
-lui-même les lignes — `DataTable` ne trie jamais. Les lignes sans date vont toujours
+lui-même les lignes (`DataTable` ne trie jamais). Les lignes sans date vont toujours
 en fin, quel que soit le sens du tri.
 
 Les cellules « libres » (`indications`, `activation`) sont fournies **déjà rendues**
-par l'appelant : puces d'indication (`ModuleTagChips maxChips={2}` — max N puces par
+par l'appelant : puces d'indication (`ModuleTagChips maxChips={2}`, max N puces par
 dimension, le surplus résumé par une puce « +N ») ou badges d'échelle
 (`ScaleMetaBadges chipsOnly`) pour les indications ; toggle d'activation ou bouton pour
 la colonne Activé. Les dates sont passées **brutes** (ISO ou `null`) et formatées à la
@@ -1242,7 +1243,7 @@ const rows: ModuleTableRow[] = items.map(item => ({
   title: t(`modules.${item.id}.label`),
   description: t(`modules.${item.id}.description`),
   indications: <ModuleTagChips tagIds={tags} taxonomy={taxonomy} maxChips={2} />,
-  unlockedAt: mod?.unlocked_at ?? null,        // ISO brut — le tableau formate
+  unlockedAt: mod?.unlocked_at ?? null,        // ISO brut, le tableau formate
   lastActivityAt: lastActivity.get(item.id) ?? null,
   activation: moduleToggle(true, busy, onRevoke),
 }))
@@ -1258,13 +1259,56 @@ const rows: ModuleTableRow[] = items.map(item => ({
 | Prop | Type | Rôle |
 |---|---|---|
 | `rows` | `readonly ModuleTableRow[]` | Lignes (id, icône, titre, description, `indications`, `unlockedAt`, `lastActivityAt`, `activation`) |
-| `firstColumnLabel` | `string` | En-tête de la 1ʳᵉ colonne (« Module » / « Échelle & questionnaire ») — les 4 autres colonnes sont communes |
+| `firstColumnLabel` | `string` | En-tête de la 1ʳᵉ colonne (« Module » / « Échelle & questionnaire ») ; les 4 autres colonnes sont communes |
 | `ariaLabel` | `string` | Libellé accessible de la table |
 | `emptyState` | `ReactNode` | Affiché à la place de la table quand `rows` est vide (filtre sans résultat) |
+| `onRowClick` | `(id: string) => void` | Rend chaque ligne cliquable (ouvre la fiche du module, K-3) et active la **colonne d'actions au survol** (cellule `row.actions`). Reçoit l'`id` de la ligne. Absent ⇒ table non cliquable, pas de colonne d'actions |
+| `programmedColumn` | `{ label: string }` | K-7 (onglet Échelles) : remplace la colonne triable « Débloqué le » par une colonne « Programmée » (non triable) rendant `row.scheduleCell`. Absent ⇒ colonne « Débloqué le » conservée (onglet Modules) |
+
+Champs de ligne optionnels ajoutés en K-4 (onglet Échelles) : `titleBadge` (`ReactNode`,
+badge accolé au nom, ex. `ScaleEvalBadge` Auto/Hétéro) et `unlockedLabelOverride` (`string`,
+remplace la cellule « Débloqué le » par un libellé ; le tri reste sur `unlockedAt`).
+Champ K-7 : `scheduleCell` (`ReactNode`, cellule « Programmée » déjà rendue, ex.
+`features/ScheduleCell`, utilisée uniquement avec la prop `programmedColumn`).
+
+Champ de ligne `actions` (`ReactNode`) : raccourcis révélés au **survol / focus** de la ligne
+(icônes `ui/Button variant="ghost"` : données, notifications, aperçu, config), rendus dans une
+colonne dédiée présente uniquement quand `onRowClick` est fourni. Chaque bouton stoppe la
+propagation pour ne pas déclencher le clic de ligne. Sous pointeur grossier (tactile), les
+actions restent visibles (`@media (hover: none)`).
 
 > La barre de filtres à facettes (`ModuleFilterBar`) est un panneau déjà encadré :
 > l'armoire la rend **au-dessus** de `ModuleTable` (elle n'est pas passée à la table,
 > ce qui ajouterait un second cadre).
+
+### `ScheduleCell` (`components/features/`)
+
+`components/features/ScheduleCell/`. Cellule de la colonne **« Programmée »** du tableau
+des échelles (K-7). Rend le statut de programmation calculé par `lib/scaleScheduleStatus.ts`
+(`computeScheduleStatus`) : **auto à venir** (`🏠` domicile · cadence · prochaine date · cloche
+de rappel si activée), **auto en retard** (`🕐` en **pastille ambre**, teinte `--color-warning`,
+fait administratif, jamais un rouge de gravité ni un signal dérivé d'un score, **MDR**),
+**à la demande** (`🩺` « en séance · à la demande » pour une hétéro, ou domicile à la demande),
+**non programmée** (libellé + bouton `ui/Button variant="outline"` « Programmer » qui stoppe la
+propagation et ouvre l'encart Programmation).
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `status` | `ScheduleStatus` | Statut dérivé (`computeScheduleStatus`) : `unscheduled` / `on_demand` / `home` |
+| `onProgram` | `() => void` | Ouvre l'encart Programmation (échelle auto « Non programmée ») |
+
+### `OverdueScalesReminder` (`components/features/`)
+
+`components/features/OverdueScalesReminder/`. Bandeau fiche patient (K-7) rappelant les
+**auto-questionnaires en retard uniquement** (jamais les passations « en séance »). Enveloppe
+`ui/Banner variant="warning"` : titre pluralisé + un `ui/Button variant="ghost"` par échelle en
+retard (nom + jours de retard) qui remonte l'ouverture de la fiche. **MDR** : constat de calendrier
+(échéance dépassée) en ambre neutre, jamais un signal clinique. Rien si aucune échelle en retard.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `items` | `readonly OverdueScaleItem[]` | Échelles en retard (`moduleType`, `label`, `overdueDays`) |
+| `onOpen` | `(moduleType: ModuleType) => void` | Ouvre la fiche de l'échelle (onglet Programmation) |
 
 ### `TimeDial`
 
@@ -1336,6 +1380,21 @@ const dayLabels = DAY_KEYS.map(k => t(`notifications.day_${k}`)) // ['L','M','Me
 
 ---
 
+## Composant `ScaleEvalBadge`
+
+Fichier : `components/features/ScaleEvalBadge/ScaleEvalBadge.tsx`. Badge **Auto** (bleu,
+auto-évaluation) / **Hétéro** (vert, hétéro-évaluation) d'une échelle. Décrit le **type de
+passation** (administratif), jamais une gravité clinique (MDR). Réutilisé par `ScaleMetaBadges`
+et par le tableau des échelles (badge accolé au nom, via `ModuleTable.titleBadge`, K-4).
+
+```tsx
+import { ScaleEvalBadge } from '../components/features/ScaleEvalBadge'
+<ScaleEvalBadge evaluationType={scale.evaluationType} />   // 'auto' | 'hetero'
+```
+
+> Le filtre **Type** (Auto/Hétéro) de l'onglet Échelles passe par le slot `extraControls`
+> de `ModuleFilterBar` (contrôle hors taxonomie rendu dans la rangée des filtres).
+
 ## Composant `ScaleMetaBadges`
 
 Fichier : `components/features/ScaleMetaBadges/ScaleMetaBadges.tsx`
@@ -1368,7 +1427,7 @@ import { ScaleMetaBadges } from '../components/features/ScaleMetaBadges/ScaleMet
 | `evaluationType` | `'auto' \| 'hetero'` | Badge coloré — bleu (auto-évaluation) ou vert (hétéro-évaluation) |
 | `category` | `string` | Chip nosologique gris (ex. `'Humeur'`, `'Anxiété'`) |
 | `targetAges` | `readonly TargetAge[]` | Chips d'âge colorés — couleurs définies dans `AGE_BADGE_CONFIG` de `data/scales.ts` |
-| `chipsOnly` | `boolean` (défaut `false`) | N'affiche que les puces (badge éval + catégorie), sans la ligne de description — pour les contextes denses (cellule « Indications » de `ModuleTable`) |
+| `chipsOnly` | `boolean` (défaut `false`) | N'affiche que les puces (badge éval + catégorie), sans la ligne de description, pour les contextes denses (cellule « Indications » de `ModuleTable`) |
 
 ### Labels i18n
 

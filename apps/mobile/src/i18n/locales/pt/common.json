@@ -406,6 +406,10 @@
       "add_trigger": "Adicionar",
       "saved_message": "O seu balanço foi guardado.",
       "save": "Guardar"
+    },
+    "phq9": {
+      "label": "O meu humor nestas 2 semanas",
+      "description": "Questionário PHQ-9 · 10 perguntas, 4 min"
     }
   }
 }

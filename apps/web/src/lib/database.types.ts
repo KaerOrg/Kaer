@@ -1,5 +1,18 @@
 export type ModuleType = string
 
+/**
+ * Motif de mise en veille d'un module (`modules.hidden_reason`, issue #406).
+ *
+ * `rights`     : droits de reproduction non acquis en usage commercial. Réactivation
+ *                conditionnée à une démarche juridique aboutie.
+ * `beta_scope` : droits acquis, mais hors du périmètre de la bêta. Réactivation =
+ *                décision produit, sans aucune démarche.
+ *
+ * Les deux ne se confondent pas : c'est ce motif que lit la zone « En veille » du
+ * praticien, et annoncer une question de licence devant une échelle libre serait faux.
+ */
+export type HiddenReason = 'rights' | 'beta_scope'
+
 export interface Database {
   public: {
     Tables: {
@@ -353,6 +366,8 @@ export interface Database {
           is_invite_excluded: boolean
           /** Module retiré de l'app sans suppression (droits non acquis), issue #247. */
           is_hidden: boolean
+          /** Motif de mise en veille, null si visible. Issue #406. */
+          hidden_reason: HiddenReason | null
           icon: string
           mobile_icon: string
           color: string
@@ -364,6 +379,7 @@ export interface Database {
           sort_order?: number
           is_invite_excluded?: boolean
           is_hidden?: boolean
+          hidden_reason?: HiddenReason | null
           icon?: string
           mobile_icon?: string
           color?: string
@@ -373,6 +389,7 @@ export interface Database {
           sort_order?: number
           is_invite_excluded?: boolean
           is_hidden?: boolean
+          hidden_reason?: HiddenReason | null
           icon?: string
           mobile_icon?: string
           color?: string
@@ -541,6 +558,45 @@ export interface Database {
           is_active?: boolean
           patient_paused?: boolean
           patient_paused_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      // Programmation des auto-questionnaires (K-6). Une ligne par (patient, échelle).
+      scale_schedules: {
+        Row: {
+          id: string
+          patient_id: string
+          practitioner_id: string
+          module_id: string
+          mode: 'home' | 'in_session'
+          frequency: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'on_demand'
+          day_of_week: number | null
+          time_of_day: string | null
+          ends_on: string | null
+          patient_reminder: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          patient_id: string
+          practitioner_id: string
+          module_id: string
+          mode?: 'home' | 'in_session'
+          frequency: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'on_demand'
+          day_of_week?: number | null
+          time_of_day?: string | null
+          ends_on?: string | null
+          patient_reminder?: boolean
+          updated_at?: string
+        }
+        Update: {
+          mode?: 'home' | 'in_session'
+          frequency?: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'on_demand'
+          day_of_week?: number | null
+          time_of_day?: string | null
+          ends_on?: string | null
+          patient_reminder?: boolean
           updated_at?: string
         }
         Relationships: []

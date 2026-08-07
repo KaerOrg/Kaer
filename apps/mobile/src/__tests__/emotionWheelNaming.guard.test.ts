@@ -12,11 +12,7 @@
 // L'ancien nom se réintroduit facilement par un merge sur un fichier de locale de
 // 2000+ lignes : d'où la garde plutôt qu'une simple relecture.
 
-import { readFileSync, readdirSync } from 'fs'
-import { join } from 'path'
-
-// __dirname = apps/mobile/src/__tests__
-const LOCALES_DIR = join(__dirname, '..', 'i18n', 'locales')
+import { localeFiles, readModuleBlock } from '../test-utils/locales'
 
 // Anciens libellés du module, langue par langue. « Feeling Wheel (Willcox, 1982) »
 // n'est PAS dans cette liste : c'est le nom de l'instrument d'origine, cité en
@@ -30,29 +26,7 @@ const LEGACY_NAMES = [
   'Roda das emoções',
 ]
 
-function localeFiles(): { rel: string; content: string }[] {
-  const out: { rel: string; content: string }[] = []
-  for (const lang of readdirSync(LOCALES_DIR)) {
-    const dir = join(LOCALES_DIR, lang)
-    for (const file of readdirSync(dir)) {
-      if (file.endsWith('.json')) {
-        out.push({ rel: `${lang}/${file}`, content: readFileSync(join(dir, file), 'utf8') })
-      }
-    }
-  }
-  return out
-}
-
-// Seules les clés vérifiées ici sont typées : le bloc en contient d'autres (dont des
-// sous-objets `context` / `node`), hors périmètre de ce garde-fou.
-type EmotionWheelBlock = { label?: string; description?: string; title?: string }
-
-function readModule(rel: string): EmotionWheelBlock {
-  const raw = JSON.parse(readFileSync(join(LOCALES_DIR, rel), 'utf8')) as {
-    modules?: Record<string, EmotionWheelBlock>
-  }
-  return raw.modules?.emotion_wheel ?? {}
-}
+const readModule = (rel: string) => readModuleBlock(rel, 'emotion_wheel')
 
 describe('emotion_wheel : renommage « Nommer ce que je ressens » (#249)', () => {
   it('ne laisse aucune occurrence de l’ancien nom dans les locales mobile', () => {

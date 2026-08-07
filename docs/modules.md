@@ -39,36 +39,53 @@ Pattern générique : `ScaleHistoryScreen` + `ScaleEntryScreen` + `SCALE_SCORING
 
 | Clé | Nom | Items | Score | Particularités | Doc |
 |-----|-----|-------|-------|----------------|-----|
-| `phq9` | PHQ-9 — Dépression | 9 | 0–27 | — | — |
-| `gad7` | GAD-7 — Anxiété généralisée | 7 | 0–21 | — | — |
+| `phq9` | Mon humeur ces 2 semaines (PHQ-9) | 10 posés, 9 cotés | 0–27 | Renommé côté patient (#405). Saisie un item par écran + relecture (#409, #416). Item 10 (retentissement fonctionnel) posé mais **hors score** (#410) | — |
+| `gad7` | GAD-7 — Anxiété généralisée | 7 | 0–21 | 💤 **En veille** (#406, `beta_scope`). Droits acquis, hors périmètre bêta | — |
 | `bsl23` | BSL-23 — Symptômes borderline | 23 | 0–4 (moyen) | 🔒 **Masquée** (#247) | — |
 | `rcads` | RCADS-25 — Anxiété & dépression (enfant/ado) | 25 | 6 sous-échelles | 🔒 **Masquée** (#247). Ebesutani (2012) | — |
 | `snap_iv` | SNAP-IV — Dépistage TDAH (enfant/ado) | 26 | 3 sous-échelles (I/HI/TOD) | 🔒 **Masquée** (#247). Hétéro-évaluation (`scale_warning`) | [doc](modules/snap_iv.md) |
-| `asrs6` | ASRS v1.1 — Dépistage Rapide (adulte) | 6 | 0–24 | Kessler (2005), bouton info PubMed | [doc](modules/asrs6.md) |
+| `asrs6` | ASRS v1.1 — Dépistage Rapide (adulte) | 6 | 0–24 | 💤 **En veille** (#406, `beta_scope`). Kessler (2005), bouton info PubMed. Autorisée par NYU en usage commercial | [doc](modules/asrs6.md) |
 | `asrs18` | ASRS v1.1 — Bilan Complet (adulte) | 18 | 0–72 + 2 sous-scores | 🔒 **Masquée** (#247). Parties A+B, bouton info PubMed | [doc](modules/asrs18.md) |
 | `epds` | EPDS — Dépression postnatale | 10 | 0–30 | 🔒 **Masquée** (#247) | [doc](modules/epds.md) |
 | `nsi` | NSI — Sévérité des cauchemars | 9 scorés + 2 contextuels | 0–45 | 🔒 **Masquée** (#247). Items contextuels (% récurrents, thèmes) stockés dans `nsi_entries` | [doc](modules/nsi.md) |
 | `cssrs` | C-SSRS — Dépistage suicidaire | 6 idéation + 4 comportements | Arbre décisionnel | `no_toggle=true` : panel dédié `CSSRSScreenPanel` côté web praticien (pas de saisie patient). `cssrs_screen_assessments` Supabase. | [doc](modules/cssrs_screen.md) |
 
-### 🔒 Échelles masquées : droits de reproduction non acquis (#247)
+### 🔒 Échelles en veille : deux motifs distincts (#247, #406)
 
-Kær est un produit commercial : un instrument téléchargeable gratuitement n'est
-pas pour autant reproductible dans l'app. Six échelles sont donc **masquées via
-`modules.is_hidden`**, c'est-à-dire retirées du catalogue praticien, de
-l'invitation, de l'aperçu, de la liste patient et des routines de rappel.
+Huit échelles sont **en veille via `modules.is_hidden`**, c'est-à-dire retirées du
+catalogue praticien, de l'invitation, de l'aperçu, de la liste patient et des
+routines de rappel. Elles ne sont pas assignables : la barrière est un trigger en
+base, pas seulement le filtre des services.
 
 **Rien n'est supprimé** : items, i18n, scoring, écrans, tests et docs restent en
 place, ainsi que les lignes `patient_modules` et les saisies patient existantes.
 Elles réapparaissent telles quelles si le module est réactivé.
 
+`modules.hidden_reason` porte le motif, et les deux ne se confondent jamais : le
+praticien le lit dans la zone « En veille », et annoncer une question de licence
+devant une échelle libre serait faux. Côté patient, en revanche, le motif n'existe
+pas : le module disparaît sans mention, quel qu'il soit.
+
+**Motif `rights` : droits de reproduction non acquis en usage commercial.** Kær est
+un produit commercial, et un instrument téléchargeable gratuitement n'est pas pour
+autant reproductible dans l'app. Réactivation = démarche juridique aboutie.
+
 | Échelle | Motif |
 |---|---|
-| `asrs18` | Licence NYU *Commercial Use - Website Integration*, payante et annuelle. Régime distinct d'`asrs6`, qui reste visible |
+| `asrs18` | Licence NYU *Commercial Use - Website Integration*, payante et annuelle. Régime distinct d'`asrs6` |
 | `epds` | © Royal College of Psychiatrists, intégration numérique déjà refusée à un tiers |
-| `snap_iv` | © J. M. Swanson, autorisation écrite requise |
+| `snap_iv` | © J. M. Swanson, autorisation écrite requise, et aucune version française validée |
 | `rcads` | UCLA : « Commercial distribution [...] in any form or medium is prohibited » |
 | `nsi` | Échelle de 2024, droits non clarifiés |
-| `bsl23` | Aucun régime de licence publié, suspendue en attendant ZI Mannheim |
+| `bsl23` | Zentralinstitut de Mannheim, usage commercial explicitement exclu |
+
+**Motif `beta_scope` : hors périmètre de la bêta**, qui porte le seul PHQ-9. Droits
+acquis, réactivation par simple décision produit.
+
+| Échelle | Motif |
+|---|---|
+| `gad7` | Libre au même titre que le PHQ-9 (Spitzer, 2006). Premier candidat à la réouverture : même détenteur, même licence, même format |
+| `asrs6` | Autorisée par NYU en usage commercial, sous réserve d'attribution et de non-modification des items |
 
 `cssrs` n'est pas concernée : elle est en `preview_kind = 'coming_soon'` et
 n'a aucun item en base. Détail du mécanisme et procédure de réactivation :
