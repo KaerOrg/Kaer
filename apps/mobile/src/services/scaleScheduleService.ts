@@ -26,6 +26,11 @@ export interface ScaleSchedule {
   endsOn: string | null
   /** Le praticien souhaite-t-il qu'un rappel calendaire accompagne cette cadence ? */
   patientReminder: boolean
+  /**
+   * Consigne écrite par le praticien (#421), ou `null`. Restituée **telle quelle** :
+   * ce sont ses mots, l'app ne les reformule pas et ne les complète pas.
+   */
+  instruction: string | null
   /** Mise en place de la programmation. Sert d'ancre quand aucune passation n'existe. */
   createdAtIso: string
 }
@@ -38,6 +43,7 @@ interface ScheduleRow {
   time_of_day: string | null
   ends_on: string | null
   patient_reminder: boolean
+  instruction: string | null
   created_at: string
 }
 
@@ -55,6 +61,8 @@ function toSchedule(row: ScheduleRow): ScaleSchedule {
     timeOfDay: row.time_of_day,
     endsOn: row.ends_on,
     patientReminder: row.patient_reminder,
+    // Une consigne vide en base vaut aucune consigne : pas de ligne fantôme à l'écran.
+    instruction: row.instruction != null && row.instruction.trim() !== '' ? row.instruction : null,
     createdAtIso: row.created_at,
   }
 }
@@ -77,7 +85,7 @@ export async function fetchScaleSchedule(
 ): Promise<ScaleSchedule | null> {
   const { data, error } = await supabase
     .from('scale_schedules')
-    .select('module_id, mode, frequency, day_of_week, time_of_day, ends_on, patient_reminder, created_at')
+    .select('module_id, mode, frequency, day_of_week, time_of_day, ends_on, patient_reminder, instruction, created_at')
     .eq('patient_id', patientId)
     .eq('module_id', moduleId)
     .maybeSingle()
@@ -90,7 +98,7 @@ export async function fetchScaleSchedule(
 export async function fetchScaleSchedules(patientId: string): Promise<Map<string, ScaleSchedule>> {
   const { data } = await supabase
     .from('scale_schedules')
-    .select('module_id, mode, frequency, day_of_week, time_of_day, ends_on, patient_reminder, created_at')
+    .select('module_id, mode, frequency, day_of_week, time_of_day, ends_on, patient_reminder, instruction, created_at')
     .eq('patient_id', patientId)
 
   const byModule = new Map<string, ScaleSchedule>()

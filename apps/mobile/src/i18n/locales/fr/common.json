@@ -217,7 +217,8 @@
       "score_note": "Ces totaux ne posent pas de diagnostic et ne se lisent pas seuls. Ils servent à en parler avec {{name}}.",
       "start_btn": "Commencer",
       "fill_now_btn": "Remplir maintenant",
-      "start_hint": "Vous pouvez vous arrêter et reprendre."
+      "start_hint": "Vous pouvez vous arrêter et reprendre.",
+      "practitioner_instruction": "{{name}} : « {{instruction}} »"
     },
     "scale_entry": {
       "progress": "{{current}} / {{total}}",

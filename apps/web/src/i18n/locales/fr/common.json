@@ -171,7 +171,7 @@
       "mode_label": "Mode de passation",
       "mode_home": "À domicile (auto)",
       "mode_in_session": "En séance",
-      "frequency_label": "Fréquence",
+      "frequency_label": "Cadence proposée",
       "freq_weekly": "Hebdomadaire",
       "freq_biweekly": "Toutes les 2 sem.",
       "freq_monthly": "Mensuelle",
@@ -199,7 +199,13 @@
       "save": "Enregistrer la programmation",
       "saved": "Programmation enregistrée.",
       "save_error": "Échec de l'enregistrement de la programmation.",
-      "action_soon": "Bientôt disponible."
+      "action_soon": "Bientôt disponible.",
+      "patient_can_adjust": "Le patient peut décaler l'heure ou mettre ses rappels en pause depuis son téléphone. Vous le verrez ici.",
+      "patient_paused": "Le patient a mis ses rappels en pause.",
+      "patient_time_override": "Le patient a décalé son rappel à {{time}}.",
+      "instruction_label": "Consigne affichée au patient",
+      "instruction_placeholder": "Remplissez-le la veille de chaque séance. On regardera l'évolution ensemble.",
+      "instruction_hint": "Deux phrases maximum. Elle s'affiche telle quelle sur son téléphone, signée de votre nom."
     },
     "programmed": {
       "col": "Programmée",
@@ -292,6 +298,11 @@
       "asrs6": "Auto-questionnaire de dépistage du TDAH adulte en 6 items (Partie A de l'ASRS v1.1). Score total 0 à 24. Recommandé par l'OMS pour le repérage rapide.",
       "snap_iv": "Grille comportementale de dépistage du TDAH en 26 items (18 critères DSM-IV + 8 critères TOD). Hétéro-évaluation par le parent ou l'enseignant.",
       "cssrs": "Évaluation structurée de l'idéation et des comportements suicidaires. Columbia University / NIMH, version « Depuis la dernière visite »."
+    },
+    "dormant": {
+      "title": "En veille, non assignables",
+      "reason_rights": "Droits d'usage en cours de vérification. Elles réapparaîtront ici une fois réglés.",
+      "reason_beta_scope": "Hors du périmètre de la bêta. Leurs droits sont acquis, elles reviendront."
     }
   },
   "patient_rights": {

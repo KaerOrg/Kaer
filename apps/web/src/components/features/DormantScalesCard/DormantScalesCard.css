@@ -1,0 +1,27 @@
+/* Zone « En veille, non assignables » (#421). Sobre et sans action : elle informe,
+   elle ne propose rien. Aucune couleur d'alerte, aucun motif n'est plus « grave »
+   que l'autre. */
+
+.dormant-scales {
+  --dormant-gap: var(--spacing-sm);
+}
+
+.dormant-scales__group + .dormant-scales__group {
+  margin-top: var(--dormant-gap);
+  padding-top: var(--dormant-gap);
+  border-top: 1px solid var(--color-border);
+}
+
+.dormant-scales__names {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.dormant-scales__reason {
+  margin: var(--spacing-xs) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}

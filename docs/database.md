@@ -409,6 +409,20 @@ Bucket public pour les photos de profil patients. Structure: `avatars/{user_id}/
 
 ---
 
+## Consigne au patient : `scale_schedules.instruction` (#421)
+
+Deux phrases au plus, écrites par le praticien et affichées **telles quelles** au
+patient sur l'écran de premier lancement du module, à la place du vide que l'ancien
+« Rien pour l'instant » laissait. Bornée à 280 caractères par
+`scale_schedules_instruction_len_ck` : le champ n'est pas un canal de messagerie, et
+rien dans l'app ne permet au patient de répondre.
+
+`null` = aucune consigne, l'état nominal. Le patient la lit par la policy
+`scale_schedules_patient_select`, déjà en place depuis K-6 ; aucune RLS n'est modifiée.
+
+**MDR** : texte libre du praticien, restitué mot pour mot. L'app ne le compose pas, ne
+le complète pas, et ne le déclenche jamais à partir d'une réponse.
+
 ## Accusé de lecture d'une passation : `patient_entries.practitioner_read_at` (#419)
 
 Une date, et une seule : celle de la **première ouverture** d'une passation par un

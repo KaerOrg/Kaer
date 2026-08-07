@@ -125,7 +125,7 @@ inatteignables après la migration des autres modules vers des layouts dédiés,
 | Dossier | Rôle |
 |---|---|
 | `components/ui/` | Primitives design system — ActionSheet, Banner, Button, Card, Chart, Chip, ConfirmDialog, DataTable, Drawer, EmptyState, InputField, Modal, ProgressRing, Radio, RatingSelector, SearchInput, Dropdown, SegmentedControl, SpeechToTextButton, StatusBadge, StepBreadcrumb, Tabs, TimePicker, Toast, Tooltip, Toggle, TreeSelector |
-| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModuleFilterBar, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, OverdueScalesReminder, PatientDataRights, ScaleEvalBadge, ScaleMetaBadges, ScalePassationDetail, ScheduleCell, SourceCitation, SupportRequestModal, WeekGrid |
+| `components/features/` | Composants métier — ActivityFeedPanel, AppointmentModal, AvailabilityEditor, CaseloadTable, CSSRSScreenPanel, Layout, MainNav, MfaReminderBanner, MfaSettingsCard, ModuleCard, ModuleFilterBar, ModulePreviewPanel (+ ModulePatientViewPanel), ModuleRenderer, ModuleSources, ModuleTable, ModuleTagChips, NotificationRoutinePanel, OverdueScalesReminder, PatientDataRights, DormantScalesCard, ScaleEvalBadge, ScaleMetaBadges, ScalePassationDetail, ScheduleCell, SourceCitation, SupportRequestModal, WeekGrid |
 
 **Règle de dépendance : `features → ui` uniquement.** Les composants `ui/` n'importent jamais depuis `features/`.
 
@@ -1309,6 +1309,23 @@ retard (nom + jours de retard) qui remonte l'ouverture de la fiche. **MDR** : co
 |---|---|---|
 | `items` | `readonly OverdueScaleItem[]` | Échelles en retard (`moduleType`, `label`, `overdueDays`) |
 | `onOpen` | `(moduleType: ModuleType) => void` | Ouvre la fiche de l'échelle (onglet Programmation) |
+
+### `DormantScalesCard` (`components/features/`)
+
+`components/features/DormantScalesCard/`. Zone « En veille, non assignables » de
+l'onglet Échelles (#421) : liste les échelles retirées de l'app, groupées par motif.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `items` | `readonly DormantModule[]` | Échelles en veille avec leur motif (`rights` / `beta_scope`). Liste vide → aucun rendu |
+
+Un praticien qui cherche le GAD-7 et ne trouve rien conclut que le produit est pauvre :
+lui dire pourquoi transforme un manque en attente. **Les deux motifs ne se mélangent
+jamais** (test dédié) : annoncer une question de licence devant une échelle libre serait
+faux, et c'est `modules.hidden_reason` (#406) qui tranche, jamais une liste écrite dans
+le composant. **Aucun contrôle** n'y figure (un test vérifie l'absence de `button`,
+`input` et `a`) : la carte informe, elle n'assigne rien, le filtre général `is_hidden`
+n'est pas relâché, et la base refuserait l'assignation de toute façon.
 
 ### `SourceCitation` (`components/features/`)
 

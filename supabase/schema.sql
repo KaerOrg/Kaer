@@ -1357,6 +1357,31 @@ create table if not exists public.scale_schedules (
   unique (patient_id, module_id)
 );
 
+-- Consigne affichée au patient (#421, QW-4). Deux phrases au plus, écrites par le
+-- praticien : « Remplissez-le la veille de chaque séance. On regardera l'évolution
+-- ensemble. » Elle remplace l'écran vide du premier lancement côté patient, et c'est
+-- le levier de rétention le moins cher du lot : quelqu'un lui parle.
+--
+-- Bornée en longueur parce qu'une consigne qui déborde n'est plus une consigne : le
+-- champ n'est pas un canal de messagerie, et rien dans l'app ne permet au patient de
+-- répondre. `null` = aucune consigne, l'état nominal.
+--
+-- ⚠️ MDR : texte libre du praticien, restitué tel quel. L'app ne le compose pas, ne le
+-- complète pas et ne le déclenche jamais à partir d'une réponse.
+alter table public.scale_schedules
+  add column if not exists instruction text;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'scale_schedules_instruction_len_ck'
+  ) then
+    alter table public.scale_schedules
+      add constraint scale_schedules_instruction_len_ck
+      check (instruction is null or char_length(instruction) <= 280);
+  end if;
+end $$;
+
 create index if not exists idx_scale_schedules_patient
   on public.scale_schedules(patient_id);
 create index if not exists idx_scale_schedules_practitioner

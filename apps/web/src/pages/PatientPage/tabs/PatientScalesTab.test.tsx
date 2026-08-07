@@ -19,8 +19,10 @@ vi.mock('../../../components/features/CSSRSScreenPanel', () => ({
 }))
 
 // Taxonomie vide : indications non rendues (pas nécessaires ici).
+const mockFetchDormantModules = vi.fn().mockResolvedValue([])
 vi.mock('@services/moduleCatalogService', () => ({
   fetchModuleTaxonomy: async () => ({ dimensions: [], tagsByDimension: new Map(), tagsByModule: new Map() }),
+  fetchDormantModules: () => mockFetchDormantModules(),
 }))
 
 import type { ScaleMetaRow } from '@services/scaleService'
@@ -102,6 +104,7 @@ function renderTab() {
 
 beforeEach(() => {
   modalCalls.length = 0
+  mockFetchDormantModules.mockResolvedValue([])
 })
 
 describe('PatientScalesTab (K-4)', () => {
@@ -145,5 +148,31 @@ describe('PatientScalesTab (K-4)', () => {
     expect(screen.getByText('scales.programmed.banner_title')).toBeInTheDocument()
     // C-SSRS (hétéro) : « en séance · à la demande », jamais une date.
     expect(screen.getByText('scales.programmed.in_session')).toBeInTheDocument()
+  })
+
+  // ── Zone « En veille » (QW-4, #421) ───────────────────────────────────────
+
+  it('liste les échelles en veille avec leur motif', async () => {
+    mockFetchDormantModules.mockResolvedValue([{ id: 'madrs', reason: 'rights' }])
+    renderTab()
+
+    await waitFor(() => expect(screen.getByText('scales.dormant.title')).toBeInTheDocument())
+    expect(screen.getByText('scales.dormant.reason_rights')).toBeInTheDocument()
+  })
+
+  it('ne fait pas entrer un module « outil » en veille dans la liste des échelles', async () => {
+    // Cet onglet ne parle que d'échelles : un module en veille qui n'en est pas une
+    // n'a rien à y faire, et `scaleById` est le seul juge.
+    mockFetchDormantModules.mockResolvedValue([{ id: 'sleep_diary', reason: 'beta_scope' }])
+    renderTab()
+
+    await waitFor(() => expect(screen.getByText('modules.phq9.label')).toBeTruthy())
+    expect(screen.queryByText('scales.dormant.title')).not.toBeInTheDocument()
+  })
+
+  it('n\'affiche aucune zone quand rien n\'est en veille', async () => {
+    renderTab()
+    await waitFor(() => expect(screen.getByText('modules.phq9.label')).toBeTruthy())
+    expect(screen.queryByText('scales.dormant.title')).not.toBeInTheDocument()
   })
 })

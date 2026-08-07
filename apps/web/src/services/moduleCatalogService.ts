@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import type { HiddenReason } from '../lib/database.types'
 
 export interface ModuleItem {
   id: string
@@ -109,6 +110,41 @@ export async function fetchHiddenModuleIds(): Promise<Set<string>> {
     .select('id')
     .eq('is_hidden', true)
   return new Set((data ?? []).map(m => m.id))
+}
+
+/** Un module en veille, avec le motif qui l'y a mis (#406). */
+export interface DormantModule {
+  readonly id: string
+  readonly reason: HiddenReason
+}
+
+/**
+ * Modules en veille **avec leur motif**, pour la zone « En veille » du praticien (#421).
+ *
+ * C'est la seule lecture qui les récupère volontairement : partout ailleurs, le filtre
+ * `is_hidden = false` les écarte, et il ne doit pas être relâché : ce serait rouvrir la
+ * porte que #247 et #406 ferment. Cette liste est **informative**, rien de ce qu'elle
+ * rend n'est assignable, et la base refuserait l'assignation de toute façon
+ * (`trg_guard_hidden_module_assignment`).
+ *
+ * Un praticien qui cherche le GAD-7 et ne trouve rien conclut que le produit est pauvre.
+ * Lui dire pourquoi transforme un manque en attente. Encore faut-il dire le VRAI motif :
+ * annoncer une question de licence devant une échelle libre serait faux.
+ */
+export async function fetchDormantModules(): Promise<DormantModule[]> {
+  const { data } = await supabase
+    .from('modules')
+    .select('id, hidden_reason')
+    .eq('is_hidden', true)
+    .order('sort_order')
+
+  const out: DormantModule[] = []
+  for (const row of data ?? []) {
+    // Un masquage sans motif est interdit par `modules_hidden_reason_ck` ; si une
+    // ligne y échappait, on l'ignore plutôt que d'inventer une raison au praticien.
+    if (row.hidden_reason != null) out.push({ id: row.id, reason: row.hidden_reason })
+  }
+  return out
 }
 
 export async function fetchInviteCategories(): Promise<ModuleCategory[]> {

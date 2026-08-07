@@ -9,6 +9,7 @@ import * as database from '../../../lib/database'
 import * as draftService from '@services/scaleDraftService'
 import * as moduleService from '@services/moduleService'
 import * as receiptService from '@services/scaleReceiptService'
+import * as scheduleService from '@services/scaleScheduleService'
 import { useConfirmDialog } from '../../../contexts/ConfirmDialogContext'
 
 jest.setTimeout(15000)
@@ -64,6 +65,16 @@ jest.mock('@services/moduleService', () => ({
 // du client Supabase.
 jest.mock('@services/scaleReceiptService', () => ({
   fetchScaleReadReceipts: jest.fn().mockResolvedValue(new Map()),
+}))
+
+// Programmation (#421) : la consigne du praticien arrive par ce service.
+jest.mock('@services/scaleScheduleService', () => ({
+  fetchScaleSchedule: jest.fn().mockResolvedValue(null),
+}))
+
+jest.mock('../../../store/authStore', () => ({
+  useAuthStore: (selector: (s: { patient: { id: string } }) => unknown) =>
+    selector({ patient: { id: 'pat-1' } }),
 }))
 
 jest.mock('../../../lib/scaleScoring', () => ({
@@ -336,5 +347,40 @@ describe('ScaleHistoryScreen : posture collapsed', () => {
     // Aucun bloc de comparaison sur une première passation.
     expect(screen.queryByTestId('last-submission-banner')).toBeNull()
     expect(screen.queryByTestId('score-disclosure')).toBeNull()
+  })
+
+  // ── Consigne du praticien (#421, QW-4) ────────────────────────────────────
+
+  it('affiche la consigne du praticien sur l\'écran de premier lancement', async () => {
+    // C'est la seule ligne où quelqu'un parle au patient plutôt que l'app : elle
+    // remplace le vide que l'ancien « Rien pour l'instant » laissait.
+    ;(database.getAllScaleEntries as jest.Mock).mockResolvedValue([])
+    ;(scheduleService.fetchScaleSchedule as jest.Mock).mockResolvedValue({
+      moduleId: 'phq9', mode: 'home', frequency: 'biweekly', dayOfWeek: 3,
+      timeOfDay: '19:00', endsOn: null, patientReminder: true,
+      instruction: 'Remplissez-le la veille de chaque séance.',
+      createdAtIso: '2026-07-01T09:00:00.000Z',
+    })
+    render(<ScaleHistoryScreen />)
+
+    await waitFor(() => expect(screen.getByText('practitioner_instruction')).toBeTruthy())
+  })
+
+  it('n\'affiche aucune ligne de consigne quand le praticien n\'en a pas écrit', async () => {
+    ;(database.getAllScaleEntries as jest.Mock).mockResolvedValue([])
+    ;(scheduleService.fetchScaleSchedule as jest.Mock).mockResolvedValue(null)
+    render(<ScaleHistoryScreen />)
+
+    await waitFor(() => expect(screen.getByTestId('module-intro-card')).toBeTruthy())
+    expect(screen.queryByText('practitioner_instruction')).toBeNull()
+  })
+
+  it('se rend sans consigne quand la lecture de la programmation échoue', async () => {
+    ;(database.getAllScaleEntries as jest.Mock).mockResolvedValue([])
+    ;(scheduleService.fetchScaleSchedule as jest.Mock).mockRejectedValue(new Error('offline'))
+    render(<ScaleHistoryScreen />)
+
+    await waitFor(() => expect(screen.getByTestId('module-intro-card')).toBeTruthy())
+    expect(screen.queryByText('practitioner_instruction')).toBeNull()
   })
 })
