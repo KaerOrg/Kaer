@@ -764,6 +764,8 @@ Les attributs structurés sont stockés dans **`field_props`** (une ligne par at
 | `reference_url` | URL vers la publication | Lien vers la source |
 | `entry_mode` | `'scrolling_list'` (défaut) ou `'one_per_screen'` | Mode de saisie patient, lu par `ScaleEntryScreen` (#409) |
 | `score_display` | `'inline'` (défaut) ou `'collapsed'` | Posture de l'accueil du module vis-à-vis du score, lue par `ScaleHistoryScreen` (#408) |
+| `instrument_citation` | `'PHQ-9, Kroenke, Spitzer & Williams, 2001'` | Citation des auteurs. **Obligation de licence** (#417) |
+| `translation_attribution` | Formule imposée par le traducteur tiers | Attribution de la traduction. **Nullable**, et l'absence est le cas nominal (#417) |
 
 **`entry_mode` : le mode de saisie est une configuration, pas une règle globale.**
 `ScaleEntryScreen` est partagé par les neuf modules d'échelle : un `if (moduleId === 'phq9')`
@@ -838,6 +840,33 @@ Ce que `collapsed` interdit, et pourquoi :
 
 La lecture est isolée dans `readScoreDisplay` (`ScaleHistoryScreen/historyConfig.ts`),
 testée à part, et retombe sur `inline` pour toute valeur absente ou inconnue.
+
+### Trois mentions de source, à ne jamais confondre (#417)
+
+| # | Prop | Nature | Où elle va |
+|---|---|---|---|
+| 1 | `instrument_citation` | **Obligation** de licence | `SourceCitation`, en pied de tout écran qui montre les items |
+| 2 | `translation_attribution` | **Obligation**, quand un tiers a traduit | Même composant, ligne suivante. **Nullable** |
+| 3 | `reference_label` | **Argument** de crédibilité, aucune obligation | Carte de l'échelle, au moment du choix du praticien (`ScaleMetaBadges`) |
+
+Les mentions 1 et 2 s'affichent parce qu'on y est **tenu** : petit, en pied, sans
+emphase. La mention 3 est un **argument**, adressé à quelqu'un qui décide ou qui doute.
+Les empiler dans le même pied de page abîme les deux : la mention légale prend un air
+d'argument commercial, et l'argument de crédibilité finit en petits caractères où
+personne ne le lit. Un test l'interdit explicitement.
+
+**`translation_attribution` nul est le cas NOMINAL**, pas un cas dégradé : la plupart
+des échelles n'ont pas de traduction sous licence, et c'est le cas du PHQ-9, dont la
+traduction est celle de Kær. Le composant ne rend alors aucune ligne, sans espace ni
+séparateur orphelin. Le jour où une échelle en a besoin : une valeur en base, **zéro
+ligne de code**.
+
+**Le garde-fou** (`apps/web/src/test/sourceCitation.guard.test.ts`) échoue si un écran
+qui affiche les items ne rend pas la mention. C'est le seul filet contre une disparition
+silencieuse : la citation vivait jusqu'ici accrochée à d'autres contenus, et il suffisait
+d'y déplacer un bloc pour la perdre. Les écrans de **saisie** en sont exemptés : un pied
+de page juridique sous chaque question ajoute du bruit là où l'attention doit être sur
+l'item, et l'obligation est satisfaite par une mention visible ailleurs dans le module.
 
 ### Après l'envoi : `ScaleSubmittedScreen` (#411)
 

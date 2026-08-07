@@ -1,6 +1,8 @@
 import { Info } from 'lucide-react'
+import { readScaleSource } from '@kaer/shared'
 import type { ContentField } from '@services/moduleService'
 import { FieldText } from '../../fields'
+import { SourceCitation } from '../../../SourceCitation'
 
 interface Props {
   fields: ContentField[]
@@ -20,6 +22,10 @@ export function QuestionnaireLayout({ fields, footer, t }: Props) {
   const questions = fields
     .filter(f => f.field_type === 'scale_question')
     .sort((a, b) => a.sort_order - b.sort_order)
+  // Cet aperçu affiche les items de l'instrument : il porte donc la citation des
+  // auteurs, qui est une obligation de licence (#417). C'est l'oubli le plus facile
+  // à faire, parce que l'écran n'est « qu'un aperçu ».
+  const source = readScaleSource(fields)
 
   return (
     <div className="preview-questionnaire">
@@ -67,6 +73,10 @@ export function QuestionnaireLayout({ fields, footer, t }: Props) {
           <FieldText field={footer} t={t} />
         </div>
       )}
+      <SourceCitation
+        citation={source.citation}
+        translationAttribution={source.translationAttribution}
+      />
     </div>
   )
 }

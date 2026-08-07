@@ -5,6 +5,16 @@
   line-height: 1.5;
 }
 
+/* Recommandation clinique (#417) : un argument de crédibilité, adressé au praticien
+   au moment où il choisit. Discret sans être en petits caractères, contrairement à la
+   mention légale de `SourceCitation`, qui n'a pas la même vocation. */
+.scale-meta__reference {
+  font-size: var(--font-size-xxs);
+  color: var(--color-text-muted, #6B7280);
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
 .scale-meta__chips {
   display: flex;
   align-items: center;

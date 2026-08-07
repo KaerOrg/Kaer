@@ -1,0 +1,19 @@
+/* Mention de source (#417) : sobre, en pied, sans emphase. On l'affiche parce qu'on
+   y est tenu, pas pour convaincre. */
+.source-citation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin: 0;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+/* Rendu uniquement quand une traduction tierce est à attribuer : sans elle, aucune
+   ligne et aucun espace parasite (le `gap` ne s'applique qu'entre enfants présents). */
+.source-citation__translation {
+  font-style: italic;
+}

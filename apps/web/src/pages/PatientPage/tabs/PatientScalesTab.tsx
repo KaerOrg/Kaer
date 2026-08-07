@@ -312,6 +312,7 @@ export function PatientScalesTab({
               scaleId={moduleType}
               evaluationType={scale.evaluationType}
               category={scale.category}
+              referenceLabel={scale.referenceLabel}
             />
           }
           actions={
