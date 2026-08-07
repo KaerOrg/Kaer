@@ -8,6 +8,7 @@ import { useAuthStore } from '../../store/authStore'
 import { usePatientEntriesRealtime } from '../../hooks/realtime/usePatientEntriesRealtime'
 import { useToast } from '../../contexts/ToastContext'
 import { Layout } from '../../components/features/Layout'
+import { NewPassationBanner } from '../../components/features/NewPassationBanner'
 import { Tabs } from '../../components/ui/Tabs'
 import { Tooltip } from '../../components/ui/Tooltip'
 import type { PatientModule } from '../../lib/database.types'
@@ -77,9 +78,20 @@ export function PatientPage() {
   const resolveRefQuery = useQuery(patientQueries.resolveRef(ref))
   const id = resolveRefQuery.data ?? null
 
+  /**
+   * Passations arrivées pendant que le praticien a la fiche sous les yeux (#423).
+   *
+   * Compteur remis à zéro dès qu'il ouvre les échelles ou ferme le bandeau : le
+   * signal a alors fait son travail. Aucun score n'y entre, jamais.
+   */
+  const [newPassations, setNewPassations] = useState(0)
+  const handleScaleEntry = useCallback(() => setNewPassations(n => n + 1), [])
+  const dismissNewPassations = useCallback(() => setNewPassations(0), [])
+
   // Temps réel : rafraîchit les données d'engagement quand le patient saisit sur
   // mobile (Realtime patient_entries, #103). Un seul canal pour le patient consulté.
-  usePatientEntriesRealtime(id)
+  // L'arrivée d'une PASSATION signale en plus le bandeau neutre (#423).
+  usePatientEntriesRealtime(id, handleScaleEntry)
 
   // Token absent de l'URL → retour dashboard (la query reste désactivée).
   useEffect(() => {
@@ -145,6 +157,13 @@ export function PatientPage() {
   const generalNoteSaving = generalNoteMutation.isPending
 
   const [activeTab, setActiveTab] = useState<'overview' | 'modules' | 'scales' | 'notes' | 'rdv'>('overview')
+
+  // « Voir » du bandeau de nouvelle passation (#423) : ouvre les échelles et éteint le
+  // signal, qui a alors fait son travail.
+  const openScalesTab = useCallback(() => {
+    setActiveTab('scales')
+    setNewPassations(0)
+  }, [])
 
   // Prêt = patient résolu ET toutes les données chargées.
   const loading =
@@ -228,6 +247,14 @@ export function PatientPage() {
         <button className="patient-page__back" onClick={() => navigate('/')}>
           {t('patient.back')}
         </button>
+
+        {/* Une passation vient d'arriver, sans rechargement (#423). Un fait, jamais
+            une interprétation : ni score, ni adjectif, ni couleur d'alerte. */}
+        <NewPassationBanner
+          count={newPassations}
+          onOpen={openScalesTab}
+          onDismiss={dismissNewPassations}
+        />
 
         {activeTab === 'overview' && (
           <div className="patient-page__header">

@@ -317,6 +317,11 @@
       "one_per_screen_note": "Le patient répond à un item par écran, dans cet ordre.",
       "step_progress": "Écran {{index}} sur {{total}}",
       "unscored": "hors score"
+    },
+    "realtime": {
+      "new_passation_one": "Une passation vient d'arriver.",
+      "new_passation_other": "{{count}} passations viennent d'arriver.",
+      "open": "Voir"
     }
   },
   "patient_rights": {

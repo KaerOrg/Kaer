@@ -466,6 +466,13 @@ DELETE/UPDATE portent l'ancien `patient_id` (routage vers le bon canal). Ajout �
 publication idempotent (`do $$ … pg_publication_tables … $$`). Côté web :
 `patientRealtimeService.subscribePatientEntries` + hook `usePatientEntriesRealtime`.
 
+> **Le contenu de la saisie est écarté à la frontière (#423).** L'abonné ne reçoit que
+> la NATURE du changement (`{ eventType, entryKind, moduleId }`), jamais le `payload` :
+> un abonné qui lirait les réponses pour décider d'afficher quelque chose franchirait la
+> ligne du statut non-dispositif médical. C'est ce qui permet au bandeau « nouvelle
+> passation » d'être déclenché par l'**arrivée** d'une saisie, quel qu'en soit le
+> contenu.
+
 ## Index
 
 | Table | Index | Colonne(s) | Usage |
