@@ -6,6 +6,13 @@ jest.mock('react-i18next', () => ({
 }))
 
 jest.mock('@expo/vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons')
+
+// Programmation du praticien (#413) : mockée au niveau du SERVICE, jamais de la base.
+// Sans ce mock, l'écran passerait par le vrai client Supabase et le `.catch` de
+// l'appel masquerait l'absence de couverture.
+jest.mock('@services/scaleScheduleService', () => ({
+  fetchScaleSchedule: jest.fn().mockResolvedValue(null),
+}))
 jest.mock('@react-native-community/datetimepicker', () => 'DateTimePicker')
 
 jest.mock('../../../store/authStore', () => ({
@@ -40,6 +47,7 @@ jest.mock('@services/notificationService', () => ({
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react-native'
 import ModuleRemindersScreen from './ModuleRemindersScreen'
+import * as scheduleService from '@services/scaleScheduleService'
 
 const goBack = jest.fn()
 const setOptions = jest.fn()
@@ -76,6 +84,7 @@ beforeEach(() => {
   mockUpdateTime.mockResolvedValue(true)
   mockPause.mockResolvedValue(true)
   mockResume.mockResolvedValue(true)
+  ;(scheduleService.fetchScaleSchedule as jest.Mock).mockResolvedValue(null)
 })
 
 describe('ModuleRemindersScreen', () => {
@@ -154,5 +163,61 @@ describe('ModuleRemindersScreen', () => {
     await screen.findByText('09:00')
     // Un écran de rappels parle d'horaires. Aucun vocabulaire d'évaluation.
     expect(JSON.stringify(toJSON())).not.toMatch(/score|niveau|progrès|régulier|bravo/i)
+  })
+})
+
+// ── Cadence proposée par le praticien (#413) ────────────────────────────────
+
+describe('ModuleRemindersScreen : cadence proposée', () => {
+  const SCHEDULE = {
+    moduleId: 'emotion_wheel', mode: 'home' as const, frequency: 'biweekly' as const,
+    dayOfWeek: 3, timeOfDay: '19:00', endsOn: null, patientReminder: true,
+  }
+
+  it('lit la programmation par le service, jamais depuis l\'écran', async () => {
+    ;(scheduleService.fetchScaleSchedule as jest.Mock).mockResolvedValue(SCHEDULE)
+    renderScreen()
+    await screen.findByTestId('proposed-cadence')
+    expect(scheduleService.fetchScaleSchedule).toHaveBeenCalledWith('pt-1', 'emotion_wheel')
+  })
+
+  it('affiche la cadence proposée et rappelle qu\'elle n\'est pas imposée', async () => {
+    ;(scheduleService.fetchScaleSchedule as jest.Mock).mockResolvedValue(SCHEDULE)
+    renderScreen()
+    await screen.findByTestId('proposed-cadence')
+    expect(screen.getByText('modules.scale_reminder.proposed_label')).toBeTruthy()
+    // Une cadence qu'on subit se solde par une désinstallation, pas par de l'observance.
+    expect(screen.getByText('modules.scale_reminder.proposed_reassurance')).toBeTruthy()
+  })
+
+  it('laisse les réglages du patient accessibles sous la proposition', async () => {
+    // La proposition ne remplace rien : le patient garde la main juste en dessous.
+    ;(scheduleService.fetchScaleSchedule as jest.Mock).mockResolvedValue(SCHEDULE)
+    renderScreen()
+    await screen.findByTestId('proposed-cadence')
+    expect(screen.getByText('09:00')).toBeTruthy()
+    expect(screen.getByTestId('reminder-save')).toBeTruthy()
+  })
+
+  it('se rend sans le bloc quand aucune cadence n\'est programmée', async () => {
+    // Cas nominal : pas de bloc vide, pas de ligne fantôme.
+    ;(scheduleService.fetchScaleSchedule as jest.Mock).mockResolvedValue(null)
+    renderScreen()
+    await screen.findByText('09:00')
+    expect(screen.queryByTestId('proposed-cadence')).toBeNull()
+  })
+
+  it('se rend sans le bloc quand la lecture échoue', async () => {
+    ;(scheduleService.fetchScaleSchedule as jest.Mock).mockRejectedValue(new Error('offline'))
+    renderScreen()
+    await screen.findByText('09:00')
+    expect(screen.queryByTestId('proposed-cadence')).toBeNull()
+  })
+
+  it('MDR : la proposition ne porte ni score ni réponse', async () => {
+    ;(scheduleService.fetchScaleSchedule as jest.Mock).mockResolvedValue(SCHEDULE)
+    const { toJSON } = renderScreen()
+    await screen.findByTestId('proposed-cadence')
+    expect(JSON.stringify(toJSON())).not.toMatch(/score|answers|total/i)
   })
 })

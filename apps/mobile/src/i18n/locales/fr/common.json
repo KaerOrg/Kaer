@@ -1980,6 +1980,25 @@
       "plan_lead": "Si ça ne va pas maintenant, ce n'est pas le bon endroit.",
       "plan_action": "Ouvrir mon plan de sécurité",
       "open": "À propos de ce questionnaire"
+    },
+    "scale_reminder": {
+      "proposed_label": "Cadence proposée",
+      "proposed_reassurance": "Vous pouvez changer ça. Personne ne vous en voudra.",
+      "frequency_weekly": "Chaque semaine",
+      "frequency_biweekly": "Toutes les 2 semaines",
+      "frequency_monthly": "Chaque mois",
+      "frequency_quarterly": "Tous les 3 mois",
+      "frequency_on_demand": "Quand vous le souhaitez",
+      "cadence_day_time": "{{frequency}}, le {{day}} à {{time}}",
+      "cadence_day": "{{frequency}}, le {{day}}",
+      "cadence_time": "{{frequency}}, à {{time}}",
+      "day_mon": "lundi",
+      "day_tue": "mardi",
+      "day_wed": "mercredi",
+      "day_thu": "jeudi",
+      "day_fri": "vendredi",
+      "day_sat": "samedi",
+      "day_sun": "dimanche"
     }
   },
   "module": {
