@@ -44,6 +44,7 @@ const RANGE_OPTIONS: readonly SegmentOption<TimeRange>[] = [
 ]
 
 const PLUS_ICON = <MaterialCommunityIcons name="plus" size={20} color={colors.white} />
+const INFO_ICON = <MaterialCommunityIcons name="information-outline" size={22} color={colors.text} />
 
 export default function ScaleHistoryScreen() {
   const navigation = useNavigation<Nav>()
@@ -52,9 +53,27 @@ export default function ScaleHistoryScreen() {
   const { config, accentColor, activeColor, isTeenMode, t, i18n } = useScaleScreen(scale_id)
   const { showConfirm } = useConfirmDialog()
 
+  const handleOpenAbout = useCallback(
+    () => navigation.navigate('ScaleAbout', { scale_id }),
+    [navigation, scale_id],
+  )
+
   React.useEffect(() => {
-    navigation.setOptions({ title: t(`modules.${scale_id}.label`) })
-  }, [scale_id, t, navigation])
+    // Bouton d'information de l'en-tête : la porte d'entrée de la fiche « à propos »
+    // (#415). Discret, à droite du titre, jamais imposé au patient.
+    navigation.setOptions({
+      title: t(`modules.${scale_id}.label`),
+      headerRight: () => (
+        <Button
+          variant="ghost"
+          onPress={handleOpenAbout}
+          accessibilityLabel={t('modules.scale_about.open')}
+          iconLeft={INFO_ICON}
+          testID="open-scale-about"
+        />
+      ),
+    })
+  }, [scale_id, t, navigation, handleOpenAbout])
 
   const [entries, setEntries] = useState<ScaleEntry[]>([])
   const [loading, setLoading] = useState(true)

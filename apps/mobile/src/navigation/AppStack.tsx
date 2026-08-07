@@ -15,6 +15,7 @@ import MedicationSideEffectsEntryScreen from '../screens/modules/MedicationSideE
 import MoodTrackerScreen from '../screens/modules/MoodTrackerScreen'
 import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
 import ScaleSubmittedScreen from '../screens/modules/ScaleSubmittedScreen'
+import ScaleAboutScreen from '../screens/modules/ScaleAboutScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
 import ModuleRemindersScreen from '../screens/modules/ModuleRemindersScreen'
 import type { PreviewKind } from '@kaer/shared'
@@ -30,6 +31,9 @@ export type AppStackParamList = {
   // réponses ne lui sont pas transmises, et c'est ce qui le garde hors du champ du
   // dispositif médical. Les ressources qu'il propose sont les mêmes pour tout le monde.
   ScaleSubmitted: { scale_id: string }
+  // Fiche « à propos » d'une échelle (#415) : ce que l'instrument est, ce qu'il n'est
+  // pas, qui voit quoi. Rien n'y dépend d'une réponse du patient.
+  ScaleAbout: { scale_id: string }
   // previewKindOverride : force un layout précis au lieu de celui du module (ex. la
   // roue crantée du plan de crise ouvre le module en mode édition `editable_steps`).
   // startEntry : ouvre directement la saisie plutôt que l'accueil du module. Posé par
@@ -131,6 +135,11 @@ export default function AppStack() {
         name="ScaleSubmitted"
         component={ScaleSubmittedScreen}
         options={{ title: '', headerBackVisible: false }}
+      />
+      <Stack.Screen
+        name="ScaleAbout"
+        component={ScaleAboutScreen}
+        options={{ title: '' }}
       />
       <Stack.Screen
         name="ModuleContent"

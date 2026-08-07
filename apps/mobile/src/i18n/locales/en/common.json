@@ -1471,7 +1471,11 @@
       "submit": "Send my answers",
       "intro_length": "10 questions, about 4 minutes.",
       "intro_window": "They cover the past 2 weeks.",
-      "intro_recipient": "Your answers go to {{name}}."
+      "intro_recipient": "Your answers go to {{name}}.",
+      "about_what": "A reference questionnaire, recommended by health authorities and used worldwide to follow how depressive symptoms change over time.",
+      "about_not": "A diagnosis. A high score does not say « you are depressed », it says « there is something worth discussing ».",
+      "about_who": "{{name}} sees your ten answers and the date. You see your totals and your dates.",
+      "about_instrument_note": "If the patient answers yes to question 9, an assessment of suicide risk or self-harm by a qualified professional is advised."
     },
     "bsl23": {
       "label": "BSL-23",
@@ -1826,6 +1830,14 @@
       "plan_title": "My safety plan",
       "plan_subtitle": "What you prepared together",
       "done": "Done"
+    },
+    "scale_about": {
+      "what_title": "What it is",
+      "not_title": "What it is not",
+      "who_title": "Who sees what",
+      "plan_lead": "If things are not going well right now, this is not the right place.",
+      "plan_action": "Open my safety plan",
+      "open": "About this questionnaire"
     }
   },
   "agenda": {
