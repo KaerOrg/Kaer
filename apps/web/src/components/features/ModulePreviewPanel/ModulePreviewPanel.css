@@ -860,6 +860,51 @@
   display: block;
 }
 
+/* ── Aperçu « un item par écran » (#422) ────────────────────────────────────
+   Storyboard : un écran par item, dans l'ordre, avec la progression que le
+   patient voit. Montre la FORME réelle de la saisie sans cacher les items. */
+
+.preview-questionnaire__mode {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.preview-questionnaire--stepper .preview-questionnaire__questions {
+  gap: var(--spacing-md);
+}
+
+.preview-questionnaire__screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.preview-questionnaire__screen-item {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.preview-questionnaire__progress {
+  font-size: var(--font-size-xxs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+/* Mention « hors score » : un fait de construction de l'instrument, pas un
+   jugement. Habillage neutre, aucune couleur d'alerte. */
+.preview-questionnaire__unscored {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg);
+  font-size: var(--font-size-xxs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
 /* ── Sleep journal (sleep_diary) ─────────────────────────────────────────── */
 /* Reproduit l'écran de saisie d'une nuit + le récap "list mode" 14 dernières
    nuits. Source : apps/mobile/src/components/ModuleRenderer/FieldRenderer.tsx

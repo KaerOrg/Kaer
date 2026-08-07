@@ -8,6 +8,10 @@ export { fetchModuleFields } from './services/moduleFields'
 
 export { collectIndexed } from './services/fieldProps'
 export { readScaleSource } from './services/scaleSource'
+export {
+  readEntryMode, sharedOptionsOf, optionsForQuestion, isScoredQuestion, QUESTION_FIELD_TYPES,
+} from './services/scaleEntryMode'
+export type { EntryMode } from './services/scaleEntryMode'
 export { computeScheduleStatus } from './services/scaleScheduleStatus'
 export type { ScheduleStatus, SchedulePeriod, ScheduleFrequency, ScheduleMode, RecurringFrequency } from './services/scaleScheduleStatus'
 export type { ScaleSource } from './services/scaleSource'

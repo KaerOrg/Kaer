@@ -53,7 +53,7 @@ Valeurs de `preview_kind` et leur layout :
 | `fields` | Grille de champs avec widget | `sleep_diary` |
 | `medication_tracker` | Suivi d'observance — 3 onglets (Aujourd'hui : check global + détail par molécule + motif + notes ; Calendrier : mois passif + série « jours renseignés » ; Mes médicaments : liste fond/PRN co-éditée). Pastilles neutres, aucun taux ni alerte (MDR). Aperçu web `MedicationTrackerLayout` ; écran mobile `MedicationTracker/` ; éditeur liste praticien `MedicationAdherenceCard` | `medication_adherence` |
 | `cards` | Accordéon de cartes dépliables | `psychoeducation` |
-| `questionnaire` | Questionnaire clinique interactif (ScaleEntryScreen) | `phq9`, `gad7`, `bsl23`, `snap_iv`, `asrs6`, `asrs18` |
+| `questionnaire` | Questionnaire clinique interactif (ScaleEntryScreen). Aperçu web : liste défilante ou **storyboard un item par écran** selon `scale_meta.entry_mode` (#422), chaque item avec SES modalités et la mention « hors score » quand il n'entre pas dans le total | `phq9`, `gad7`, `bsl23`, `snap_iv`, `asrs6`, `asrs18` |
 | `slider_dashboard` | Tableau de bord multi-dimensions — 2 onglets (Saisie / Suivi) à parité avec le mobile refondu (#161) : Saisie = curseurs + notes + rappel + historique en mini-empreinte ; Suivi = ruban « Vue par symptôme » + repères + courbes par dimension (sélecteur 7J/1M/3M/1A). **Aucune moyenne composite agrégée** (interdit MDR). Nommé par motif, réutilisable : `moduleId` dérivé des fields, accent lu en config (`accent_color`). Aperçu web `SliderDashboardLayout` ; écran patient mobile `DimensionTrackerView` | `mood_tracker`, `medication_side_effects` |
 | `guided_exercise` | Exercice guidé pas-à-pas (timer, multi-étapes) | `cognitive_saturation` |
 | `crisis_companion` | Compagnon de crise « urge surfing » : machine à états accueil+catégories (un écran) → activité + délai → minuteur décompté → fin neutre. Aucune persistance. Nommé par motif, `moduleId` dérivé pour le chrome. Aperçu web = storyboard lecture seule | `distress_tolerance` (onglet « Agir en crise ») |
@@ -793,8 +793,15 @@ y est une violation bloquante. Le mode vit donc en base, échelle par échelle.
 | `one_per_screen` | Un item par écran, avance automatique, relecture avant envoi (`StepperEntry`) | Instrument court, où le straight-lining coûte plus cher que quelques secondes |
 
 Toute valeur absente ou inconnue retombe sur `scrolling_list` : une configuration
-erronée dégrade vers le comportement historique, elle ne casse pas la saisie. La
-lecture est isolée dans `readEntryMode` (`ScaleEntryScreen/entryConfig.ts`), testée à part.
+erronée dégrade vers le comportement historique, elle ne casse ni la saisie ni l'aperçu.
+
+La lecture vit dans **`@kaer/shared`** (`services/scaleEntryMode.ts`, #422), avec les
+règles voisines : `sharedOptionsOf`, `optionsForQuestion` (les modalités **propres** à un
+item priment sur celles du questionnaire) et `isScoredQuestion`. Le patient saisit dans
+ce mode et le praticien en voit l'aperçu : deux lectures divergeraient au premier
+changement de configuration, et l'aperçu montrerait une interface qui n'existe plus.
+**Un aperçu faux est pire qu'une absence d'aperçu, parce qu'il est cru.** Côté mobile,
+`ScaleEntryScreen/entryConfig.ts` ré-exporte la lecture partagée.
 
 ### Items POSÉS et items COTÉS : deux notions distinctes (#410)
 

@@ -312,6 +312,11 @@
       "band_item": "Answer to item {{position}}",
       "band_item_unscored": "Item {{position}}, not scored",
       "empty": "No administration in this window."
+    },
+    "preview": {
+      "one_per_screen_note": "The patient answers one item per screen, in this order.",
+      "step_progress": "Screen {{index}} of {{total}}",
+      "unscored": "not scored"
     }
   },
   "patient_rights": {
