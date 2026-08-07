@@ -60,6 +60,19 @@ values
   ('phq9.scale_meta', 'score_display',     'collapsed'),
   ('phq9.scale_meta', 'reference_label',   'NICE NG222 — Dépression adulte : PHQ-9 recommandé pour le suivi régulier (2022). Également recommandé par l''APA Clinical Practice Guidelines.'),
   ('phq9.scale_meta', 'reference_url',     'https://www.nice.org.uk/guidance/ng222'),
+  -- Citation des auteurs (#417). C'est une OBLIGATION, condition de la libération du
+  -- PHQ-9 par Pfizer, et non un ornement. Elle est stockée en clair et non derrière une
+  -- clé i18n : noms d'auteurs et année sont identiques dans toutes les langues, et une
+  -- citation « traduite » serait fausse. Même régime que `reference_label`.
+  --
+  -- À ne PAS confondre avec `reference_label` ci-dessus : celle-là est un argument de
+  -- crédibilité, celle-ci une obligation de licence. Les empiler abîmerait les deux.
+  ('phq9.scale_meta', 'instrument_citation', 'PHQ-9, Kroenke, Spitzer & Williams, 2001'),
+  -- `translation_attribution` reste ABSENT pour le PHQ-9, définitivement : la
+  -- traduction française est celle de Kær (arbitrage du 06/08, cf. docs/instruments/
+  -- phq9.md), il n'y a aucun tiers à attribuer. Le composant ne rend alors aucune
+  -- ligne. Le jour où une échelle utilise une traduction sous licence : une valeur en
+  -- base, zéro ligne de code.
 
   -- GAD-7
   ('gad7.scale_meta', 'evaluation_type',   'auto'),

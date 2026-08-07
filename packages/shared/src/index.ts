@@ -7,6 +7,8 @@ export { colors, spacing, radius, fontSize } from './theme'
 export { fetchModuleFields } from './services/moduleFields'
 
 export { collectIndexed } from './services/fieldProps'
+export { readScaleSource } from './services/scaleSource'
+export type { ScaleSource } from './services/scaleSource'
 
 export { readEnabledGroups } from './services/patientModuleConfig'
 export { isFilledValue } from './services/entryValues'
