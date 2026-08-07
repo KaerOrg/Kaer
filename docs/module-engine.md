@@ -760,6 +760,7 @@ Les attributs structurés sont stockés dans **`field_props`** (une ligne par at
 | `reference_label` | `'Kroenke et al., 2001'` | Label de la référence bibliographique |
 | `reference_url` | URL vers la publication | Lien vers la source |
 | `entry_mode` | `'scrolling_list'` (défaut) ou `'one_per_screen'` | Mode de saisie patient, lu par `ScaleEntryScreen` (#409) |
+| `score_display` | `'inline'` (défaut) ou `'collapsed'` | Posture de l'accueil du module vis-à-vis du score, lue par `ScaleHistoryScreen` (#408) |
 
 **`entry_mode` : le mode de saisie est une configuration, pas une règle globale.**
 `ScaleEntryScreen` est partagé par les neuf modules d'échelle : un `if (moduleId === 'phq9')`
@@ -803,6 +804,37 @@ posés. Une passation enregistrée avant l'arrivée d'un item en porte moins : l
 manquantes restent nulles, elles ne décalent aucune réponse, et la saisie ne se croit pas
 complète. Le score déjà enregistré, lui, ne bouge jamais : `readTotalScore` (web) lit
 `payload.total_score` et ne recalcule rien.
+
+### `score_display` : montrer le score, ou le rendre accessible (#408)
+
+`ScaleHistoryScreen` et `EntryCard` sont partagés par les neuf modules d'échelle : la
+posture vis-à-vis du score est donc une configuration, comme le mode de saisie.
+
+| Valeur | Accueil du module |
+|---|---|
+| `inline` (défaut) | Total en tête de chaque passation + courbe d'évolution. Comportement historique |
+| `collapsed` | Liste de dates seulement, totaux sous un dépli replié, **pas de courbe** |
+
+**Le défaut reste `inline` délibérément** : une échelle qui n'a rien demandé ne doit pas
+changer d'apparence dans le dos de son module. Seul le PHQ-9 porte `collapsed` à ce jour,
+les autres échelles étant en veille (#406).
+
+Ce que `collapsed` interdit, et pourquoi :
+
+- **Aucun écart en points.** « 4 points de moins sur combien ? » est sans réponse pour le
+  patient, et « 4 points de plus » tombe sur quelqu'un seul, le soir, dont le biais
+  interprétatif négatif fait partie du tableau clinique. PROMDEP (Kendrick, *HTA* 2024,
+  ECR en grappes, 141 cabinets) ne trouve aucun bénéfice symptomatique au retour du score
+  au patient.
+- **Aucune courbe.** Trois points ne font pas une tendance, et une courbe sans axe est un
+  jugement déguisé.
+- **Aucun score sans action explicite.** Le patient fait la comparaison lui-même s'il le
+  veut ; ce n'est plus l'app qui la lui met sous les yeux.
+- **Aucune couleur, aucune flèche, aucun adjectif** ne qualifie un total : tous se rendent
+  identiquement, dans l'ordre du temps, jamais triés par valeur.
+
+La lecture est isolée dans `readScoreDisplay` (`ScaleHistoryScreen/historyConfig.ts`),
+testée à part, et retombe sur `inline` pour toute valeur absente ou inconnue.
 
 La clé i18n `modules.<id>.full_title` porte le titre complet de l'échelle (ex. `"Patient Health Questionnaire-9"`). La clé `modules.<id>.label` (déjà utilisée par le moteur générique) porte le nom court.
 

@@ -101,7 +101,7 @@ Ajouter un nouvel alias = mettre à jour ces trois endroits dans le même commit
 
 | Dossier | Rôle |
 |---|---|
-| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, EmptyState, InputField, PhotoCarousel, ProgressBar, ProgressRing, Radio, RatingSelector, Slider, TimePicker, TreeSelector, StatusBadge, Toast |
+| `components/ui/` | Primitives design system — Button, Card, Chart, Checkbox, Chip, ConfirmDialog, ActionSheet, Disclosure, EmptyState, InputField, PhotoCarousel, ProgressBar, ProgressRing, Radio, RatingSelector, Slider, TimePicker, TreeSelector, StatusBadge, Toast |
 | `components/features/` | Composants métier — DimensionTrackerView, DisclaimerBanner, InlineText, ModuleRenderer, NotificationRoutinePanel, PsyEduBlockRenderer, TeenAccent, TodaySchedule |
 
 **Règle de dépendance : `features → ui` uniquement.**
@@ -423,6 +423,45 @@ plusieurs étapes, questionnaire un item par écran, exercice guidé.
 > la main dans `TreeSelector`, `GuidedExerciseLayout`, `CrisisCompanionLayout` et
 > `WordRepetitionExercise`. Toute nouvelle barre passe par ce primitive ; ces quatre
 > occurrences sont à reprendre quand on touchera à ces écrans.
+
+---
+
+### Disclosure (`src/components/ui/Disclosure/`)
+
+Bloc **repliable** : un en-tête cliquable portant un libellé et un chevron, un contenu
+révélé à la demande.
+
+**Contrôlé** (`open` + `onToggle`) plutôt qu'autonome : l'ouverture est souvent une
+information que le parent veut connaître ou piloter, et un état interne caché rend le
+composant intestable depuis l'extérieur.
+
+> **Quand l'utiliser.** Quand une information doit rester **accessible sans être
+> imposée** : un chiffre qu'on ne met pas sous les yeux, un détail secondaire. C'est
+> une décision de posture, pas un gain de place. Usage de référence : le dépli
+> « Voir le détail chiffré » de l'accueil des échelles (#408), où le score reste
+> consultable mais n'est plus affiché d'office.
+
+| Prop | Type | Rôle |
+|---|---|---|
+| `label` | `string` | Libellé de l'en-tête, toujours visible (obligatoire) |
+| `children` | `ReactNode` | Contenu révélé, rendu uniquement quand `open` (obligatoire) |
+| `open` | `boolean` | État d'ouverture (obligatoire) |
+| `onToggle` | `(open: boolean) => void` | Demande de bascule, reçoit l'état souhaité (obligatoire) |
+| `style?` | `StyleProp<ViewStyle>` | Style du conteneur |
+| `testID?` | `string` | Identifiant de test |
+
+```tsx
+const [open, setOpen] = useState(false)
+<Disclosure label={t('modules.scale_history.score_details')} open={open} onToggle={setOpen}>
+  <Card>{/* … */}</Card>
+</Disclosure>
+```
+
+L'état d'ouverture est exposé à l'accessibilité (`accessibilityState.expanded`).
+
+> **Dette connue, à migrer.** Le motif en-tête + chevron + corps replié est encore
+> réimplémenté à la main dans `CardsLayout`, `ColumnFormLayout`, `PatientScenarioLayout`
+> et `EditableStepsLayout`. Toute nouvelle section repliable passe par ce primitive.
 
 ---
 
