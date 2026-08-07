@@ -172,7 +172,10 @@ export default function ScaleEntryScreen() {
     // l'enregistrement, jamais avant, pour qu'un échec d'envoi laisse de quoi reprendre.
     await discardDraft(scale_id).catch(() => {})
     if (isMounted.current) setSaving(false)
-    navigation.goBack()
+    // #411 : l'envoi ne referme plus l'écran. Il débouche sur les ressources d'aide,
+    // les mêmes pour tout le monde et à chaque envoi. `replace` et non `navigate` :
+    // le retour ne doit pas ramener sur un questionnaire déjà envoyé.
+    navigation.replace('ScaleSubmitted', { scale_id })
   }, [allAnswered, answers, config, entry_id, navigation, scale_id, posedItems, scoredItems, answeredCount, loadState, textInputValues, showToast, t])
 
   const handleExit = useCallback(() => navigation.goBack(), [navigation])

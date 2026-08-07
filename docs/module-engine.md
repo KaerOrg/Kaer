@@ -839,6 +839,35 @@ Ce que `collapsed` interdit, et pourquoi :
 La lecture est isolée dans `readScoreDisplay` (`ScaleHistoryScreen/historyConfig.ts`),
 testée à part, et retombe sur `inline` pour toute valeur absente ou inconnue.
 
+### Après l'envoi : `ScaleSubmittedScreen` (#411)
+
+L'envoi d'une échelle ne referme plus l'écran. `ScaleEntryScreen.handleSubmit` fait
+`navigation.replace('ScaleSubmitted', { scale_id })` : la passation enregistrée débouche
+sur une confirmation, puis sur des ressources d'aide.
+
+**Ce qui rend cet écran licite au regard du MDR 2017/745** : les **mêmes ressources
+fixes, à tout le monde, à chaque envoi, sans lire une seule réponse**. Aucun calcul,
+aucune condition sur une donnée patient. C'est le statut d'un numéro d'urgence en pied
+de page. Un écran de sortie conditionné par l'item 9 a été explicitement abandonné pour
+cette raison : il aurait fait de Kær un dispositif médical, et vu le risque en jeu, pas
+même en classe IIa.
+
+La route ne transporte **que** `scale_id` : il n'existe aucun chemin par lequel une
+réponse pourrait atteindre cet écran. Un test lit le source du composant et échoue si
+`answers`, `total_score` ou un seuil y apparaissent un jour.
+
+**La seule condition d'affichage** est la tuile « Mon plan de sécurité », rendue
+uniquement si `crisis_plan` est attribué au patient. C'est une propriété de
+l'**attribution** (configuration praticien), jamais une donnée saisie : conditionner
+là-dessus reste licite. Elle est **absente**, jamais grisée, quand le plan n'est pas
+débloqué.
+
+Les trois numéros de secours viennent des fields `exercise_safety` du module
+`crisis_plan`, rendus par le composant partagé `CrisisEmergencyCalls` en densité `full`.
+Ils sont semés **une seule fois** : les recopier sur chaque module qui veut les afficher
+dupliquerait trois numéros de secours dans la configuration, avec le risque qu'ils
+divergent. Le 114 y part en `sms:` et non en `tel:`.
+
 La clé i18n `modules.<id>.full_title` porte le titre complet de l'échelle (ex. `"Patient Health Questionnaire-9"`). La clé `modules.<id>.label` (déjà utilisée par le moteur générique) porte le nom court.
 
 ### Comportement `no_toggle`

@@ -1960,6 +1960,14 @@
     "cssrs": {
       "label": "C-SSRS, Risque suicidaire",
       "description": ""
+    },
+    "scale_submitted": {
+      "title": "C'est envoyé.",
+      "seen_by": "Il sera lu par {{name}}.",
+      "resources_hint": "Si ça ne va pas, maintenant ou plus tard :",
+      "plan_title": "Mon plan de sécurité",
+      "plan_subtitle": "Ce que vous avez préparé ensemble",
+      "done": "Terminé"
     }
   },
   "module": {

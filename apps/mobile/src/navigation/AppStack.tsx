@@ -14,6 +14,7 @@ import MedicationSideEffectsHistoryScreen from '../screens/modules/MedicationSid
 import MedicationSideEffectsEntryScreen from '../screens/modules/MedicationSideEffectsEntryScreen'
 import MoodTrackerScreen from '../screens/modules/MoodTrackerScreen'
 import ScaleEntryScreen from '../screens/modules/ScaleEntryScreen'
+import ScaleSubmittedScreen from '../screens/modules/ScaleSubmittedScreen'
 import ModuleContentScreen from '../screens/modules/ModuleContentScreen'
 import ModuleRemindersScreen from '../screens/modules/ModuleRemindersScreen'
 import type { PreviewKind } from '@kaer/shared'
@@ -25,6 +26,10 @@ export type AppStackParamList = {
   // resume : reprend le brouillon local laissé par une saisie interrompue (#412).
   // Sans lui, on repart d'un questionnaire vierge : c'est ce que fait « Recommencer ».
   ScaleEntry: { scale_id: string; entry_id?: string; resume?: boolean }
+  // Écran d'après-envoi (#411). Il ne reçoit QUE l'identifiant de l'échelle : les
+  // réponses ne lui sont pas transmises, et c'est ce qui le garde hors du champ du
+  // dispositif médical. Les ressources qu'il propose sont les mêmes pour tout le monde.
+  ScaleSubmitted: { scale_id: string }
   // previewKindOverride : force un layout précis au lieu de celui du module (ex. la
   // roue crantée du plan de crise ouvre le module en mode édition `editable_steps`).
   // startEntry : ouvre directement la saisie plutôt que l'accueil du module. Posé par
@@ -119,6 +124,13 @@ export default function AppStack() {
         name="ScaleEntry"
         component={ScaleEntryScreen}
         options={{ title: 'Nouveau questionnaire' }}
+      />
+      {/* Sans retour dans l'en-tête : on quitte cet écran par « Terminé », pour que
+          les ressources d'aide ne se referment pas d'un geste réflexe. */}
+      <Stack.Screen
+        name="ScaleSubmitted"
+        component={ScaleSubmittedScreen}
+        options={{ title: '', headerBackVisible: false }}
       />
       <Stack.Screen
         name="ModuleContent"
