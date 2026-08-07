@@ -38,8 +38,10 @@ export function reportAppError(input: AppErrorDescriptor): void {
 // Le wrapper fetch du client Supabase (`lib/supabase.ts`) ne couvre QUE les
 // 5xx et les échecs réseau — un 4xx légitime (mot de passe faux, token
 // d'invitation invalide) ne doit pas déclencher d'alerte automatique. Cette
-// fonction n'est câblée dans aucun service à ce jour (#96) : c'est le point
-// d'entrée recommandé le jour où un service veut signaler un 4xx anormal.
+// fonction est le point d'entrée pour un service qui veut signaler un 4xx
+// anormal. Premier appelant : `markPassationRead` (#419), dont l'échec ne se
+// voit nulle part côté praticien : un accusé de lecture qui ne se pose pas est
+// invisible à l'écran, et le patient attendrait un « Vu le … » qui ne vient pas.
 export function reportFailedOperation(route: string | null, message: string, reason: string | null): void {
   reportAppError({ kind: 'failed_operation', message, route, stack: null, reason })
 }

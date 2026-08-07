@@ -1,4 +1,6 @@
 import { supabase } from '../lib/supabase'
+import { logDataAccess } from './auditService'
+import { reportFailedOperation } from './errorReportingService'
 import type { RhythmEntry } from '@kaer/shared'
 import type { DefusionTechnique } from '../lib/defusionTechniques'
 import { DEFUSION_TECHNIQUES } from '../lib/defusionTechniques'
@@ -147,6 +149,11 @@ export type ScalePassation = {
   readonly date: string
   readonly answers: readonly (number | null)[]
   readonly totalScore: number | null
+  /**
+   * Première ouverture par un praticien rattaché (#419), ou `null` si personne ne l'a
+   * encore ouverte. `null` est un état normal, pas une donnée manquante.
+   */
+  readonly readAt: string | null
 }
 
 /** Une réponse absente reste absente : `null` porte « non répondu », pas zéro. */
@@ -168,7 +175,7 @@ export async function fetchScalePassations(
 ): Promise<ScalePassation[]> {
   const { data, error } = await supabase
     .from('patient_entries')
-    .select('local_id, client_created_at, payload')
+    .select('local_id, client_created_at, payload, practitioner_read_at')
     .eq('patient_id', patientId)
     .eq('entry_kind', 'scale_entry')
     .eq('module_id', moduleType)
@@ -180,7 +187,54 @@ export async function fetchScalePassations(
     date: row.client_created_at,
     answers: toAnswers(row.payload.answers),
     totalScore: toNumber(row.payload.total_score) ?? null,
+    readAt: row.practitioner_read_at,
   }))
+}
+
+/**
+ * Pose l'accusé de lecture d'une passation et trace l'accès (#419).
+ *
+ * **Sans bouton, à l'ouverture.** Un « j'ai lu » à cliquer crée une corvée et une
+ * culpabilité ; l'ouverture de l'écran est déjà le geste qui atteste qu'un humain a
+ * regardé.
+ *
+ * Deux effets distincts, volontairement non fusionnés :
+ *   • le RPC pose la date de PREMIÈRE ouverture et n'y revient jamais (idempotent
+ *     côté base). C'est ce que le patient verra ;
+ *   • le journal d'audit, lui, enregistre CHAQUE consultation : une passation est une
+ *     donnée de santé, et sa lecture doit être traçable, indépendamment de ce qu'on
+ *     montre au patient.
+ *
+ * Best-effort de bout en bout : ni l'accusé ni l'audit ne doivent empêcher le praticien
+ * de lire la passation qu'il a sous les yeux.
+ */
+export async function markPassationRead(
+  patientId: string,
+  localId: string,
+  moduleId: string,
+): Promise<string | null> {
+  void logDataAccess({
+    action: 'read',
+    targetTable: 'patient_entries',
+    targetId: localId,
+    patientId,
+    // Métadonnées techniques uniquement : aucune réponse, aucun score (MDR/RGPD).
+    metadata: { scope: 'passation', module_id: moduleId },
+  })
+
+  const { data, error } = await supabase.rpc('mark_entry_read', {
+    p_patient_id: patientId,
+    p_local_id: localId,
+  })
+  if (error) {
+    reportFailedOperation(
+      `patient/${moduleId}/passation`,
+      'mark_entry_read failed',
+      error.message,
+    )
+    return null
+  }
+  return data
 }
 
 // ── Évolution de l'humeur (6 dimensions dans subscale_scores) ────────────────

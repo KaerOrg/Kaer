@@ -409,6 +409,38 @@ Bucket public pour les photos de profil patients. Structure: `avatars/{user_id}/
 
 ---
 
+## Accusé de lecture d'une passation : `patient_entries.practitioner_read_at` (#419)
+
+Une date, et une seule : celle de la **première ouverture** d'une passation par un
+praticien rattaché. Elle alimente la ligne « Vu par … le … » côté patient.
+
+| Élément | Rôle |
+|---|---|
+| `patient_entries.practitioner_read_at` | timestamptz, nullable. `null` = jamais ouverte, et c'est un **état normal** : rien ne s'affiche alors côté patient |
+| `mark_entry_read(p_patient_id, p_local_id)` | RPC `SECURITY DEFINER`. Re-vérifie le rattachement praticien ↔ patient, pose la date **si elle est nulle**, renvoie celle qui fait foi. Idempotent : rappeler ne la déplace pas |
+| `fn_guard_entry_read_receipt` / `trg_guard_entry_read_receipt` | Rejette toute écriture de la colonne **par le patient**, à l'insertion comme à la mise à jour |
+
+**Pourquoi un RPC plutôt qu'une policy `update`.** Le praticien n'a que le `select` sur
+`patient_entries`. Lui ouvrir un `update` général le laisserait modifier le `payload`,
+c'est-à-dire réécrire les réponses de son patient. Le seul geste accordé est celui-ci, et
+il est borné à une colonne.
+
+**Pourquoi une garde en plus.** Le patient, lui, a un `update` plein sur ses propres
+lignes (l'upsert de sync y retombe). Sans le trigger, il pourrait poser l'accusé lui-même
+et se voir répondre « vu par votre soignant » alors que personne n'a rien ouvert : un
+mensonge dans un dossier de santé. La garde ne regarde qu'une chose, l'auteur de
+l'écriture ; l'upsert de sync, qui ne touche pas la colonne, passe sans encombre.
+
+**Un seul horodatage.** Il n'est jamais réécrit aux consultations suivantes : le patient
+n'a pas à savoir combien de fois son praticien a rouvert sa passation. Et **aucun état
+intermédiaire** ne remplace l'absence de date : ni « transmis », ni « en attente de
+lecture », qui laisseraient entendre un engagement que personne n'a pris.
+
+**MDR** : une date d'ouverture est un fait administratif, sans lien avec le contenu des
+réponses. Elle ne doit jamais devenir un indicateur adressé au patient (« votre praticien
+ne vous a pas lu depuis 3 semaines ») : ce serait un jugement. Tests d'intégration SQL :
+[`supabase/tests/entryReadReceipt.test.ts`](../supabase/tests/entryReadReceipt.test.ts).
+
 ## Realtime — `patient_entries` (issue #103)
 
 `patient_entries` est publiée dans `supabase_realtime` (`replica identity full`) : le web

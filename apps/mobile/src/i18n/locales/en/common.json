@@ -199,6 +199,7 @@
       "last_sent_label": "Last sent",
       "entries_section": "My questionnaires",
       "sent_status": "sent",
+      "read_notice": "Seen by {{name}} on {{date}}",
       "score_details": "See the figures",
       "score_note": "These totals do not make a diagnosis and are not read on their own. They are there to discuss with {{name}}.",
       "start_btn": "Start",

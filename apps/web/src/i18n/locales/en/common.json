@@ -239,6 +239,7 @@
       "unscored_title": "Item {{position}}, not scored",
       "unscored_caption": "This item is asked, it does not count towards the total.",
       "follow_up_title": "Follow-up",
+      "opened_at": "Opened on {{date}}.",
       "patient_sees": "The patient sees this administration in their app.",
       "next_due": "Next due: {{date}}",
       "answers_title_one": "The answer",

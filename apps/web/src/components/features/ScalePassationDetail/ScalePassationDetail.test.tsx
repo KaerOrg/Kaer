@@ -56,6 +56,7 @@ function passation(over: Partial<ScalePassation> = {}): ScalePassation {
     date: '2026-07-28T21:12:00Z',
     answers: [2, 1, 1],
     totalScore: 3,
+    readAt: null,
     ...over,
   }
 }
@@ -181,6 +182,22 @@ describe('ScalePassationDetail', () => {
       .toContain('scales.entry_detail.next_due')
     expect(renderDetail({ nextDueIso: null }).container.textContent)
       .not.toContain('scales.entry_detail.next_due')
+  })
+
+  it('affiche la date de première ouverture quand la passation a été lue (#419)', () => {
+    const { container } = renderDetail({
+      passation: passation({ readAt: '2026-07-29T08:00:00Z' }),
+    })
+
+    expect(container.textContent).toContain('scales.entry_detail.opened_at')
+  })
+
+  it('n\'affiche aucun état intermédiaire tant que la passation n\'a pas été ouverte', () => {
+    // Ni « transmis », ni « en attente de lecture » : ces mots laisseraient entendre un
+    // engagement que personne n'a pris.
+    const { container } = renderDetail({ passation: passation({ readAt: null }) })
+
+    expect(container.textContent).not.toContain('scales.entry_detail.opened_at')
   })
 
   it('restitue la consigne telle que le patient l\'a lue', () => {

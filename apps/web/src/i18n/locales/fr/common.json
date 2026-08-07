@@ -239,6 +239,7 @@
       "unscored_title": "Item {{position}}, hors score",
       "unscored_caption": "Cet item est posé, il n'entre pas dans le total.",
       "follow_up_title": "Suivi",
+      "opened_at": "Ouverte le {{date}}.",
       "patient_sees": "Le patient voit cette passation dans son application.",
       "next_due": "Prochaine échéance : {{date}}",
       "answers_title_one": "La réponse",

@@ -10,8 +10,10 @@ vi.mock('@services/moduleService', () => ({
 }))
 
 const mockFetchScalePassations = vi.fn()
+const mockMarkPassationRead = vi.fn()
 vi.mock('@services/engagementService', () => ({
   fetchScalePassations: (...args: unknown[]) => mockFetchScalePassations(...args),
+  markPassationRead: (...args: unknown[]) => mockMarkPassationRead(...args),
 }))
 
 const mockFetchScaleSchedule = vi.fn()
@@ -53,8 +55,8 @@ const FIELDS: ContentField[] = [
 ]
 
 const PASSATIONS = [
-  { id: 'p0', date: '2026-07-14T09:00:00Z', answers: [1, 1], totalScore: 2 },
-  { id: 'p1', date: '2026-07-28T21:12:00Z', answers: [0, 1], totalScore: 1 },
+  { id: 'p0', date: '2026-07-14T09:00:00Z', answers: [1, 1], totalScore: 2, readAt: null },
+  { id: 'p1', date: '2026-07-28T21:12:00Z', answers: [0, 1], totalScore: 1, readAt: null },
 ]
 
 function renderPanel() {
@@ -71,6 +73,7 @@ beforeEach(() => {
   mockFetchScalePassations.mockResolvedValue(PASSATIONS)
   mockFetchScaleSchedule.mockResolvedValue(null)
   mockFetchScaleMeta.mockResolvedValue([{ id: 'phq9', evaluationType: 'auto' }])
+  mockMarkPassationRead.mockResolvedValue(null)
 })
 
 describe('ScalePassationsPanel', () => {
@@ -110,6 +113,36 @@ describe('ScalePassationsPanel', () => {
 
     await waitFor(() => expect(container.querySelectorAll('.spd-item').length).toBe(2))
     expect(container.textContent).not.toContain('scales.entry_detail.next_due')
+  })
+
+  // ── Accusé de lecture (#419) ──────────────────────────────────────────────
+
+  it('pose l\'accusé de lecture à l\'ouverture, sans aucune action du praticien', async () => {
+    const { container } = renderPanel()
+
+    await waitFor(() => expect(mockMarkPassationRead).toHaveBeenCalled())
+    // Sur la passation réellement affichée, la plus récente.
+    expect(mockMarkPassationRead).toHaveBeenCalledWith('pat-1', 'p1', 'phq9')
+    // Et aucun bouton « j'ai lu » : le geste, c'est d'avoir ouvert l'écran.
+    expect(container.textContent?.toLowerCase()).not.toContain('lu')
+  })
+
+  it('pose l\'accusé de la passation qu\'on ouvre ensuite', async () => {
+    const { container } = renderPanel()
+
+    await waitFor(() => expect(container.querySelectorAll('.spd-item').length).toBe(2))
+    mockMarkPassationRead.mockClear()
+    fireEvent.click(container.querySelectorAll('.spd-item')[1]) // la plus ancienne
+
+    await waitFor(() => expect(mockMarkPassationRead).toHaveBeenCalledWith('pat-1', 'p0', 'phq9'))
+  })
+
+  it('ne pose aucun accusé quand il n\'y a rien à ouvrir', async () => {
+    mockFetchScalePassations.mockResolvedValue([])
+    const { container } = renderPanel()
+
+    await waitFor(() => expect(container.textContent).toContain('scales.entry_detail.empty'))
+    expect(mockMarkPassationRead).not.toHaveBeenCalled()
   })
 
   it('reprend la prochaine échéance de la programmation, jamais le retard', async () => {
