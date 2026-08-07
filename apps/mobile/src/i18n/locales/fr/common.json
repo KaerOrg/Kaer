@@ -1510,7 +1510,11 @@
       "submit": "Envoyer mes réponses",
       "intro_length": "10 questions, environ 4 minutes.",
       "intro_window": "Elles portent sur les 2 dernières semaines.",
-      "intro_recipient": "Vos réponses partent à {{name}}."
+      "intro_recipient": "Vos réponses partent à {{name}}.",
+      "about_what": "Un questionnaire de référence, recommandé par les autorités de santé, utilisé partout dans le monde pour suivre l'évolution des symptômes dépressifs.",
+      "about_not": "Un diagnostic. Un score élevé ne dit pas « vous êtes déprimé », il dit « il y a de quoi en parler ».",
+      "about_who": "{{name}} voit vos dix réponses et la date. Vous voyez vos totaux et vos dates.",
+      "about_instrument_note": "Si le patient répond oui à la question 9, une évaluation du risque suicidaire ou de l'auto-agressivité par un professionnel qualifié est conseillée."
     },
     "bsl23": {
       "label": "BSL-23",
@@ -1968,6 +1972,14 @@
       "plan_title": "Mon plan de sécurité",
       "plan_subtitle": "Ce que vous avez préparé ensemble",
       "done": "Terminé"
+    },
+    "scale_about": {
+      "what_title": "Ce que c'est",
+      "not_title": "Ce que ça n'est pas",
+      "who_title": "Qui voit quoi",
+      "plan_lead": "Si ça ne va pas maintenant, ce n'est pas le bon endroit.",
+      "plan_action": "Ouvrir mon plan de sécurité",
+      "open": "À propos de ce questionnaire"
     }
   },
   "module": {
