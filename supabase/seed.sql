@@ -209,7 +209,17 @@ insert into public.field_props (field_id, prop_key, prop_value) values
   -- Marque l'item comme posé mais non coté. Le total du PHQ-9 reste la somme des
   -- items 1 à 9, sur 0 à 27 : c'est ce qui garde comparables les passations
   -- antérieures à l'arrivée de l'item 10.
-  ('phq9.q10', 'scored', 'false')
+  ('phq9.q10', 'scored', 'false'),
+  -- Items suivis en bande sous la courbe d'évolution (#420). Un total qui baisse de
+  -- 22 à 13 pendant que le retentissement reste « très difficile » ne raconte pas la
+  -- même chose qu'une baisse accompagnée d'un retour au travail ; et suivre l'item 9
+  -- dans le temps est plus informatif que sa valeur isolée.
+  --
+  -- C'est une CONFIG, pas une liste écrite dans un composant : l'écran d'évolution est
+  -- partagé par toutes les échelles, et y coder « le 9ᵉ item du PHQ-9 » serait
+  -- exactement le `if (moduleId === 'phq9')` que l'Epic interdit.
+  ('phq9.q9',  'track_in_evolution', 'true'),
+  ('phq9.q10', 'track_in_evolution', 'true')
 on conflict (field_id, prop_key) do update set prop_value = excluded.prop_value;
 
 -- ── GAD-7 ─────────────────────────────────────────────────────────────────────

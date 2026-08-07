@@ -90,6 +90,29 @@ function maxValueOf(
 }
 
 /**
+ * Total maximal atteignable par les items cotés, ou `null` s'il n'est pas dérivable de
+ * la configuration.
+ *
+ * On ne devine pas : écrire « / 27 » en dur reviendrait à coder un instrument dans un
+ * composant partagé par neuf échelles. Sert au détail d'une passation comme à la borne
+ * haute de l'axe de la vue Évolution (#420).
+ */
+export function readMaxScore(fields: readonly ContentField[]): number | null {
+  const sharedOptions = fields
+    .filter(f => f.field_type === 'scale_option')
+    .sort((a, b) => a.sort_order - b.sort_order)
+
+  let total = 0
+  for (const question of fields.filter(isQuestion)) {
+    if (question.props['scored'] === 'false') continue
+    const itemMax = maxValueOf(question, sharedOptions)
+    if (itemMax == null) return null
+    total += itemMax
+  }
+  return total
+}
+
+/**
  * Construit les lignes du détail à partir des fields du module et des réponses reçues.
  *
  * ⚠️ L'index d'une réponse est son rang dans le questionnaire **au moment de la
@@ -109,15 +132,12 @@ export function buildPassationRows(
 
   const scored: PassationRow[] = []
   const unscored: PassationRow[] = []
-  let maxScore: number | null = 0
+  // Le total maximal ne dépend QUE de la configuration, jamais des réponses : il se lit
+  // à part, et la même lecture sert à borner l'axe de la vue Évolution (#420).
+  const maxScore = readMaxScore(fields)
 
   questions.forEach((question, index) => {
     const isScored = question.props['scored'] !== 'false'
-
-    if (isScored && maxScore != null) {
-      const itemMax = maxValueOf(question, sharedOptions)
-      maxScore = itemMax == null ? null : maxScore + itemMax
-    }
 
     // Item posé après cette passation : aucune ligne, aucun tiret orphelin.
     if (index >= answers.length) return

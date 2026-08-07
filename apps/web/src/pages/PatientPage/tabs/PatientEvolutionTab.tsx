@@ -34,6 +34,7 @@ import { buildNamingTaxonomy, readContextCodes } from '../../../lib/emotionNamin
 import { buildReferenceWindow, type ReferenceKind } from './sleepReference'
 import { BehavioralActivationPanel } from './BehavioralActivationPanel'
 import { ColumnFormDataPanel } from './ColumnFormDataPanel'
+import { ScaleEvolutionSection } from './ScaleEvolutionSection'
 import {
   type TimeRange,
   RANGE_DAYS,
@@ -42,8 +43,6 @@ import {
   filterByRange,
 } from '../../../lib/chartConfig'
 import {
-  SCALE_CONFIG,
-  DEFAULT_SCALE_COLOR,
   FEAR_BEFORE_COLOR,
   FEAR_AFTER_COLOR,
 } from './clinicalChartConfig'
@@ -393,19 +392,22 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData, family }: Pro
         )
       })()}
 
-      {/* ── Échelles cliniques (une section repliable par échelle) ─── */}
+      {/* ── Échelles cliniques (une section repliable par échelle) ───
+          La vue porte sa PROPRE fenêtre de lecture (6 mois / 1 an / tout, #420) : le
+          sélecteur global propose 1 mois et 3 mois, qui ne montrent que deux points
+          sur un instrument bimensuel, et n'offre pas « tout ». Badge et rappel de
+          métrique portent donc sur TOUT l'historique, un fait indépendant de la
+          fenêtre choisie, plutôt que de contredire ce que le graphe affiche. */}
       {showScales && scales.filter(mt => isShown(mt)).map(mt => {
-        const points = filterByRange(scaleData[mt] ?? [], days)
-        const cfg = SCALE_CONFIG[mt] ?? { color: DEFAULT_SCALE_COLOR, yMax: 27 }
-        const chartData = points.map(p => ({ date: p.date, score: p.score }))
-        const last = points.at(-1)?.score
+        const series = scaleData[mt] ?? []
+        const last = series.at(-1)?.score
         return (
           <EvolutionSection
             key={mt}
             sectionKey={mt}
             anchorId={`evo-section-${mt}`}
             title={t(`evolution.scale_${mt}`)}
-            badge={t('evolution.n_sessions', { count: points.length })}
+            badge={t('evolution.n_sessions', { count: series.length })}
             metricReminder={last != null ? t('evolution.last_score', { score: last }) : undefined}
             archivedLabel={isArchived(mt) ? t('evolution.archived_badge') : undefined}
             expanded={isExpanded(mt)}
@@ -413,16 +415,7 @@ export function PatientEvolutionTab({ patientId, onOpenModuleData, family }: Pro
             viewDataLabel={t('evolution.view_data')}
             onViewData={handleViewData}
           >
-            {chartData.length >= 2 ? (
-              <LineChart
-                data={chartData}
-                series={[{ key: 'score', color: cfg.color, label: t(`evolution.scale_${mt}`) }]}
-                yDomain={[0, cfg.yMax]}
-                locale={i18n.language}
-              />
-            ) : (
-              <p className="evolution-card__no-data">{t('evolution.not_enough_data')}</p>
-            )}
+            <ScaleEvolutionSection patientId={patientId} moduleType={mt} />
           </EvolutionSection>
         )
       })}
