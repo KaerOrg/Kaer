@@ -42,6 +42,9 @@ const CONFIG_AFTER_UNLOCK: ReadonlySet<ModuleType> = new Set([
   'medication_adherence',
   'behavioral_activation',
   'cognitive_saturation',
+  // Respiration : l'onglet porte l'activation des techniques et l'objectif proposé,
+  // deux gestes qui n'ont de sens que sur un module déjà déverrouillé (W0 #372).
+  'breathing_techniques',
 ])
 
 export interface ModuleTabContext {

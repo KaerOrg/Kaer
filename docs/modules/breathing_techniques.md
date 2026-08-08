@@ -58,6 +58,41 @@ Côté web praticien, `breathing_pacer` rend l'aperçu descriptif (`field_row`) 
 | `duration_seconds` | INTEGER | Durée effective de la session |
 | `created_at` | TEXT | Horodatage ISO 8601 |
 
+### L'activation praticien (W0, web)
+
+L'onglet « Techniques & objectif » de la modale du module porte **le geste clinique** :
+quelles techniques le patient voit, laquelle est travaillée en séance, et l'objectif
+proposé (en sessions par semaine, jamais en minutes).
+
+> **Où vit cette config, et pourquoi pas dans `breathing_settings`.** T0 a créé la table
+> `breathing_settings` avec une policy praticien, mais **rien ne l'alimente** : le mobile
+> écrit ses réglages dans `patient_entries` et lit sa config depuis SQLite local. Une
+> écriture praticien dans cette table serait donc invisible côté patient.
+>
+> L'activation passe par **`patient_modules.config`** (`enabled_techniques`,
+> `primary_technique`, `weekly_goal_sessions`), le canal que le mobile lit déjà, comme
+> pour `cognitive_saturation` (#201). `breathing_settings` reste les préférences
+> d'appareil du patient (durées, sons, rappel).
+>
+> **Dette ouverte** : personne ne projette `patient_entries` vers `breathing_sessions` /
+> `breathing_settings`. À câbler, ou à assumer explicitement.
+
+| Fichier | Rôle |
+|---|---|
+| `packages/shared/services/breathingTechniques.ts` | Lecture des techniques déclarées en base, partagée web ≡ mobile |
+| `services/moduleAssignmentService` | `fetchBreathingPractitionerConfig`, `updateBreathingPractitionerConfig`, lecteur pur |
+| `hooks/queries/moduleQueries.breathingConfig` | Factory de lecture (clé canonique, invalidée à l'enregistrement) |
+| `PatientPage/hooks/useBreathingConfigEditor` | Brouillon local, enregistrement explicite |
+| `PatientPage/tabs/BreathingConfigPanel` + `BreathingTechniqueRow` + `BreathingGoalField` | L'onglet |
+
+**Invariants tenus par le code** : la technique de séance reste toujours parmi les
+activées (désactiver la principale la démet) ; l'objectif est borné à 1-14 comme le
+`check` en base ; le formulaire n'est pas rendu tant que la config n'est pas lue, sans
+quoi enregistrer écraserait l'activation réelle par une activation vide.
+
+**Repli au déverrouillage** : la cohérence cardiaque est activée d'office, pour qu'un
+patient n'ouvre jamais un module vide.
+
 ### Configuration des techniques (config-first, issue #69)
 
 La définition des 5 techniques (couleur, durée recommandée, séquence de phases) vit

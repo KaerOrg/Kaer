@@ -22,6 +22,13 @@ export { buildColumnSpecs, readSliderParams, CHILD_FIELD_TYPES } from './service
 export type { ColumnSpec, SliderParams } from './services/columnForm'
 export { shiftDate, mondayOf, weekDays, todayIso, dateToIso } from './services/weekDates'
 
+// Techniques de respiration déclarées en base (config-first) : le web praticien et le
+// mobile patient lisent la même config, donc les mêmes rythmes et les mêmes couleurs.
+export { readBreathingTechniques, formatRhythm } from './services/breathingTechniques'
+export type {
+  BreathingTechniqueSpec, BreathingPhaseSpec, BreathingPhaseType,
+} from './services/breathingTechniques'
+
 // Séquence du plan de sécurité : logique pure partagée par le layout mobile (parcours
 // patient) et le layout web (aperçu praticien) — une seule source, zéro duplication.
 export {

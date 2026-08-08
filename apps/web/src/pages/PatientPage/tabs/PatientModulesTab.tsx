@@ -29,12 +29,14 @@ import {
   revokeModule as revokeModuleService,
 } from '@services/moduleAssignmentService'
 import { DEFUSION_TECHNIQUES } from '../../../lib/defusionTechniques'
+import { BREATHING_DEFAULT_TECHNIQUE } from '../../../lib/breathingDefaults'
 import { scaleQueries, engagementQueries } from '../../../hooks/queries'
 import { useRimEditor } from '../hooks/useRimEditor'
 import { usePsychoEducationPicker } from '../hooks/usePsychoEducationPicker'
 import { useCrisisPlanEditor } from '../hooks/useCrisisPlanEditor'
 import { useMedicationEffectsEditor } from '../hooks/useMedicationEffectsEditor'
 import { useDefusionConfigEditor } from '../hooks/useDefusionConfigEditor'
+import { useBreathingConfigEditor } from '../hooks/useBreathingConfigEditor'
 import { useMedicationListEditor } from '../hooks/useMedicationListEditor'
 import { useBAActivitiesEditor } from '../hooks/useBAActivitiesEditor'
 import { PatientViewProvider } from '../../../contexts/PatientViewContext'
@@ -49,6 +51,7 @@ import { MedicationEffectsConfigPanel } from './MedicationEffectsConfigPanel'
 import { MedicationListConfigPanel } from './MedicationListConfigPanel'
 import { BAActivitiesConfigPanel } from './BAActivitiesConfigPanel'
 import { DefusionConfigPanel } from './DefusionConfigPanel'
+import { BreathingConfigPanel } from './BreathingConfigPanel'
 
 // La barre de filtres de la vue active n'apparaît qu'au-delà de ce nombre de
 // modules actifs — en dessous, la liste est assez courte pour se passer de filtre.
@@ -123,6 +126,7 @@ export function PatientModulesTab({
   const crisis = useCrisisPlanEditor(patientId, modules, onReloadModules)
   const medEffects = useMedicationEffectsEditor(modules, onReloadModules)
   const defusionConfig = useDefusionConfigEditor(modules, onReloadModules)
+  const breathingConfig = useBreathingConfigEditor(modules, onReloadModules)
   const medList = useMedicationListEditor(modules, onReloadModules)
   const baList = useBAActivitiesEditor(modules, onReloadModules)
 
@@ -173,6 +177,7 @@ export function PatientModulesTab({
       case 'medication_adherence': void medList.openEditor(); break
       case 'behavioral_activation': void baList.openEditor(); break
       case 'cognitive_saturation': void defusionConfig.openEditor(); break
+      case 'breathing_techniques': void breathingConfig.openEditor(); break
     }
   }
 
@@ -237,9 +242,17 @@ export function PatientModulesTab({
     // « Décrocher d'une pensée » : au déblocage, les deux techniques sont proposées
     // (config.enabled_techniques, épic mobile #197). Le praticien peut en désactiver
     // ensuite via l'onglet Configuration.
+    // Respiration : la cohérence cardiaque est activée d'office, pour qu'un patient
+    // n'ouvre jamais un module vide. Le praticien ajuste ensuite dans l'onglet
+    // « Techniques & objectif » (W0 #372).
     const config = moduleType === 'cognitive_saturation'
       ? { enabled_techniques: [...DEFUSION_TECHNIQUES] }
-      : undefined
+      : moduleType === 'breathing_techniques'
+        ? {
+            enabled_techniques: [BREATHING_DEFAULT_TECHNIQUE],
+            primary_technique: BREATHING_DEFAULT_TECHNIQUE,
+          }
+        : undefined
     const result = await unlockStandardModule(patientId, practitionerId, moduleType, config)
     if (result.ok) await onReloadModules()
     setBusyModule(null)
@@ -688,6 +701,8 @@ export function PatientModulesTab({
         return <BAActivitiesConfigPanel baList={baList} onClose={closeModal} />
       case 'cognitive_saturation':
         return <DefusionConfigPanel defusionConfig={defusionConfig} onClose={closeModal} />
+      case 'breathing_techniques':
+        return <BreathingConfigPanel breathingConfig={breathingConfig} onClose={closeModal} />
       default:
         return null
     }
